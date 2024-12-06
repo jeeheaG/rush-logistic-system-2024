@@ -22,6 +22,7 @@ public class JwtAuthenticationFilter implements GlobalFilter {
 
     @Value("${service.jwt.secret-key}")
     private String secretKey;
+    private static final String HEADER_USER_ID = "USER_ID";
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -34,10 +35,28 @@ public class JwtAuthenticationFilter implements GlobalFilter {
         String token = extractToken(exchange);
         if (token == null || !isValidToken(token)) {
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+            // TODO : 헤더에 userId 만 남길 것인지, 토큰 그대로 전달할지
+
+            // 일단 userid 추출해서 새 헤더 추가
+            String userId = getUserIdFromToken(token);
+            exchange.getRequest().getHeaders().add(HEADER_USER_ID, userId);
             return exchange.getResponse().setComplete();
         }
 
         return chain.filter(exchange);
+    }
+
+    /**
+     * 토큰에서 userId 추출
+     * @param token
+     * @return
+     */
+    private String getUserIdFromToken(String token) {
+        SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64URL.decode(secretKey));
+        Jws<Claims> claimsJws = Jwts.parser()
+                .verifyWith(key)
+                .build().parseSignedClaims(token);
+        return claimsJws.getPayload().getSubject();
     }
 
 
