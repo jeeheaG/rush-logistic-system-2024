@@ -23,11 +23,12 @@ public class JwtAuthenticationFilter implements GlobalFilter {
     @Value("${service.jwt.secret-key}")
     private String secretKey;
 
-    private static final String AUTH_ENDPOINT_PREFIX = "/auth";
+    private static final String AUTH_ENDPOINT_PREFIX = "/api/auth";
     private static final String HEADER_USER_ID = "USER_ID";
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        log.info("JwtAuthenticationFilter start");
         // 회원가입, 로그인일 경우 토큰 확인 안함
         String path = exchange.getRequest().getURI().getPath();
         if (path.startsWith(AUTH_ENDPOINT_PREFIX)) {
@@ -36,14 +37,16 @@ public class JwtAuthenticationFilter implements GlobalFilter {
 
         String token = extractToken(exchange);
         if (token == null || !isValidToken(token)) {
+            log.info("JwtAuthenticationFilter : token is null or invalid");
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-            // TODO : 헤더에 userId 만 남길 것인지, 토큰 그대로 전달할지
-
-            // 일단 userid 추출해서 새 헤더 추가
-            String userId = getUserIdFromToken(token);
-            exchange.getRequest().getHeaders().add(HEADER_USER_ID, userId);
             return exchange.getResponse().setComplete();
         }
+
+        // TODO : 헤더에 userId 만 남길 것인지, 토큰 그대로 전달할지
+
+        // 일단 subject 의 userid 추출해서 새 헤더 추가
+        String userId = getUserIdFromToken(token);
+        exchange.getRequest().getHeaders().add(HEADER_USER_ID, userId);
 
         return chain.filter(exchange);
     }
