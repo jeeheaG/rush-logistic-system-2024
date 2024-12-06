@@ -1,0 +1,40 @@
+server:
+  port: 19091
+
+spring:
+  application:
+    name: gateway-service
+  main:
+    web-application-type: reactive
+  cloud:
+    gateway:
+      routes:
+        - id: user-slack-service
+          uri: lb://user-slack-service
+          predicates:
+            - Path=/api/auth/**, /api/users/**, /api/slack/**
+        - id: order-delivery-service
+          uri: lb://order-delivery-service
+          predicates:
+            - Path=/api/orders/**, /api/deliveries/**
+        - id: hub-service
+          uri: lb://hub-service
+          predicates:
+            - Path=/api/hubs/**, /api/hubs-routes/**
+        - id: company-product-service
+          uri: lb://company-product-service
+          predicates:
+            - Path=/api/products/**, /api/companies/**
+      discovery:
+        locator:
+          enabled: true  # 서비스 디스커버리를 통해 동적으로 라우트를 생성하도록 설정
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:19090/eureka/
+
+service:
+  jwt:
+    ## TODO : 실수로 커밋해버렸는데, 어차피 우리 키 새로 만들어야 해서 새 키로 바꾸고 환경변수 처리할 것!
+    secret-key: "401b09eab3c013d4ca54922bb802bec8fd5318192b0a75f201d8b3727429080fb337591abd3e44453b954555b7a0812e1081c39b740293f765eae731f5a65ed1"
