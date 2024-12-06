@@ -22,13 +22,15 @@ public class JwtAuthenticationFilter implements GlobalFilter {
 
     @Value("${service.jwt.secret-key}")
     private String secretKey;
+
+    private static final String AUTH_ENDPOINT_PREFIX = "/auth";
     private static final String HEADER_USER_ID = "USER_ID";
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         // 회원가입, 로그인일 경우 토큰 확인 안함
         String path = exchange.getRequest().getURI().getPath();
-        if (path.startsWith("/auth")) {
+        if (path.startsWith(AUTH_ENDPOINT_PREFIX)) {
             return chain.filter(exchange);
         }
 
