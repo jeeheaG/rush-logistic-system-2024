@@ -2,7 +2,11 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/auth.main.iml" filepath="$PROJECT_DIR$/.idea/modules/auth.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.rush.logistic.client.order-delivery.main.iml" filepath="$PROJECT_DIR$/.idea/modules/com.rush.logistic.client.order-delivery.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/gateway.main.iml" filepath="$PROJECT_DIR$/.idea/modules/gateway.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/hub.main.iml" filepath="$PROJECT_DIR$/.idea/modules/hub.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/order-delivery.main.iml" filepath="$PROJECT_DIR$/.idea/modules/order-delivery.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/rush-logistic-system-2024.iml" filepath="$PROJECT_DIR$/.idea/rush-logistic-system-2024.iml" />
     </modules>
   </component>
