@@ -12,11 +12,13 @@ import lombok.NoArgsConstructor;
 public class Response<T> {
     private String resultCode;
     private T result;
+    private String msg;
 
-    public static <T> Response<T> success(T result) {
+    public static <T> Response<T> success(T result, String msg) {
         return Response.<T>builder()
                 .resultCode("SUCCESS")
                 .result(result)
+                .msg(msg)
                 .build();
     }
 

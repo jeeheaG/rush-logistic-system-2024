@@ -23,7 +23,7 @@ public class CompanyController {
     @PostMapping
     public Response<?> company(@RequestBody CompanyCreateRequest request) {
         companyService.createCompany(request);
-        return Response.success("업체 생성에 성공하였습니다.");
+        return Response.success(request , "업체 생성에 성공하였습니다.");
     }
 
 }
