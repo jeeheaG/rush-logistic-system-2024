@@ -21,6 +21,7 @@ public class CompanyService {
     //업체 추가
     @Transactional
     public void createCompany(CompanyCreateRequest requestDto) {
+        // TODO: MASTER, HUB-MANAGER 확인 로직 추가
         CompanyDto dto = CompanyCreateRequest.toDto(requestDto);
 
         Optional<Company> company = companyRepository.findByName(dto.name());
