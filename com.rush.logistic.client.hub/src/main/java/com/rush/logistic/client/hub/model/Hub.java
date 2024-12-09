@@ -46,4 +46,11 @@ public class Hub extends BaseEntity{
 
         return hub;
     }
+
+    public void update(HubInfoRequestDto requestDto) {
+        this.name = requestDto.getName();
+        this.address = requestDto.getAddress();
+        this.latitude = requestDto.getLatitude();
+        this.longitude = requestDto.getLongitude();
+    }
 }
