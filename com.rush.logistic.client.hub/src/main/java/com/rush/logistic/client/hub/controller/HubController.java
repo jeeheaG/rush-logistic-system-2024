@@ -3,11 +3,15 @@ package com.rush.logistic.client.hub.controller;
 import com.rush.logistic.client.hub.dto.BaseResponseDto;
 import com.rush.logistic.client.hub.dto.HubIdResponseDto;
 import com.rush.logistic.client.hub.dto.HubInfoRequestDto;
+import com.rush.logistic.client.hub.dto.HubInfoResponseDto;
 import com.rush.logistic.client.hub.service.HubService;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,5 +32,12 @@ public class HubController {
         BaseResponseDto<HubIdResponseDto> responseDto = hubService.createHub(requestDto);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+    }
+
+    @GetMapping("/{hubId}")
+    public ResponseEntity<BaseResponseDto<HubInfoResponseDto>> getHubDetails(@PathVariable("hubId") UUID hubId) {
+        BaseResponseDto<HubInfoResponseDto> responseDto = hubService.getHubDetails(hubId);
+
+        return ResponseEntity.ok(responseDto);
     }
 }
