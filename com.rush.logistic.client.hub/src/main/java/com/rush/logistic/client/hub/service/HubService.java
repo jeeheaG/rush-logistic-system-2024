@@ -26,6 +26,7 @@ public class HubService {
 
         // 허브 저장
         Hub hub = hubRepository.save(Hub.from(requestDto));
+        // TODO: 저장 실패시 예외 처리 추가
 
         // 허브 생성 반환
         HubIdResponseDto responseDto = HubIdResponseDto.from(hub.getHubId());
