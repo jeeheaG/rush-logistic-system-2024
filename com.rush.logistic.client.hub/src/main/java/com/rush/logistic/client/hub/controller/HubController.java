@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,6 +38,14 @@ public class HubController {
     @GetMapping("/{hubId}")
     public ResponseEntity<BaseResponseDto<HubInfoResponseDto>> getHubDetails(@PathVariable("hubId") UUID hubId) {
         BaseResponseDto<HubInfoResponseDto> responseDto = hubService.getHubDetails(hubId);
+
+        return ResponseEntity.ok(responseDto);
+    }
+
+    @PutMapping("/{hubId}")
+    public ResponseEntity<BaseResponseDto<HubInfoResponseDto>> updateHubDetails(@PathVariable("hubId") UUID hubId,
+                                                                                @RequestBody HubInfoRequestDto requestDto) {
+        BaseResponseDto<HubInfoResponseDto> responseDto = hubService.updateHubDetails(hubId, requestDto);
 
         return ResponseEntity.ok(responseDto);
     }
