@@ -19,12 +19,15 @@ public class Company extends BaseEntity {
     @Column(name = "company_id", updatable = false, nullable = false)
     private UUID id;
 
+    @Setter
     @Column(name = "hub_id")
     private UUID hubId;
 
+    @Setter
     @Column(name = "name", nullable = false)
     private String name;
 
+    @Setter
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
     private CompanyType type;
