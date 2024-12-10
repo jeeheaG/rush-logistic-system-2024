@@ -72,4 +72,20 @@ public class UserService {
         UserInfoResponseDto userInfoResponseDto = UserInfoResponseDto.from(getUser);
         return BaseResponseDTO.success(userInfoResponseDto);
     }
+
+    @Transactional(readOnly = false)
+    public BaseResponseDTO<UserInfoResponseDto> deleteUser(String userId) {
+
+        Optional<User> user = userRepository.findById(Long.valueOf(userId));
+
+        if (user.isEmpty()) {
+            return BaseResponseDTO.error("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND.value());
+        }
+
+        User getUser = user.get();
+        getUser.setDelete(true);
+        userRepository.save(getUser);
+        UserInfoResponseDto userInfoResponseDto = UserInfoResponseDto.from(getUser);
+        return BaseResponseDTO.success(userInfoResponseDto);
+    }
 }

@@ -61,6 +61,8 @@ public class AuthService {
                 .role(UserRoleEnum.MASTER)
                 .build();
 
+        user.setDelete(false);
+
         User savedUser = userRepository.save(user);
 
         SignUpResponseDto responseDto = SignUpResponseDto.of(savedUser);

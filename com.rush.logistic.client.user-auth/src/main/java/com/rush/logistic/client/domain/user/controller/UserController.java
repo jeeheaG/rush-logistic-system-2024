@@ -57,4 +57,12 @@ public class UserController {
         BaseResponseDTO<UserInfoResponseDto> responseDto = userService.updateUser(userId, updateRequestDto);
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
+
+    @DeleteMapping("/users/{userId}")
+    //    @PreAuthorize("hasAuthority('ROLE_MASTER')")
+    public ResponseEntity<BaseResponseDTO<UserInfoResponseDto>> deleteUser(@PathVariable String userId) {
+
+        BaseResponseDTO<UserInfoResponseDto> responseDto = userService.deleteUser(userId);
+        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+    }
 }
