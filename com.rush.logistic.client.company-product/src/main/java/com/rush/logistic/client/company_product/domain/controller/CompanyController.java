@@ -2,6 +2,7 @@ package com.rush.logistic.client.company_product.domain.controller;
 
 import com.rush.logistic.client.company_product.domain.dto.CompanyDto;
 import com.rush.logistic.client.company_product.domain.dto.request.CompanyCreateRequest;
+import com.rush.logistic.client.company_product.domain.dto.request.CompanyUpdateRequest;
 import com.rush.logistic.client.company_product.domain.dto.response.CompanySearchResponse;
 import com.rush.logistic.client.company_product.domain.service.CompanyService;
 import com.rush.logistic.client.company_product.global.exception.Response;
@@ -32,12 +33,17 @@ public class CompanyController {
     @GetMapping
     public Response<Page<CompanyDto>> getAllCompanies(Pageable pageable) {
         Page<CompanyDto> companies = companyService.getAllCompany(pageable);
-        return Response.success(companies, "가게 조회에 성공하였습니다.");
+        return Response.success(companies, "업체 조회에 성공하였습니다.");
     }
 
     @GetMapping("/{Id}")
     public Response<CompanySearchResponse> getCompany(@PathVariable UUID Id) {
-        return Response.success(companyService.getCompany(Id),"가게 단건 조회에 성공하였습니다.");
+        return Response.success(companyService.getCompany(Id),"업체 단건 조회에 성공하였습니다.");
+    }
+
+    @PutMapping("/{Id}")
+    public Response<?> updateCompany(@PathVariable UUID Id, @RequestBody CompanyUpdateRequest request) {
+        return Response.success(companyService.updateCompany(Id,request), "업체 수정에 성공하였습니다");
     }
 
 }
