@@ -5,6 +5,7 @@ import com.rush.logistic.client.domain.auth.dto.SignUpResponseDto;
 import com.rush.logistic.client.domain.global.BaseResponseDTO;
 import com.rush.logistic.client.domain.user.dto.UserInfoListResponseDto;
 import com.rush.logistic.client.domain.user.dto.UserInfoResponseDto;
+import com.rush.logistic.client.domain.user.dto.UserUpdateRequestDto;
 import com.rush.logistic.client.domain.user.entity.User;
 import com.rush.logistic.client.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserService {
 
     private final UserRepository userRepository;
@@ -42,16 +44,32 @@ public class UserService {
                 .success(UserInfoListResponseDto.of(userList));
     }
 
-    public BaseResponseDTO<UserInfoResponseDto> getUser(String username) {
+    public BaseResponseDTO<UserInfoResponseDto> getUserById(String userId) {
 
-        Optional<User> user = userRepository.findByUsername(username);
+        Optional<User> user = userRepository.findById(Long.valueOf(userId));
 
-        if (!user.isPresent()) {
+        if (user.isEmpty()) {
             return BaseResponseDTO.error("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND.value());
         }
 
-        // 사용자 정보가 있으면 DTO로 변환하여 success 응답 반환
         UserInfoResponseDto userInfoResponseDto = UserInfoResponseDto.from(user.get());
+        return BaseResponseDTO.success(userInfoResponseDto);
+    }
+
+    @Transactional(readOnly = false)
+    public BaseResponseDTO<UserInfoResponseDto> updateUser(String userId, UserUpdateRequestDto updateRequestDto) {
+
+        Optional<User> user = userRepository.findById(Long.valueOf(userId));
+
+        if (user.isEmpty()) {
+            return BaseResponseDTO.error("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND.value());
+        }
+
+        User getUser = user.get();
+        getUser.updateUser(updateRequestDto);
+        userRepository.save(getUser);
+
+        UserInfoResponseDto userInfoResponseDto = UserInfoResponseDto.from(getUser);
         return BaseResponseDTO.success(userInfoResponseDto);
     }
 }

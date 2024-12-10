@@ -3,6 +3,7 @@ package com.rush.logistic.client.domain.user.controller;
 import com.rush.logistic.client.domain.global.BaseResponseDTO;
 import com.rush.logistic.client.domain.user.dto.UserInfoListResponseDto;
 import com.rush.logistic.client.domain.user.dto.UserInfoResponseDto;
+import com.rush.logistic.client.domain.user.dto.UserUpdateRequestDto;
 import com.rush.logistic.client.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,34 +23,38 @@ public class UserController {
     //  그리고 authconfig에서 .requestMatchers("/api/users/**").permitAll() 이부분 수정하기
 //    @PreAuthorize("hasAuthority('ROLE_MASTER')")
     @GetMapping("/users")
-    public ResponseEntity<BaseResponseDTO<UserInfoListResponseDto<UserInfoResponseDto>>> getAllUsers(@RequestHeader(value = "USER_ID", required = false) String userId){
+    public ResponseEntity<BaseResponseDTO<UserInfoListResponseDto<UserInfoResponseDto>>> getAllUsers(){
 
         BaseResponseDTO<UserInfoListResponseDto<UserInfoResponseDto>> responseDto = userService.getAllUsers();
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
 
-    // TODO : 일단 username으로 검색했는데 나중에 헤더에서 userId 받아서 본인것만 조회하게
-    @GetMapping("/users/{username}")
+    // TODO : 일단 userId로 검색했는데 나중에 헤더에서 userId 받아서 본인것만 조회하게
+    //  혹시 조회할때 마스터는 상관없게 구현?
+    @GetMapping("/users/{userId}")
     public ResponseEntity<BaseResponseDTO<UserInfoResponseDto>> getUserById(
             @RequestHeader(value = "USER_ID", required = false) String authenticatedUserId,
-            @PathVariable String username) {
-
-        Long userId = userService.findByUsername(username).getUserId();
-        //Long id = Long.parseLong(authenticatedUserId);
+            @PathVariable String userId) {
 
         // TODO : 임시
-        Long id = 1L;
+        authenticatedUserId = "1";
 
         // 요청한 사용자가 본인인지 확인
-        if (!id.equals(userId)) {
-            // error 메소드 사용
+        if (!authenticatedUserId.equals(userId)) {
             BaseResponseDTO<UserInfoResponseDto> errorResponse = BaseResponseDTO.error("자기 자신의 데이터만 조회할 수 있습니다.", HttpStatus.FORBIDDEN.value());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
         }
 
-        // 단일 사용자 조회 로직
-        BaseResponseDTO<UserInfoResponseDto> responseDto = userService.getUser(username);
+        BaseResponseDTO<UserInfoResponseDto> responseDto = userService.getUserById(userId);
+        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+    }
+
+    @PatchMapping("/users/{userId}")
+    //    @PreAuthorize("hasAuthority('ROLE_MASTER')")
+    public ResponseEntity<BaseResponseDTO<UserInfoResponseDto>> updateUser(@RequestBody UserUpdateRequestDto updateRequestDto, @PathVariable String userId) {
+
+        BaseResponseDTO<UserInfoResponseDto> responseDto = userService.updateUser(userId, updateRequestDto);
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
 }

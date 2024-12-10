@@ -1,9 +1,12 @@
 package com.rush.logistic.client.domain.user.entity;
 
 import com.rush.logistic.client.domain.global.BaseEntity;
+import com.rush.logistic.client.domain.user.dto.UserUpdateRequestDto;
 import com.rush.logistic.client.domain.user.enums.UserRoleEnum;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.Optional;
 
 
 @Entity
@@ -33,4 +36,11 @@ public class User extends BaseEntity {
 
     @Column(name = "role", nullable = false)
     private UserRoleEnum role;
+
+    public void updateUser(UserUpdateRequestDto requestDto){
+
+        Optional.ofNullable(requestDto.getUsername()).ifPresent(username -> this.username = username);
+        Optional.ofNullable(requestDto.getSlackId()).ifPresent(slackId -> this.slackId = slackId);
+        Optional.ofNullable(requestDto.getRole()).ifPresent(role -> this.role = role);
+    }
 }
