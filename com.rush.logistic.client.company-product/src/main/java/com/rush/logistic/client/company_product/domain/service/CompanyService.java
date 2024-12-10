@@ -4,7 +4,6 @@ import com.rush.logistic.client.company_product.domain.dto.CompanyDto;
 import com.rush.logistic.client.company_product.domain.dto.request.CompanyCreateRequest;
 import com.rush.logistic.client.company_product.domain.dto.request.CompanyUpdateRequest;
 import com.rush.logistic.client.company_product.domain.dto.response.CompanySearchResponse;
-import com.rush.logistic.client.company_product.domain.entity.BaseEntity;
 import com.rush.logistic.client.company_product.domain.entity.Company;
 import com.rush.logistic.client.company_product.domain.repository.CompanyRepository;
 import com.rush.logistic.client.company_product.global.exception.ApplicationException;
@@ -15,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -48,16 +48,16 @@ public class CompanyService {
 
     //업체 단건 조회
     @Transactional
-    public CompanySearchResponse getCompany(UUID Id) {
-        Company company = companyRepository.findById(Id)
+    public CompanySearchResponse getCompany(UUID id) {
+        Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.INVALID_REQUEST));
         return CompanySearchResponse.from(company);
     }
 
     //업체 수정
     @Transactional
-    public CompanyDto updateCompany(UUID Id, CompanyUpdateRequest request) {
-        Company company = companyRepository.findById(Id)
+    public CompanyDto updateCompany(UUID id, CompanyUpdateRequest request) {
+        Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.INVALID_REQUEST));
 
         company.setHubId(request.hubId());
@@ -68,5 +68,18 @@ public class CompanyService {
         Company updatedCompany = companyRepository.save(company);
 
         return CompanyDto.from(updatedCompany);
+    }
+
+    //업체 삭제
+    @Transactional
+    public CompanyDto deleteCompany(UUID id) {
+        Company company = companyRepository.findById(id)
+                .orElseThrow(() -> new ApplicationException(ErrorCode.INVALID_REQUEST));
+        company.setIsDelete(true);
+        company.setDeletedAt(LocalDateTime.now());
+
+        Company deletedCompany = companyRepository.save(company);
+
+        return CompanyDto.from(deletedCompany);
     }
 }

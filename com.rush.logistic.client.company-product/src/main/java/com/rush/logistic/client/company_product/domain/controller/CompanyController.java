@@ -36,14 +36,20 @@ public class CompanyController {
         return Response.success(companies, "업체 조회에 성공하였습니다.");
     }
 
-    @GetMapping("/{Id}")
-    public Response<CompanySearchResponse> getCompany(@PathVariable UUID Id) {
-        return Response.success(companyService.getCompany(Id),"업체 단건 조회에 성공하였습니다.");
+    @GetMapping("/{id}")
+    public Response<CompanySearchResponse> getCompany(@PathVariable UUID id) {
+        return Response.success(companyService.getCompany(id),"업체 단건 조회에 성공하였습니다.");
     }
 
-    @PutMapping("/{Id}")
-    public Response<?> updateCompany(@PathVariable UUID Id, @RequestBody CompanyUpdateRequest request) {
-        return Response.success(companyService.updateCompany(Id,request), "업체 수정에 성공하였습니다");
+    @PutMapping("/{id}")
+    public Response<?> updateCompany(@PathVariable UUID id, @RequestBody CompanyUpdateRequest request) {
+        return Response.success(companyService.updateCompany(id,request), "업체 수정에 성공하였습니다");
+    }
+
+    @DeleteMapping("/{id}")
+    public Response<?> deleteCompany(@PathVariable UUID id) {
+        companyService.deleteCompany(id);
+        return Response.success(companyService.getCompany(id),"가게 정보가 삭제되었습니다.");
     }
 
 }
