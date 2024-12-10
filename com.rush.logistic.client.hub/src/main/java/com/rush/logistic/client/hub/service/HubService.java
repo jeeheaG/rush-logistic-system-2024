@@ -92,7 +92,7 @@ public class HubService {
     }
 
     @Transactional
-    public BaseResponseDto<HubInfoResponseDto> deleteHub(UUID hubId) {
+    public BaseResponseDto<HubIdResponseDto> deleteHub(UUID hubId) {
         // TODO: MASTER USER 확인 로직 추가
         try {
             // 허브 조회
@@ -107,10 +107,10 @@ public class HubService {
             hubRepository.save(hub);
 
             return BaseResponseDto
-                    .<HubInfoResponseDto>from(HttpStatus.OK.value(), HttpStatus.OK, HubMessage.HUB_DELETED_SUCCESS.getMessage(), HubInfoResponseDto.from(hub));
+                    .<HubIdResponseDto>from(HttpStatus.OK.value(), HttpStatus.OK, HubMessage.HUB_DELETED_SUCCESS.getMessage(), HubIdResponseDto.from(hub.getHubId()));
         }catch (IllegalArgumentException e) {
             return BaseResponseDto
-                    .<HubInfoResponseDto>from(HttpStatus.NOT_FOUND.value(), HttpStatus.NOT_FOUND, HubMessage.HUB_NOT_FOUND.getMessage(), null);
+                    .<HubIdResponseDto>from(HttpStatus.NOT_FOUND.value(), HttpStatus.NOT_FOUND, HubMessage.HUB_NOT_FOUND.getMessage(), null);
         }
     }
 }
