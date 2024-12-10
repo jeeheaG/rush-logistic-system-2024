@@ -4,11 +4,19 @@ import com.rush.logistic.client.hub.dto.BaseResponseDto;
 import com.rush.logistic.client.hub.dto.HubIdResponseDto;
 import com.rush.logistic.client.hub.dto.HubInfoRequestDto;
 import com.rush.logistic.client.hub.dto.HubInfoResponseDto;
+import com.rush.logistic.client.hub.dto.HubListResponseDto;
 import com.rush.logistic.client.hub.message.HubMessage;
 import com.rush.logistic.client.hub.model.Hub;
 import com.rush.logistic.client.hub.repository.HubRepository;
+import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -75,5 +83,32 @@ public class HubService {
             return BaseResponseDto
                     .<HubInfoResponseDto>from(HttpStatus.NOT_FOUND.value(), HttpStatus.NOT_FOUND, HubMessage.HUB_NOT_FOUND.getMessage(), null);
         }
+    }
+
+    public BaseResponseDto<HubListResponseDto<HubInfoResponseDto>> getHubInfoList(
+            int page, int size, String sortBy, boolean isAsc
+    ) {
+        try {
+            Direction direction = isAsc ? Direction.ASC : Direction.DESC;
+            Sort sort = Sort.by(direction, sortBy);
+            Pageable pageable = PageRequest.of(page, size, sort);
+
+            // 허브 리스트 조회
+            Page<Hub> hubList = hubRepository.findAllByIsDeleteFalse(pageable).orElseThrow(() ->
+                    new NoSuchElementException(HubMessage.HUB_INFO_LIST_NOT_FOUND.getMessage())
+            );
+
+            List<HubInfoResponseDto> hubInfoList = hubList.stream()
+                    .map(HubInfoResponseDto::from)
+                    .toList();
+
+            return BaseResponseDto
+                    .<HubListResponseDto<HubInfoResponseDto>>from(HttpStatus.OK.value(), HttpStatus.OK, HubMessage.HUB_INFO_LIST_FOUND_SUCCESS.getMessage(), HubListResponseDto.from(hubInfoList));
+        } catch (NoSuchElementException e) {
+            return BaseResponseDto
+                    .<HubListResponseDto<HubInfoResponseDto>>from(HttpStatus.NOT_FOUND.value(), HttpStatus.NOT_FOUND, HubMessage.HUB_INFO_LIST_NOT_FOUND.getMessage(), null);
+
+        }
+
     }
 }
