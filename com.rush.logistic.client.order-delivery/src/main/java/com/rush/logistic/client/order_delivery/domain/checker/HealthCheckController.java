@@ -1,7 +1,7 @@
 package com.rush.logistic.client.order_delivery.domain.checker;
 
-import com.rush.logistic.client.order_delivery.global.common.response.BaseResponse;
-import com.rush.logistic.client.order_delivery.global.common.response.BasicCode;
+import com.rush.logistic.client.order_delivery.global.response.BaseResponse;
+import com.rush.logistic.client.order_delivery.global.response.BasicCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

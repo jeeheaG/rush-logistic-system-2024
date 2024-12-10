@@ -1,7 +1,8 @@
-package com.rush.logistic.client.order_delivery.global.common.response;
+package com.rush.logistic.client.order_delivery.global.response;
 
 import lombok.Builder;
 import lombok.Getter;
+import org.springframework.http.HttpStatus;
 
 @Getter
 @Builder
@@ -14,6 +15,7 @@ public class BaseResponse {
 
     public static BaseResponse toResponse(StatusCode statusCode) {
         return BaseResponse.builder()
+                .status(String.valueOf(statusCode.getHttpStatus().value()))
                 .code(statusCode.getHttpStatus().name())
                 .message(statusCode.getMessage())
                 .build();
@@ -21,9 +23,18 @@ public class BaseResponse {
 
     public static BaseResponse toResponse(StatusCode statusCode, Object data) {
         return BaseResponse.builder()
+                .status(String.valueOf(statusCode.getHttpStatus().value()))
                 .code(statusCode.getHttpStatus().name())
                 .message(statusCode.getMessage())
                 .data(data)
+                .build();
+    }
+
+    public static BaseResponse toResponse(HttpStatus status) {
+        return BaseResponse.builder()
+                .status(String.valueOf(status.value()))
+                .code(status.name())
+                .message(status.getReasonPhrase())
                 .build();
     }
 }

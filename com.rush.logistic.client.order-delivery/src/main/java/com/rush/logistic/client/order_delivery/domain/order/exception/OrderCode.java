@@ -1,12 +1,13 @@
-package com.rush.logistic.client.order_delivery.global.common.response;
+package com.rush.logistic.client.order_delivery.domain.order.exception;
 
+import com.rush.logistic.client.order_delivery.global.response.StatusCode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 @Getter
 @AllArgsConstructor
-public enum OrderCode implements StatusCode{
+public enum OrderCode implements StatusCode {
     //2xx
     CREATE_ORDER_OK(HttpStatus.CREATED, "주문 생성 성공"),
     UPDATE_ORDER_OK(HttpStatus.OK, "주문 수정 성공"),
