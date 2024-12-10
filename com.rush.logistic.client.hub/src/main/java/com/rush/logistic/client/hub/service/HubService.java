@@ -76,4 +76,27 @@ public class HubService {
                     .<HubInfoResponseDto>from(HttpStatus.NOT_FOUND.value(), HttpStatus.NOT_FOUND, HubMessage.HUB_NOT_FOUND.getMessage(), null);
         }
     }
+
+    @Transactional
+    public BaseResponseDto<HubInfoResponseDto> deleteHub(UUID hubId) {
+        // TODO: MASTER USER 확인 로직 추가
+        try {
+            // 허브 조회
+            Hub hub = hubRepository.findById(hubId)
+                    .orElseThrow(() ->
+                            new IllegalArgumentException(HubMessage.HUB_NOT_FOUND.getMessage())
+                    );
+            // 허브 삭제정보 업데이트
+            hub.delete();
+
+            // 허브 삭제정보 저장
+            hubRepository.save(hub);
+
+            return BaseResponseDto
+                    .<HubInfoResponseDto>from(HttpStatus.OK.value(), HttpStatus.OK, HubMessage.HUB_DELETED_SUCCESS.getMessage(), HubInfoResponseDto.from(hub));
+        }catch (IllegalArgumentException e) {
+            return BaseResponseDto
+                    .<HubInfoResponseDto>from(HttpStatus.NOT_FOUND.value(), HttpStatus.NOT_FOUND, HubMessage.HUB_NOT_FOUND.getMessage(), null);
+        }
+    }
 }
