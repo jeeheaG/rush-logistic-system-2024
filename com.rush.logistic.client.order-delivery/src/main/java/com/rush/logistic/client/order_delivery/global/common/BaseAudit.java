@@ -47,9 +47,9 @@ public class BaseAudit {
         this.updatedAt = ZonedDateTime.now(ZoneId.of(TIME_ZONE_ID));
     }
 
-    protected void setDeleteInfo(UUID deleteUserId) {
+    public void softDelete(UUID deleteUserId) {
         this.deletedAt = ZonedDateTime.now(ZoneId.of(TIME_ZONE_ID));
         this.deletedBy = deleteUserId;
-//        this.isDelete = true; // @SQLDelete 로 대체
+        this.isDelete = true;
     }
 }

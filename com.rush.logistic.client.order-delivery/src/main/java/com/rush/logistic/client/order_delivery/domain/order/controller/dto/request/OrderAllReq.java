@@ -6,7 +6,7 @@ import lombok.Builder;
 import java.util.UUID;
 
 @Builder
-public record CreateOrderReq(
+public record OrderAllReq(
         UUID productId,
         Integer quantity,
         UUID receiveCompanyId,

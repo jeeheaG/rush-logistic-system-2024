@@ -1,5 +1,6 @@
 package com.rush.logistic.client.order_delivery.domain.order.service;
 
+import com.rush.logistic.client.order_delivery.domain.order.controller.dto.request.OrderAllReq;
 import com.rush.logistic.client.order_delivery.domain.order.controller.dto.response.OrderAllRes;
 import com.rush.logistic.client.order_delivery.domain.order.domain.Order;
 import com.rush.logistic.client.order_delivery.domain.order.exception.OrderCode;
@@ -23,9 +24,29 @@ public class OrderService {
         return OrderAllRes.fromEntity(orderSaved);
     }
 
-    public OrderAllRes getOrderById(UUID orderId) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new OrderException(OrderCode.ORDER_NOT_EXIST));
+    public OrderAllRes getOrderDetail(UUID orderId) {
+        Order order = getOrderEntityById(orderId);
         return OrderAllRes.fromEntity(order);
     }
+
+    @Transactional
+    public OrderAllRes updateOrder(UUID orderId, OrderAllReq requestDto) {
+        Order order = getOrderEntityById(orderId);
+        order.updateAll(requestDto);
+        return OrderAllRes.fromEntity(order);
+    }
+
+    @Transactional
+    public UUID deleteOrder(UUID orderId, UUID userId) {
+        Order order = getOrderEntityById(orderId);
+        order.softDelete(userId);
+        return order.getId();
+    }
+
+
+    private Order getOrderEntityById(UUID orderId) {
+        return orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderException(OrderCode.ORDER_NOT_EXIST));
+    }
+
 }
