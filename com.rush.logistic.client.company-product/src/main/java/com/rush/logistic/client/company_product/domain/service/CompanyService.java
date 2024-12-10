@@ -26,14 +26,16 @@ public class CompanyService {
 
     //업체 추가
     @Transactional
-    public void createCompany(CompanyCreateRequest requestDto) {
+    public CompanyDto createCompany(CompanyCreateRequest request) {
         // TODO: MASTER, HUB-MANAGER 확인 로직 추가
-        CompanyDto dto = CompanyCreateRequest.toDto(requestDto);
+        CompanyDto dto = CompanyCreateRequest.toDto(request);
 
         Optional<Company> company = companyRepository.findByName(dto.name());
 
         if(company.isEmpty()){
             Company companyEntity = companyRepository.save(dto.toEntity(dto));
+            System.out.println("Saved Company ID: " + companyEntity.getId());
+            return CompanyDto.from(companyEntity);
         }else{
             throw new ApplicationException(ErrorCode.DUPLICATED_COMPANYNAME);
         }
