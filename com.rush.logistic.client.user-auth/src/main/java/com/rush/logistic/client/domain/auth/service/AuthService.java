@@ -63,9 +63,9 @@ public class AuthService {
 
         User savedUser = userRepository.save(user);
 
-        SignUpResponseDto responseDto = SignUpResponseDto.from(savedUser);
+        SignUpResponseDto responseDto = SignUpResponseDto.of(savedUser);
 
-        return BaseResponseDTO.<SignUpResponseDto>success(responseDto);
+        return BaseResponseDTO.success(responseDto);
     }
 
     public BaseResponseDTO<SignInResponseDto> signIn(Long userId, String password) {
@@ -78,9 +78,9 @@ public class AuthService {
 
         String token = createAccessToken(user.getUserId(), user.getRole());
 
-        SignInResponseDto responseDto = SignInResponseDto.from(token);
+        SignInResponseDto responseDto = SignInResponseDto.of(token);
 
-        return BaseResponseDTO.<SignInResponseDto>success(responseDto);
+        return BaseResponseDTO.success(responseDto);
 
     }
 }
