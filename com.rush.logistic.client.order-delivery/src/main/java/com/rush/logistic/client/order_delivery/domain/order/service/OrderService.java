@@ -7,14 +7,17 @@ import com.rush.logistic.client.order_delivery.domain.order.exception.OrderExcep
 import com.rush.logistic.client.order_delivery.domain.order.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 @Service
 public class OrderService {
     private final OrderRepository orderRepository;
 
+    @Transactional
     public OrderAllRes createOrder(Order order) {
         Order orderSaved = orderRepository.save(order);
         return OrderAllRes.fromEntity(orderSaved);

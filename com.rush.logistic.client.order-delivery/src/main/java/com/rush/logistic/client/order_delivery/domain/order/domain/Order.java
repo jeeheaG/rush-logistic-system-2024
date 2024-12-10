@@ -46,4 +46,8 @@ public class Order extends BaseAudit {
 
     private String requestNote;
 
+    public void updateAll() {
+
+    }
+
 }
