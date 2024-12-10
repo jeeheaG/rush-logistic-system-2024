@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -53,7 +54,14 @@ public class HubController {
         return ResponseEntity.ok(responseDto);
     }
 
-    @GetMapping
+  @DeleteMapping("/{hubId}")
+    public ResponseEntity<BaseResponseDto<HubIdResponseDto>> deleteHub(@PathVariable("hubId") UUID hubId) {
+        BaseResponseDto<HubIdResponseDto> responseDto = hubService.deleteHub(hubId);
+
+        return ResponseEntity.ok(responseDto);
+    }
+  
+  @GetMapping
     public ResponseEntity<BaseResponseDto<HubListResponseDto<HubInfoResponseDto>>> getHubInfoList(
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,

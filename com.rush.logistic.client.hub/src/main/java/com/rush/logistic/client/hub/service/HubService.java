@@ -50,6 +50,13 @@ public class HubService {
                     .orElseThrow(() ->
                             new IllegalArgumentException(HubMessage.HUB_NOT_FOUND.getMessage())
                     );
+
+            // soft delete된 허브입니다.
+            if (hub.isDelete()) {
+                return BaseResponseDto
+                        .<HubInfoResponseDto>from(HttpStatus.GONE.value(), HttpStatus.GONE, HubMessage.HUB_ALREADY_DELETED.getMessage(), null);
+            }
+
             // 허브 정보 반환
             HubInfoResponseDto responseDto = HubInfoResponseDto.from(hub);
 
@@ -71,6 +78,13 @@ public class HubService {
                     .orElseThrow(() ->
                             new IllegalArgumentException(HubMessage.HUB_NOT_FOUND.getMessage())
                     );
+
+            // soft delete된 허브입니다.
+            if (hub.isDelete()) {
+                return BaseResponseDto
+                        .<HubInfoResponseDto>from(HttpStatus.GONE.value(), HttpStatus.GONE, HubMessage.HUB_ALREADY_DELETED.getMessage(), null);
+            }
+
             // 허브 정보 업데이트
             hub.update(requestDto);
 
@@ -82,6 +96,36 @@ public class HubService {
         }catch (IllegalArgumentException e) {
             return BaseResponseDto
                     .<HubInfoResponseDto>from(HttpStatus.NOT_FOUND.value(), HttpStatus.NOT_FOUND, HubMessage.HUB_NOT_FOUND.getMessage(), null);
+        }
+    }
+  
+    @Transactional
+    public BaseResponseDto<HubIdResponseDto> deleteHub(UUID hubId) {
+        // TODO: MASTER USER 확인 로직 추가
+        try {
+            // 허브 조회
+            Hub hub = hubRepository.findById(hubId)
+                    .orElseThrow(() ->
+                            new IllegalArgumentException(HubMessage.HUB_NOT_FOUND.getMessage())
+                    );
+
+            // soft delete된 허브입니다.
+            if (hub.isDelete()) {
+                return BaseResponseDto
+                        .<HubIdResponseDto>from(HttpStatus.GONE.value(), HttpStatus.GONE, HubMessage.HUB_ALREADY_DELETED.getMessage(), null);
+            }
+
+            // 허브 삭제정보 업데이트
+            hub.delete();
+
+            // 허브 삭제정보 저장
+            hubRepository.save(hub);
+
+            return BaseResponseDto
+                    .<HubIdResponseDto>from(HttpStatus.OK.value(), HttpStatus.OK, HubMessage.HUB_DELETED_SUCCESS.getMessage(), HubIdResponseDto.from(hub.getHubId()));
+        }catch (IllegalArgumentException e) {
+            return BaseResponseDto
+                    .<HubIdResponseDto>from(HttpStatus.NOT_FOUND.value(), HttpStatus.NOT_FOUND, HubMessage.HUB_NOT_FOUND.getMessage(), null);
         }
     }
 
@@ -109,6 +153,5 @@ public class HubService {
                     .<HubListResponseDto<HubInfoResponseDto>>from(HttpStatus.NOT_FOUND.value(), HttpStatus.NOT_FOUND, HubMessage.HUB_INFO_LIST_NOT_FOUND.getMessage(), null);
 
         }
-
     }
 }
