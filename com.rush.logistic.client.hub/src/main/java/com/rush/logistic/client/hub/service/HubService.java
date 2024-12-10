@@ -42,6 +42,13 @@ public class HubService {
                     .orElseThrow(() ->
                             new IllegalArgumentException(HubMessage.HUB_NOT_FOUND.getMessage())
                     );
+
+            // soft delete된 허브입니다.
+            if (hub.isDelete()) {
+                return BaseResponseDto
+                        .<HubInfoResponseDto>from(HttpStatus.GONE.value(), HttpStatus.GONE, HubMessage.HUB_ALREADY_DELETED.getMessage(), null);
+            }
+
             // 허브 정보 반환
             HubInfoResponseDto responseDto = HubInfoResponseDto.from(hub);
 
