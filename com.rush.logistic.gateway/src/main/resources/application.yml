@@ -9,8 +9,8 @@ spring:
   cloud:
     gateway:
       routes:
-        - id: user-slack-service
-          uri: lb://user-slack-service
+        - id: auth
+          uri: lb://auth
           predicates:
             - Path=/api/auth/**, /api/users/**, /api/slack/**
         - id: order-delivery-service
