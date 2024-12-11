@@ -8,6 +8,7 @@ import com.rush.logistic.client.company_product.domain.entity.Company;
 import com.rush.logistic.client.company_product.domain.repository.CompanyRepository;
 import com.rush.logistic.client.company_product.global.exception.ApplicationException;
 import com.rush.logistic.client.company_product.global.exception.ErrorCode;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +24,8 @@ import java.util.UUID;
 public class CompanyService {
 
     private final CompanyRepository companyRepository;
+
+    private final EntityManager entityManager;
 
     //업체 추가
     @Transactional
@@ -67,14 +70,19 @@ public class CompanyService {
         company.setAddress(request.address());
         company.setType(request.type());
 
-        Company updatedCompany = companyRepository.save(company);
+        entityManager.flush();
 
-        return CompanyDto.from(updatedCompany);
+        entityManager.clear();
+
+        Company companyForReturn = companyRepository.findById(id)
+                .orElseThrow(() -> new ApplicationException(ErrorCode.COMPANY_NOT_FOUND));
+
+        return CompanyDto.from(companyForReturn);
     }
 
     //업체 삭제
     @Transactional
-    public CompanyDto deleteCompany(UUID id) {
+    public void deleteCompany(UUID id) {
         Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.INVALID_REQUEST));
         if (company.getIsDelete()){
@@ -82,9 +90,5 @@ public class CompanyService {
         }
         company.setIsDelete(true);
         company.setDeletedAt(LocalDateTime.now());
-
-        Company deletedCompany = companyRepository.save(company);
-
-        return CompanyDto.from(deletedCompany);
     }
 }
