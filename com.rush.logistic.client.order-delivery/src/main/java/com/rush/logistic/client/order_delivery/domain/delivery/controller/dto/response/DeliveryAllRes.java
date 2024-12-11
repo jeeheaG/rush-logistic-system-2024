@@ -9,6 +9,7 @@ import java.util.UUID;
 @Builder
 public record DeliveryAllRes(
 //        UUID orderId,
+        UUID deliveryId,
         String status,
         UUID startHubId,
         UUID endHubId,
@@ -25,6 +26,7 @@ public record DeliveryAllRes(
 ) {
     public static DeliveryAllRes fromEntity(Delivery delivery) {
         return DeliveryAllRes.builder()
+                .deliveryId(delivery.getId())
                 .status(delivery.getStatus().name())
                 .startHubId(delivery.getStartHubId())
                 .endHubId(delivery.getEndHubId())

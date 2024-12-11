@@ -6,7 +6,6 @@ import com.rush.logistic.client.order_delivery.global.common.BaseAudit;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
 import java.util.UUID;
@@ -41,24 +40,25 @@ public class Order extends BaseAudit {
     @Column(nullable = false)
     private UUID produceCompanyId;
 
-    // TODO : temp
-    private UUID deliveryId;
+//    // TODO : temp
+//    private UUID deliveryId;
 
-//    @OneToOne(fetch = FetchType.LAZY, optional = false)
-//    @JoinColumn(name = "delivery_id", nullable = false)
-//    private Delivery delivery;
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "delivery_id", nullable = false)
+    private Delivery delivery;
 
     // TODO : 날짜 형식
     private String requestDeadLine;
 
     private String requestNote;
 
-    public void updateAll(OrderAllReq requestDto) {
+    public void updateAll(OrderAllReq requestDto, Delivery delivery) {
         if (requestDto.productId()!=null) { this.productId = requestDto.productId(); }
         if (requestDto.quantity()!=null) { this.quantity = requestDto.quantity(); }
         if (requestDto.receiveCompanyId()!=null) { this.receiveCompanyId = requestDto.receiveCompanyId(); }
         if (requestDto.produceCompanyId()!=null) { this.produceCompanyId = requestDto.produceCompanyId(); }
-        if (requestDto.deliveryId()!=null) { this.deliveryId = requestDto.deliveryId(); }
+//        if (requestDto.deliveryId()!=null) { this.deliveryId = requestDto.deliveryId(); }
+        if (delivery!=null) { this.delivery = delivery; }
         if (requestDto.requestDeadLine()!=null) { this.requestDeadLine = requestDto.requestDeadLine(); }
         if (requestDto.requestNote()!=null) { this.requestNote = requestDto.requestNote(); }
     }

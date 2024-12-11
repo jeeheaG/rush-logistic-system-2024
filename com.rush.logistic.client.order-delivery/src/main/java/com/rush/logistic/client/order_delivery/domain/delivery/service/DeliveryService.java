@@ -20,16 +20,16 @@ public class DeliveryService {
     private final DeliveryRepository deliveryRepository;
     private final EntityManager entityManager;
 
-    /**
-     * OrderService 쪽에서 호출됨
-     * @param requestModel
-     * @return
-     */
-    @Transactional
-    public Delivery createDelivery(DeliveryAllReq requestModel) {
-        Delivery delivery = requestModel.toEntity();
-        return deliveryRepository.save(delivery);
-    }
+//    /**
+//     * OrderService 쪽에서 호출됨
+//     * @param requestModel
+//     * @return
+//     */
+//    @Transactional
+//    public Delivery createDelivery(DeliveryAllReq requestModel) {
+//        Delivery delivery = requestModel.toEntity();
+//        return deliveryRepository.save(delivery);
+//    }
 
     public DeliveryAllRes getDeliveryDetail(UUID deliveryId) {
         Delivery delivery = getDeliveryEntityById(deliveryId);
@@ -41,6 +41,7 @@ public class DeliveryService {
         Delivery delivery = getDeliveryEntityById(deliveryId);
         delivery.updateAll(requestDto);
         entityManager.flush();
+
         Delivery savedDelivery = getDeliveryEntityById(deliveryId);
         return DeliveryAllRes.fromEntity(savedDelivery);
     }

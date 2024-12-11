@@ -1,5 +1,6 @@
 package com.rush.logistic.client.order_delivery.domain.order.controller.dto.request;
 
+import com.rush.logistic.client.order_delivery.domain.delivery.controller.dto.request.DeliveryAllReq;
 import com.rush.logistic.client.order_delivery.domain.delivery.domain.Delivery;
 import com.rush.logistic.client.order_delivery.domain.order.domain.Order;
 import lombok.Builder;
@@ -7,12 +8,12 @@ import lombok.Builder;
 import java.util.UUID;
 
 @Builder
-public record OrderAllReq(
+public record OrderAndDeliveryAllReq(
         UUID productId,
         Integer quantity,
         UUID receiveCompanyId,
         UUID produceCompanyId,
-        UUID deliveryId,
+        DeliveryAllReq deliveryInfo,
         String requestDeadLine,
         String requestNote
 ) {

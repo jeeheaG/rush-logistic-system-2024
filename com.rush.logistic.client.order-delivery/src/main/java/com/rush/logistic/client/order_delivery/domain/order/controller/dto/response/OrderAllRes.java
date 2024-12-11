@@ -1,5 +1,6 @@
 package com.rush.logistic.client.order_delivery.domain.order.controller.dto.response;
 
+import com.rush.logistic.client.order_delivery.domain.delivery.controller.dto.response.DeliveryAllRes;
 import com.rush.logistic.client.order_delivery.domain.order.domain.Order;
 import lombok.Builder;
 
@@ -13,7 +14,8 @@ public record OrderAllRes(
         Integer quantity,
         UUID receiveCompanyId,
         UUID produceCompanyId,
-        UUID deliveryId,
+//        UUID deliveryId,
+        DeliveryAllRes delivery,
         String requestDeadLine,
         String requestNote,
         UUID createdBy,
@@ -25,13 +27,15 @@ public record OrderAllRes(
         Boolean isDelete
 ) {
     public static OrderAllRes fromEntity(Order order) {
+        DeliveryAllRes deliveryAllRes = DeliveryAllRes.fromEntity(order.getDelivery());
+
         return OrderAllRes.builder()
                 .orderId(order.getId())
                 .productId(order.getProductId())
                 .quantity(order.getQuantity())
                 .receiveCompanyId(order.getReceiveCompanyId())
                 .produceCompanyId(order.getProduceCompanyId())
-                .deliveryId(order.getDeliveryId())
+                .delivery(deliveryAllRes)
                 .requestDeadLine(order.getRequestDeadLine())
                 .requestNote(order.getRequestNote())
                 .createdAt(order.getCreatedAt())

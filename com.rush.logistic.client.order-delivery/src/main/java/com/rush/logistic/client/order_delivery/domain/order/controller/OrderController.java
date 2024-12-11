@@ -1,6 +1,7 @@
 package com.rush.logistic.client.order_delivery.domain.order.controller;
 
 import com.rush.logistic.client.order_delivery.domain.order.controller.dto.request.OrderAllReq;
+import com.rush.logistic.client.order_delivery.domain.order.controller.dto.request.OrderAndDeliveryAllReq;
 import com.rush.logistic.client.order_delivery.domain.order.controller.dto.response.OrderAllRes;
 import com.rush.logistic.client.order_delivery.domain.order.controller.dto.response.OrderIdRes;
 import com.rush.logistic.client.order_delivery.domain.order.service.OrderService;
@@ -21,10 +22,10 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping
-    public ResponseEntity<Object> createOrder(@RequestBody OrderAllReq requestDto) {
+    public ResponseEntity<Object> createOrder(@RequestBody OrderAndDeliveryAllReq requestDto) {
         log.info("OrderController createOrder");
 
-        OrderAllRes responseDto = orderService.createOrder(requestDto.toEntity());
+        OrderAllRes responseDto = orderService.createDeliveryAndOrder(requestDto);
         return ResponseEntity.ok().body(BaseResponse.toResponse(OrderCode.CREATE_ORDER_OK, responseDto));
     }
 
