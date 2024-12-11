@@ -16,11 +16,11 @@ public record DeliveryAllRes(
         String address,
         String receiverSlackId,
         UUID receiverId,
-        UUID createdBy,
+        String createdBy,
         ZonedDateTime createdAt,
-        UUID updatedBy,
+        String updatedBy,
         ZonedDateTime updatedAt,
-        UUID deletedBy,
+        String deletedBy,
         ZonedDateTime deletedAt,
         Boolean isDelete
 ) {

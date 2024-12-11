@@ -49,7 +49,7 @@ public class DeliveryService {
     @Transactional
     public UUID deleteDelivery(UUID deliveryId, UUID userId) {
         Delivery delivery = getDeliveryEntityById(deliveryId);
-        delivery.softDelete(userId);
+        delivery.softDelete(userId.toString());
         return delivery.getId();
     }
 

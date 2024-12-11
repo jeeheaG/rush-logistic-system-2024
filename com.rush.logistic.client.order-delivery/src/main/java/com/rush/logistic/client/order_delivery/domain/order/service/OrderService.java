@@ -57,7 +57,7 @@ public class OrderService {
     @Transactional
     public UUID deleteOrder(UUID orderId, UUID userId) {
         Order order = getOrderEntityById(orderId);
-        order.softDelete(userId);
+        order.softDelete(userId.toString());
         return order.getId();
     }
 

@@ -14,15 +14,14 @@ public record OrderAllRes(
         Integer quantity,
         UUID receiveCompanyId,
         UUID produceCompanyId,
-//        UUID deliveryId,
         DeliveryAllRes delivery,
         String requestDeadLine,
         String requestNote,
-        UUID createdBy,
+        String createdBy,
         ZonedDateTime createdAt,
-        UUID updatedBy,
+        String updatedBy,
         ZonedDateTime updatedAt,
-        UUID deletedBy,
+        String deletedBy,
         ZonedDateTime deletedAt,
         Boolean isDelete
 ) {

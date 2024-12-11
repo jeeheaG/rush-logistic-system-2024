@@ -6,11 +6,11 @@ import java.util.UUID;
 
 @Builder
 public record DeliverymanIdRes(
-        UUID DeliverymanId
+        Long userId
 ) {
-    public static DeliverymanIdRes toDto(UUID DeliverymanId) {
+    public static DeliverymanIdRes toDto(Long userId) {
         return DeliverymanIdRes.builder()
-                .DeliverymanId(DeliverymanId)
+                .userId(userId)
                 .build();
     }
 }

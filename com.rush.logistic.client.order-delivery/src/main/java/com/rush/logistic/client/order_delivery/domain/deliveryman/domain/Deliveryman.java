@@ -2,9 +2,11 @@ package com.rush.logistic.client.order_delivery.domain.deliveryman.domain;
 
 // TODO : validation
 
+import com.rush.logistic.client.order_delivery.domain.deliveryman.controller.dto.request.DeliverymanUpdateReq;
 import com.rush.logistic.client.order_delivery.global.common.BaseAudit;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -24,11 +26,11 @@ import java.util.UUID;
 @SQLRestriction("is_delete = false")
 public class Deliveryman extends BaseAudit {
 
-    // 혹시 몰라 만들어두는 고유값 필드 (로직에서 되도록 사용은 안하고 구현 예정)
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(name="deliveryman_id", updatable = false, nullable = false)
-    private UUID id;
+//    // 혹시 몰라 만들어두는 고유값 필드 (로직에서 되도록 사용은 안하고 구현 예정)
+//    @GeneratedValue(generator = "UUID")
+//    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+//    @Column(name="deliveryman_id", updatable = false, nullable = false)
+//    private UUID id;
 
     @Id
     @Column(updatable = false, nullable = false)
@@ -36,18 +38,26 @@ public class Deliveryman extends BaseAudit {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private DeliverymanInChargeEnum type;
+    private DeliverymanInChargeTypeEnum inChargeType;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private DeliverymanStatusEnum status;
 
-    @Column(nullable = false)
     private Integer sequence;
 
+    @Column(nullable = false)
     private UUID hubInChargeId;
 
     private UUID lastHubId;
 
     private ZonedDateTime lastDeliveryTime;
+
+    public void updateAll(DeliverymanUpdateReq requestDto) {
+        if (requestDto.status()!=null) { this.status = requestDto.status(); }
+        if (requestDto.sequence()!=null) { this.sequence = requestDto.sequence(); }
+        if (requestDto.hubInChargeId()!=null) { this.hubInChargeId = requestDto.hubInChargeId(); }
+        if (requestDto.lastHubId()!=null) { this.lastHubId = requestDto.lastHubId(); }
+        if (requestDto.lastDeliveryTime()!=null) { this.lastDeliveryTime = requestDto.lastDeliveryTime(); }
+    }
 }
