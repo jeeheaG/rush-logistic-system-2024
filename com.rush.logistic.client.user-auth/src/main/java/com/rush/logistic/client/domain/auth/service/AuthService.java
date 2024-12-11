@@ -58,6 +58,7 @@ public class AuthService {
                 .password(encodedPassword)
                 .slackId(signUpRequestDto.getSlackId())
                 .role(UserRoleEnum.MASTER)
+                .email(signUpRequestDto.getEmail())
                 .build();
 
         user.setDelete(false);

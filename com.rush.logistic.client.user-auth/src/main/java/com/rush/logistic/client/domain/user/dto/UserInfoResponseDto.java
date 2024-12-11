@@ -18,6 +18,7 @@ public class UserInfoResponseDto {
     private String password;
     private String slackId;
     private UserRoleEnum role;
+    private String email;
 
     public static UserInfoResponseDto from(User user) {
         return UserInfoResponseDto.builder()
@@ -26,6 +27,7 @@ public class UserInfoResponseDto {
                 .password(user.getPassword())
                 .slackId(user.getSlackId())
                 .role(user.getRole())
+                .email(user.getEmail())
                 .build();
     }
 }
