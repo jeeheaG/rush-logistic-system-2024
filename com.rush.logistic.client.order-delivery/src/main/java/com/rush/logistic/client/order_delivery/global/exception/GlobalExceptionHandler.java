@@ -4,6 +4,7 @@ import com.rush.logistic.client.order_delivery.global.response.BaseResponse;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -53,6 +54,19 @@ public class GlobalExceptionHandler {
 //                        ILLEGAL_ARGUMENT_ERROR.getMessage(),
 //                        invalidParameterResponses));
 //    }
+
+    /**
+     * 엔티티 save 할 때 @Column(nullable = false) 위반 시 발생하는 에러
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<BaseResponse> dataIntegrityViolationExceptionHandler(DataIntegrityViolationException e) {
+        log.error("DataIntegrityViolationException: " + e);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                BaseResponse.toResponse(HttpStatus.BAD_REQUEST, e.getMessage())
+        );
+    }
 
     /**
      * [Exception] BaseException 핸들러
