@@ -5,18 +5,15 @@ import com.rush.logistic.client.company_product.domain.type.CompanyType;
 
 import java.util.UUID;
 
-public record CompanyCreateRequest (
-        UUID id,
+public record CompanyUpdateRequest(
         UUID hubId,
         String name,
         String address,
         CompanyType type
 
-){
-    //request -> dto
-    public static CompanyDto toDto(CompanyCreateRequest request) {
+) {
+    public static CompanyDto toDto(CompanyUpdateRequest request) {
         return CompanyDto.builder()
-                .id(request.id)
                 .hubId(request.hubId())
                 .name(request.name())
                 .address(request.address())

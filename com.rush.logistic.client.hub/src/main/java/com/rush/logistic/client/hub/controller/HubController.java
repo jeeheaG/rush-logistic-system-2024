@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -46,6 +47,13 @@ public class HubController {
     public ResponseEntity<BaseResponseDto<HubInfoResponseDto>> updateHubDetails(@PathVariable("hubId") UUID hubId,
                                                                                 @RequestBody HubInfoRequestDto requestDto) {
         BaseResponseDto<HubInfoResponseDto> responseDto = hubService.updateHubDetails(hubId, requestDto);
+
+        return ResponseEntity.ok(responseDto);
+    }
+
+    @DeleteMapping("/{hubId}")
+    public ResponseEntity<BaseResponseDto<HubIdResponseDto>> deleteHub(@PathVariable("hubId") UUID hubId) {
+        BaseResponseDto<HubIdResponseDto> responseDto = hubService.deleteHub(hubId);
 
         return ResponseEntity.ok(responseDto);
     }
