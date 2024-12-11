@@ -3,7 +3,7 @@ package com.rush.logistic.client.domain.auth.service;
 import com.rush.logistic.client.domain.auth.dto.SignInResponseDto;
 import com.rush.logistic.client.domain.auth.dto.SignUpRequestDto;
 import com.rush.logistic.client.domain.auth.dto.SignUpResponseDto;
-import com.rush.logistic.client.domain.global.BaseResponseDTO;
+import com.rush.logistic.client.domain.global.BaseResponseDto;
 import com.rush.logistic.client.domain.user.entity.User;
 import com.rush.logistic.client.domain.user.enums.UserRoleEnum;
 import com.rush.logistic.client.domain.user.repository.UserRepository;
@@ -11,7 +11,6 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -50,7 +49,7 @@ public class AuthService {
                 .compact();
     }
 
-    public BaseResponseDTO<SignUpResponseDto> signUp(SignUpRequestDto signUpRequestDto) {
+    public BaseResponseDto<SignUpResponseDto> signUp(SignUpRequestDto signUpRequestDto) {
 
         String encodedPassword = passwordEncoder.encode(signUpRequestDto.getPassword());
 
@@ -67,10 +66,10 @@ public class AuthService {
 
         SignUpResponseDto responseDto = SignUpResponseDto.of(savedUser);
 
-        return BaseResponseDTO.success(responseDto);
+        return BaseResponseDto.success(responseDto);
     }
 
-    public BaseResponseDTO<SignInResponseDto> signIn(Long userId, String password) {
+    public BaseResponseDto<SignInResponseDto> signIn(Long userId, String password) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid user ID or password"));
 
@@ -82,7 +81,7 @@ public class AuthService {
 
         SignInResponseDto responseDto = SignInResponseDto.of(token);
 
-        return BaseResponseDTO.success(responseDto);
+        return BaseResponseDto.success(responseDto);
 
     }
 }

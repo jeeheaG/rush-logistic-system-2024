@@ -5,8 +5,6 @@ import com.rush.logistic.client.domain.user.dto.UserUpdateRequestDto;
 import com.rush.logistic.client.domain.user.enums.UserRoleEnum;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -38,6 +36,7 @@ public class User extends BaseEntity {
     private String slackId;
 
     @Column(name = "role", nullable = false)
+    @Enumerated(value = EnumType.STRING)
     private UserRoleEnum role;
 
     public void updateUser(UserUpdateRequestDto requestDto){
