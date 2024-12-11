@@ -8,12 +8,15 @@ import com.rush.logistic.client.company_product.domain.entity.Product;
 import com.rush.logistic.client.company_product.domain.repository.ProductRepository;
 import com.rush.logistic.client.company_product.global.exception.ApplicationException;
 import com.rush.logistic.client.company_product.global.exception.ErrorCode;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -22,6 +25,8 @@ import java.util.UUID;
 public class ProductService {
 
     private final ProductRepository productRepository;
+
+    private final EntityManager entityManager;
 
     //상품 추가
     @Transactional
@@ -54,6 +59,7 @@ public class ProductService {
     }
 
     //상품 수정
+
     @Transactional
     public ProductDto updateProduct(UUID id, ProductUpdateRequest request){
         Product product = productRepository.findById(id)
@@ -64,8 +70,27 @@ public class ProductService {
         product.setName(request.name());
         product.setQuantity(request.quantity());
 
-        Product updatedProduct = productRepository.save(product);
+        entityManager.flush();
 
-        return ProductDto.from(updatedProduct);
+        entityManager.clear();
+
+        Product productForReturn = productRepository.findById(id)
+                .orElseThrow(() -> new ApplicationException((ErrorCode.PRODUCT_NOT_FOUND)));
+
+        return ProductDto.from(productForReturn);
+    }
+
+    //상품 삭제
+    @Transactional
+    public void deleteProduct(UUID id){
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ApplicationException((ErrorCode.PRODUCT_NOT_FOUND)));
+
+        if ( product.getIsDelete()){
+            throw new ApplicationException(ErrorCode.INVALID_REQUEST);
+        }
+
+        product.setIsDelete(true);
+        product.setDeletedAt(LocalDateTime.now());
     }
 }

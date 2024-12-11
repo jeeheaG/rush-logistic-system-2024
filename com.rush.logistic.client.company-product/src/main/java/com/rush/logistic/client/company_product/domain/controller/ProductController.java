@@ -45,4 +45,11 @@ public class ProductController {
     public Response<?> updateProduct(@PathVariable UUID id, @RequestBody ProductUpdateRequest request){
         return Response.success(productService.updateProduct(id,request), "상품 수정에 성공하였습니다.");
     }
+
+    @DeleteMapping("/{id}")
+    public Response<?> deleteProduct(@PathVariable UUID id){
+        productService.deleteProduct(id);
+        return Response.success(null, "상품 삭제에 성공하였습니다.");
+    }
+
 }
