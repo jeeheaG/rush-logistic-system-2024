@@ -1,7 +1,10 @@
 package com.rush.logistic.client.slack.domain.service;
 
+import com.rush.logistic.client.domain.user.enums.UserRoleEnum;
 import com.rush.logistic.client.slack.domain.dto.SlackInfoResponseDto;
 import com.rush.logistic.client.slack.domain.entity.BaseResponseDto;
+import com.rush.logistic.client.slack.domain.entity.SlackEntity;
+import com.rush.logistic.client.slack.domain.repository.SlackRepository;
 import com.slack.api.Slack;
 import com.slack.api.methods.MethodsClient;
 import com.slack.api.methods.SlackApiException;
@@ -12,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
@@ -20,12 +24,14 @@ import java.io.IOException;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class SlackService {
+
+    private final SlackRepository slackRepository;
 
     @Value(value = "${slack.token}")
     String slackToken;
 
-    private static final String SLACK_USER_INFO_URL = "https://slack.com/api/users.info";
 
     public String getSlackIdByEmail(String email) {
         RestTemplate restTemplate = new RestTemplate();
@@ -49,8 +55,8 @@ public class SlackService {
         return response.split("\"id\":\"")[1].split("\"")[0];
     }
 
-
-    public BaseResponseDto<SlackInfoResponseDto> sendSlackMessage(String message, String email) {
+    @Transactional(readOnly = false)
+    public BaseResponseDto<SlackInfoResponseDto> sendSlackMessage(String userId, String message, String email) {
 
         String slackId = getSlackIdByEmail(email);
         String channelAddress;
@@ -75,6 +81,15 @@ public class SlackService {
             if (response.isOk()) {
 
                 SlackInfoResponseDto slackInfoResponseDto = SlackInfoResponseDto.from(slackId,message);
+
+                SlackEntity slack = SlackEntity.builder()
+                        .sendUserId(userId)
+                        .receiveUserSlackId(slackId)
+                        .message(message)
+                        .build();
+
+                slackRepository.save(slack);
+
                 return BaseResponseDto.success(slackInfoResponseDto);
             } else {
                 return BaseResponseDto.error("Slack 메시지 전송 실패: " + response.getError(), HttpStatus.BAD_REQUEST.value());
