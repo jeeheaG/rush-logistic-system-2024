@@ -1,8 +1,6 @@
 package com.rush.logistic.client.order_delivery.domain.deliveryman.controller.dto.response;
 
-import com.rush.logistic.client.order_delivery.domain.delivery.controller.dto.response.DeliveryAllRes;
 import com.rush.logistic.client.order_delivery.domain.deliveryman.domain.Deliveryman;
-import com.rush.logistic.client.order_delivery.domain.order.domain.Order;
 import lombok.Builder;
 
 import java.time.ZonedDateTime;
