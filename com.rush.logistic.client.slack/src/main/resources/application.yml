@@ -21,3 +21,6 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:19090/eureka/
+
+slack:
+  token: ${SLACK_API_TOKEN}

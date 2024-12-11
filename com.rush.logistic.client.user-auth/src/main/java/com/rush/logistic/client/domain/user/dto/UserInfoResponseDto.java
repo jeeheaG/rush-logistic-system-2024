@@ -1,6 +1,5 @@
 package com.rush.logistic.client.domain.user.dto;
 
-import com.rush.logistic.client.domain.auth.dto.SignInResponseDto;
 import com.rush.logistic.client.domain.user.entity.User;
 import com.rush.logistic.client.domain.user.enums.UserRoleEnum;
 import lombok.AllArgsConstructor;
