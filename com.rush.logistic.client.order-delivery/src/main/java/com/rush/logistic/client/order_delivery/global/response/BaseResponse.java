@@ -37,4 +37,12 @@ public class BaseResponse {
                 .message(status.getReasonPhrase())
                 .build();
     }
+
+    public static BaseResponse toResponse(HttpStatus status, String message) {
+        return BaseResponse.builder()
+                .status(String.valueOf(status.value()))
+                .code(status.name())
+                .message(message)
+                .build();
+    }
 }

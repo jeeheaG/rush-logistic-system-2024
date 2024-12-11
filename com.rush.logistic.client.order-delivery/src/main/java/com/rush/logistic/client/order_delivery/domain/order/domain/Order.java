@@ -1,5 +1,6 @@
 package com.rush.logistic.client.order_delivery.domain.order.domain;
 
+import com.rush.logistic.client.order_delivery.domain.delivery.domain.Delivery;
 import com.rush.logistic.client.order_delivery.domain.order.controller.dto.request.OrderAllReq;
 import com.rush.logistic.client.order_delivery.global.common.BaseAudit;
 import jakarta.persistence.*;
@@ -40,8 +41,12 @@ public class Order extends BaseAudit {
     @Column(nullable = false)
     private UUID produceCompanyId;
 
-    @Column(nullable = false)
+    // TODO : temp
     private UUID deliveryId;
+
+//    @OneToOne(fetch = FetchType.LAZY, optional = false)
+//    @JoinColumn(name = "delivery_id", nullable = false)
+//    private Delivery delivery;
 
     // TODO : 날짜 형식
     private String requestDeadLine;

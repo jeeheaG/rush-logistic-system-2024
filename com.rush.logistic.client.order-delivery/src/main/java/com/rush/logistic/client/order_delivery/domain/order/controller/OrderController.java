@@ -46,7 +46,7 @@ public class OrderController {
 
     @DeleteMapping("/{orderId}")
     public ResponseEntity<Object> deleteOrder(@PathVariable UUID orderId) {
-        log.info("OrderController updateOrder");
+        log.info("OrderController deleteOrder");
 
         UUID userId = UUID.randomUUID(); // TODO : 임시 UUID
 
