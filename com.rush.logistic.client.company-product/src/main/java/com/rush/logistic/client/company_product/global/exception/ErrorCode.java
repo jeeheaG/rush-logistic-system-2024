@@ -8,8 +8,12 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum ErrorCode {
     INVALID_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
+
     DUPLICATED_COMPANYNAME(HttpStatus.CONFLICT, "업체 이름이 중복됩니다."),
-    COMPANY_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 업체를 찾지 못하였습니다.");
+    COMPANY_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 업체를 찾지 못하였습니다."),
+
+    DUPLICATED_PRODUCTNAME(HttpStatus.CONFLICT, "상품 이름이 중복됩니다."),
+    PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 상품을 찾지 못하였습니다.");
 
     private HttpStatus status;
     private String message;
