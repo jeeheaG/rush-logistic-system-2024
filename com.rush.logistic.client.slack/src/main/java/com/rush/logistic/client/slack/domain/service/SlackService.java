@@ -1,6 +1,5 @@
 package com.rush.logistic.client.slack.domain.service;
 
-import com.rush.logistic.client.domain.user.enums.UserRoleEnum;
 import com.rush.logistic.client.slack.domain.dto.SlackInfoResponseDto;
 import com.rush.logistic.client.slack.domain.entity.BaseResponseDto;
 import com.rush.logistic.client.slack.domain.entity.SlackEntity;
