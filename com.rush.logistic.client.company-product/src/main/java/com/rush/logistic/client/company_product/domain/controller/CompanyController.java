@@ -49,7 +49,7 @@ public class CompanyController {
     @DeleteMapping("/{id}")
     public Response<?> deleteCompany(@PathVariable UUID id) {
         companyService.deleteCompany(id);
-        return Response.success(companyService.deleteCompany(id),"가게 정보가 삭제되었습니다.");
+        return Response.success(null,"업체 삭제에 성공하였습니다.");
     }
 
 }
