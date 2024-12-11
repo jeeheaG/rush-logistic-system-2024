@@ -1,4 +1,4 @@
-package com.rush.logistic.client.domain.global;
+package com.rush.logistic.client.slack.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;

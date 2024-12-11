@@ -1,7 +1,6 @@
 package com.rush.logistic.client.slack.domain.entity;
 
 
-import com.rush.logistic.client.domain.global.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
