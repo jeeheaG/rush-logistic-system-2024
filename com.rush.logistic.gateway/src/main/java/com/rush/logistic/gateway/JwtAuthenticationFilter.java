@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
@@ -43,10 +44,24 @@ public class JwtAuthenticationFilter implements GlobalFilter {
         }
 
         // TODO : 헤더에 userId 만 남길 것인지, 토큰 그대로 전달할지
+        SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64URL.decode(secretKey));
+
+        Jws<Claims> claimsJws = Jwts.parser()
+                .verifyWith(key)
+                .build().parseSignedClaims(token);
+
+        Claims claims = claimsJws.getBody();
+
+        ServerHttpRequest request = exchange.getRequest().mutate()
+                .header("USER_ID", claims.get("user_id").toString())
+                .header("role", claims.get("role").toString())
+                .build();
+
+        exchange = exchange.mutate().request(request).build();
 
         // 일단 subject 의 userid 추출해서 새 헤더 추가
-        String userId = getUserIdFromToken(token);
-        exchange.getRequest().getHeaders().add(HEADER_USER_ID, userId);
+//        String userId = getUserIdFromToken(token);
+//        exchange.getRequest().getHeaders().add(HEADER_USER_ID, userId);
 
         return chain.filter(exchange);
     }
