@@ -25,9 +25,9 @@ public class CompanyController {
     private final CompanyService companyService;
 
     @PostMapping
-    public Response<?> company(@RequestBody CompanyCreateRequest request) {
-        companyService.createCompany(request);
-        return Response.success(request , "업체 생성에 성공하였습니다.");
+    public Response<?> createCompany(@RequestBody CompanyCreateRequest request) {
+        CompanyDto result = companyService.createCompany(request);
+        return Response.success(result , "업체 생성에 성공하였습니다.");
     }
 
     @GetMapping
@@ -49,7 +49,7 @@ public class CompanyController {
     @DeleteMapping("/{id}")
     public Response<?> deleteCompany(@PathVariable UUID id) {
         companyService.deleteCompany(id);
-        return Response.success(companyService.getCompany(id),"가게 정보가 삭제되었습니다.");
+        return Response.success(companyService.deleteCompany(id),"가게 정보가 삭제되었습니다.");
     }
 
 }

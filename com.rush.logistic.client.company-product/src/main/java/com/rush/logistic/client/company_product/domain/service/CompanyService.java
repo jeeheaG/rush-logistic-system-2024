@@ -26,14 +26,16 @@ public class CompanyService {
 
     //업체 추가
     @Transactional
-    public void createCompany(CompanyCreateRequest requestDto) {
+    public CompanyDto createCompany(CompanyCreateRequest request) {
         // TODO: MASTER, HUB-MANAGER 확인 로직 추가
-        CompanyDto dto = CompanyCreateRequest.toDto(requestDto);
+        CompanyDto dto = CompanyCreateRequest.toDto(request);
 
         Optional<Company> company = companyRepository.findByName(dto.name());
 
         if(company.isEmpty()){
             Company companyEntity = companyRepository.save(dto.toEntity(dto));
+            System.out.println("Saved Company ID: " + companyEntity.getId());
+            return CompanyDto.from(companyEntity);
         }else{
             throw new ApplicationException(ErrorCode.DUPLICATED_COMPANYNAME);
         }
@@ -50,7 +52,7 @@ public class CompanyService {
     @Transactional
     public CompanySearchResponse getCompany(UUID id) {
         Company company = companyRepository.findById(id)
-                .orElseThrow(() -> new ApplicationException(ErrorCode.INVALID_REQUEST));
+                .orElseThrow(() -> new ApplicationException(ErrorCode.COMPANY_NOT_FOUND));
         return CompanySearchResponse.from(company);
     }
 
@@ -58,7 +60,7 @@ public class CompanyService {
     @Transactional
     public CompanyDto updateCompany(UUID id, CompanyUpdateRequest request) {
         Company company = companyRepository.findById(id)
-                .orElseThrow(() -> new ApplicationException(ErrorCode.INVALID_REQUEST));
+                .orElseThrow(() -> new ApplicationException(ErrorCode.COMPANY_NOT_FOUND));
 
         company.setHubId(request.hubId());
         company.setName(request.name());
@@ -75,6 +77,9 @@ public class CompanyService {
     public CompanyDto deleteCompany(UUID id) {
         Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.INVALID_REQUEST));
+        if (company.getIsDelete()){
+            throw new ApplicationException(ErrorCode.INVALID_REQUEST);
+        }
         company.setIsDelete(true);
         company.setDeletedAt(LocalDateTime.now());
 
