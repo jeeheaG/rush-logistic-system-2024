@@ -5,7 +5,24 @@ spring:
   application:
     name: order-delivery-service
 
+  datasource:
+    url: ${ORDER_DB_URL}
+    username: ${ORDER_DB_USER}
+    password: ${ORDER_DB_PW}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      show-sql: true
+      format-sql: true
+      use_sql_comments: true
+      hibernate:
+        physical_naming_strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+
+
 eureka:
   client:
     service-url:
       defaultZone: http://localhost:19090/eureka/
+

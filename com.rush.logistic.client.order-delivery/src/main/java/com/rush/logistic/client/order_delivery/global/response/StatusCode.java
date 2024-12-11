@@ -1,4 +1,4 @@
-package com.rush.logistic.client.order_delivery.global.common.response;
+package com.rush.logistic.client.order_delivery.global.response;
 
 import org.springframework.http.HttpStatus;
 
