@@ -1,4 +1,4 @@
-package com.rush.logistic.client.company_product.domain.entity;
+package com.rush.logistic.client.company_product.global.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
