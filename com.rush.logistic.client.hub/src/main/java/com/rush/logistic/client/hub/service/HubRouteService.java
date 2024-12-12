@@ -51,6 +51,8 @@ public class HubRouteService {
 
     @Transactional
     public BaseResponseDto<HubRouteIdResponseDto> createHubRoute(HubPointRequestDto requestDto) {
+        // TODO: 미리 구해둔 허브간 경로 정보가 있는지 확인 없다면 아래 로직 수행
+        // TODO: 미리 구해둔 허브간 경로가 오래되었다면 아래 로직 수행해서 갱신
         // TODO: MASTER USER 확인 로직 추가
         try {
             // TODO: 이미 생성한 경로는 다시 생성할 필요 없음
