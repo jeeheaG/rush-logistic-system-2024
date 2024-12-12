@@ -108,6 +108,12 @@ public class HubRouteService {
                             new IllegalArgumentException(HubRouteMessage.HUB_ROUTE_NOT_FOUND.getMessage())
                     );
 
+            // soft delete된 허브 경로 입니다.
+            if (hubRoute.isDelete()){
+                return BaseResponseDto
+                        .from(HttpStatus.GONE.value(), HttpStatus.GONE, HubRouteMessage.HUB_ROUTE_ALREADY_DELETED.getMessage(), null);
+            }
+
             String startHubName = hubRepository.findById(requestDto.getStartHubId()).get().getName();
             String startHubAddress = hubRepository.findById(requestDto.getStartHubId()).get().getAddress();
             String endHubName = hubRepository.findById(requestDto.getEndHubId()).get().getName();
@@ -132,6 +138,12 @@ public class HubRouteService {
                     .orElseThrow(() ->
                             new IllegalArgumentException(HubRouteMessage.HUB_ROUTE_NOT_FOUND.getMessage())
                     );
+
+            // soft delete된 허브 경로 입니다.
+            if (hubRoute.isDelete()){
+                return BaseResponseDto
+                        .from(HttpStatus.GONE.value(), HttpStatus.GONE, HubRouteMessage.HUB_ROUTE_ALREADY_DELETED.getMessage(), null);
+            }
 
             UUID startHubId = hubRoute.getStartHubId();
             UUID endHubId = hubRoute.getEndHubId();
@@ -161,6 +173,12 @@ public class HubRouteService {
                     .orElseThrow(() ->
                             new IllegalArgumentException(HubRouteMessage.HUB_ROUTE_NOT_FOUND.getMessage())
                     );
+
+            // soft delete된 허브 경로 입니다.
+            if (hubRoute.isDelete()){
+                return BaseResponseDto
+                        .from(HttpStatus.GONE.value(), HttpStatus.GONE, HubRouteMessage.HUB_ROUTE_ALREADY_DELETED.getMessage(), null);
+            }
 
             String startHubName = hubRepository.findById(hubRoute.getStartHubId()).get().getName();
             String endHubName = hubRepository.findById(hubRoute.getEndHubId()).get().getName();
