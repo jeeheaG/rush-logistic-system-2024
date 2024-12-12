@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rush.logistic.client.hub.dto.BaseResponseDto;
 import com.rush.logistic.client.hub.dto.HubPointRequestDto;
 import com.rush.logistic.client.hub.dto.HubRouteIdResponseDto;
+import com.rush.logistic.client.hub.dto.HubRouteInfoResponseDto;
 import com.rush.logistic.client.hub.dto.LatLonDto;
 import com.rush.logistic.client.hub.dto.TimeTakenAndDistDto;
 import com.rush.logistic.client.hub.message.HubMessage;
@@ -96,6 +97,60 @@ public class HubRouteService {
         } catch (IllegalArgumentException e) {
             return BaseResponseDto
                     .from(HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST, HubRouteMessage.HUB_ROUTE_NOT_CREATED.getMessage(), null);
+        }
+    }
+
+    public BaseResponseDto<HubRouteInfoResponseDto> getHubRouteInfo(HubPointRequestDto requestDto) {
+        try {
+            HubRoute hubRoute = hubRouteRepository.findByStartHubIdAndEndHubId(requestDto.getStartHubId(),
+                            requestDto.getEndHubId())
+                    .orElseThrow(() ->
+                            new IllegalArgumentException(HubRouteMessage.HUB_ROUTE_NOT_FOUND.getMessage())
+                    );
+
+            String startHubName = hubRepository.findById(requestDto.getStartHubId()).get().getName();
+            String startHubAddress = hubRepository.findById(requestDto.getStartHubId()).get().getAddress();
+            String endHubName = hubRepository.findById(requestDto.getEndHubId()).get().getName();
+            String endHubAddress = hubRepository.findById(requestDto.getEndHubId()).get().getAddress();
+
+            HubRouteInfoResponseDto responseDto = HubRouteInfoResponseDto.from(
+                    hubRoute, startHubName, startHubAddress, endHubName, endHubAddress);
+
+            return BaseResponseDto
+                    .from(HttpStatus.OK.value(), HttpStatus.OK, HubRouteMessage.HUB_ROUTE_FOUND.getMessage(),
+                            responseDto);
+        } catch (IllegalArgumentException e) {
+            return BaseResponseDto
+                    .from(HttpStatus.NOT_FOUND.value(), HttpStatus.NOT_FOUND,
+                            HubRouteMessage.HUB_ROUTE_NOT_FOUND.getMessage(), null);
+        }
+    }
+
+    public BaseResponseDto<HubRouteInfoResponseDto> getHubRouteInfoById(UUID hubRouteId) {
+        try {
+            HubRoute hubRoute = hubRouteRepository.findById(hubRouteId)
+                    .orElseThrow(() ->
+                            new IllegalArgumentException(HubRouteMessage.HUB_ROUTE_NOT_FOUND.getMessage())
+                    );
+
+            UUID startHubId = hubRoute.getStartHubId();
+            UUID endHubId = hubRoute.getEndHubId();
+
+            String startHubName = hubRepository.findById(startHubId).get().getName();
+            String startHubAddress = hubRepository.findById(startHubId).get().getAddress();
+            String endHubName = hubRepository.findById(endHubId).get().getName();
+            String endHubAddress = hubRepository.findById(endHubId).get().getAddress();
+
+            HubRouteInfoResponseDto responseDto = HubRouteInfoResponseDto.from(
+                    hubRoute, startHubName, startHubAddress, endHubName, endHubAddress);
+
+            return BaseResponseDto
+                    .from(HttpStatus.OK.value(), HttpStatus.OK, HubRouteMessage.HUB_ROUTE_FOUND.getMessage(),
+                            responseDto);
+        } catch (IllegalArgumentException e) {
+            return BaseResponseDto
+                    .from(HttpStatus.NOT_FOUND.value(), HttpStatus.NOT_FOUND,
+                            HubRouteMessage.HUB_ROUTE_NOT_FOUND.getMessage(), null);
         }
     }
 
