@@ -57,11 +57,12 @@ public class OrderService {
     @Transactional
     public UUID deleteOrder(UUID orderId, UUID userId) {
         Order order = getOrderEntityById(orderId);
-        order.softDelete(userId);
+        order.softDelete(userId.toString());
         return order.getId();
     }
 
 
+    // TODO : 여기에 Transactional 붙이면 flush 없이 되나?
     private Order getOrderEntityById(UUID orderId) {
         return orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderException(OrderCode.ORDER_NOT_EXIST));
