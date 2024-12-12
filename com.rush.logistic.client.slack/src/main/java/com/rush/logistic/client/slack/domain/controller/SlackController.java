@@ -2,6 +2,7 @@ package com.rush.logistic.client.slack.domain.controller;
 
 
 import com.rush.logistic.client.domain.user.enums.UserRoleEnum;
+import com.rush.logistic.client.slack.domain.client.UserClient;
 import com.rush.logistic.client.slack.domain.dto.SlackInfoListResponseDto;
 import com.rush.logistic.client.slack.domain.dto.SlackInfoResponseDto;
 import com.rush.logistic.client.slack.domain.dto.SlackRequestDto;
@@ -34,29 +35,28 @@ public class SlackController {
     }
 
     @GetMapping("/slacks")
-    public ResponseEntity<BaseResponseDto<SlackInfoListResponseDto<SlackInfoResponseDto>>> getAllSlackMessages(@RequestHeader(value = "role", required = true) String role                                                                                                 ){
+    public ResponseEntity<BaseResponseDto<SlackInfoListResponseDto<SlackInfoResponseDto>>> getAllSlackMessages(@RequestHeader(value = "role", required = true) String role,
+                                                                                                               @RequestHeader(value = "USER_ID", required = true) String userId){
 
-        if(!Objects.equals(role, UserRoleEnum.MASTER.name())){
-
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(BaseResponseDto.error("일치하지 않는 권한입니다.", HttpStatus.UNAUTHORIZED.value()));
-        }
-
-        BaseResponseDto<SlackInfoListResponseDto<SlackInfoResponseDto>> responseDto = slackService.getAllSlacks();
+        BaseResponseDto<SlackInfoListResponseDto<SlackInfoResponseDto>> responseDto = slackService.getAllSlacks(userId, role);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
 
     @GetMapping("/slacks/{slackId}")
     public ResponseEntity<BaseResponseDto<SlackInfoResponseDto>> getSlackMessage(@RequestHeader(value = "role", required = true) String role,
-                                                                                 @PathVariable String userId){
+                                                                                 @RequestHeader(value = "USER_ID", required = true) String userId,
+                                                                                 @PathVariable String slackId){
 
         if(!Objects.equals(role, UserRoleEnum.MASTER.name())){
 
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(BaseResponseDto.error("일치하지 않는 권한입니다.", HttpStatus.UNAUTHORIZED.value()));
         }
 
-        BaseResponseDto<SlackInfoResponseDto> responseDto = slackService.getSlack(userId);
+        BaseResponseDto<SlackInfoResponseDto> responseDto = slackService.getSlack(slackId);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
+
+
 }

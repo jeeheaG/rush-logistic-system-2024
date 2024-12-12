@@ -2,6 +2,8 @@ package com.rush.logistic.client.slack.domain.service;
 
 import com.rush.logistic.client.domain.user.dto.UserInfoResponseDto;
 import com.rush.logistic.client.domain.user.entity.User;
+import com.rush.logistic.client.domain.user.enums.UserRoleEnum;
+import com.rush.logistic.client.slack.domain.client.UserClient;
 import com.rush.logistic.client.slack.domain.dto.SlackInfoListResponseDto;
 import com.rush.logistic.client.slack.domain.dto.SlackInfoResponseDto;
 import com.rush.logistic.client.slack.domain.entity.BaseResponseDto;
@@ -23,6 +25,7 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -34,6 +37,7 @@ import java.util.stream.Collectors;
 public class SlackService {
 
     private final SlackRepository slackRepository;
+    private final UserClient userClient;
 
     @Value(value = "${slack.token}")
     String slackToken;
@@ -112,7 +116,13 @@ public class SlackService {
         }
     }
 
-    public BaseResponseDto<SlackInfoListResponseDto<SlackInfoResponseDto>> getAllSlacks() {
+    public BaseResponseDto<SlackInfoListResponseDto<SlackInfoResponseDto>> getAllSlacks(String userId, String role) {
+
+//        User user = userClient.getUser(userId);
+//        if(!Objects.equals(role, UserRoleEnum.MASTER.name())){
+//
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(BaseResponseDto.error("일치하지 않는 권한입니다.", HttpStatus.UNAUTHORIZED.value()));
+//        }
 
         List<SlackInfoResponseDto> slackList = slackRepository.findAll().stream().map(SlackInfoResponseDto::of).collect(Collectors.toList());
 
