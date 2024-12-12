@@ -57,6 +57,7 @@ public class HubRouteService {
         // TODO: MASTER USER 확인 로직 추가
         try {
             // TODO: 이미 생성한 경로는 다시 생성할 필요 없음
+            // TODO: 이미 생성한 경로가 soft delete되었다면 다시 생성해야함.
             // TODO: 일정 주기로 소요시간이 업데이트 될 순 있을거 같다.
 
 
