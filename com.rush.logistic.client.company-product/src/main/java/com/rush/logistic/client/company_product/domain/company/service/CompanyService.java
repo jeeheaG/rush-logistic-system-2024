@@ -75,16 +75,16 @@ public class CompanyService {
 
         if (StringUtils.hasText(searchKeyword) && hubId != null) {
             // 검색어와 hubId가 모두 있을 경우
-            companies = companyRepository.findByNameContainingAndHubId(searchKeyword, hubId, pageable);
+            companies = companyRepository.findByNameContainingAndHubIdAndIsDeleteFalse(searchKeyword, hubId, pageable);
         } else if (StringUtils.hasText(searchKeyword)) {
             // 검색어만 있을 경우
-            companies = companyRepository.findByNameContaining(searchKeyword, pageable);
+            companies = companyRepository.findByNameContainingAndIsDeleteFalse(searchKeyword, pageable);
         } else if (hubId != null) {
             // hubId만 있을 경우
-            companies = companyRepository.findByHubId(hubId, pageable);
+            companies = companyRepository.findByHubIdAndIsDeleteFalse(hubId, pageable);
         } else {
             // 검색어와 hubId가 모두 없을 경우
-            companies = companyRepository.findAll(pageable);
+            companies = companyRepository.findByIsDeleteFalse(pageable);
         }
 
         // DTO 변환
@@ -115,7 +115,12 @@ public class CompanyService {
     public CompanySearchResponse getCompany(UUID id) {
         Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.COMPANY_NOT_FOUND));
-        return CompanySearchResponse.from(company);
+
+        if (company.getIsDelete()) {
+            throw new ApplicationException(ErrorCode.COMPANY_DELETED); // 삭제된 업체에 대한 예외
+        }
+
+            return CompanySearchResponse.from(company);
     }
 
     //업체 수정
@@ -123,6 +128,10 @@ public class CompanyService {
     public CompanyDto updateCompany(UUID id, CompanyUpdateRequest request) {
         Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.COMPANY_NOT_FOUND));
+
+        if (company.getIsDelete()) {
+            throw new ApplicationException(ErrorCode.COMPANY_DELETED); // 삭제된 업체에 대한 예외
+        }
 
         company.setHubId(request.hubId());
         company.setName(request.name());
@@ -145,7 +154,7 @@ public class CompanyService {
         Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.INVALID_REQUEST));
         if (company.getIsDelete()){
-            throw new ApplicationException(ErrorCode.INVALID_REQUEST);
+            throw new ApplicationException(ErrorCode.COMPANY_DELETED);
         }
         company.setIsDelete(true);
         company.setDeletedAt(LocalDateTime.now());
