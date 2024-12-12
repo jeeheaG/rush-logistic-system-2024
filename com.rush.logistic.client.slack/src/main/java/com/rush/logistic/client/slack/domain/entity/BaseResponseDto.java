@@ -1,4 +1,4 @@
-package com.rush.logistic.client.domain.global;
+package com.rush.logistic.client.slack.domain.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,3 +29,4 @@ public class BaseResponseDto<T> {
                 .build();
     }
 }
+

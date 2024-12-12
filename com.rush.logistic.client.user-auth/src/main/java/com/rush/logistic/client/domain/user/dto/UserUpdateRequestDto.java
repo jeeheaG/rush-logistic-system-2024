@@ -12,4 +12,5 @@ public class UserUpdateRequestDto {
     private String username;
     private String slackId;
     private UserRoleEnum role;
+    private String email;
 }

@@ -39,11 +39,15 @@ public class User extends BaseEntity {
     @Enumerated(value = EnumType.STRING)
     private UserRoleEnum role;
 
+    @Column(name = "email", nullable = false, unique = true)
+    private String email;
+
     public void updateUser(UserUpdateRequestDto requestDto){
 
         Optional.ofNullable(requestDto.getUsername()).ifPresent(username -> this.username = username);
         Optional.ofNullable(requestDto.getSlackId()).ifPresent(slackId -> this.slackId = slackId);
         Optional.ofNullable(requestDto.getRole()).ifPresent(role -> this.role = role);
+        Optional.ofNullable(requestDto.getEmail()).ifPresent(role -> this.email = email);
     }
 
     // TODO : 로그인한 유저 받아서 넣기

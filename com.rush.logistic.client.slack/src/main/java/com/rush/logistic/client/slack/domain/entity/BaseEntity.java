@@ -1,4 +1,4 @@
-package com.rush.logistic.client.domain.global;
+package com.rush.logistic.client.slack.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -19,7 +19,6 @@ public abstract class BaseEntity {
 
     @CreatedDate
     @Column(name = "create_at", updatable = false)
-    @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime createdAt;
 
     @CreatedBy
@@ -28,7 +27,6 @@ public abstract class BaseEntity {
 
     @LastModifiedDate
     @Column(name = "update_at")
-    @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime updatedAt;
 
     @LastModifiedBy
@@ -48,15 +46,6 @@ public abstract class BaseEntity {
         this.isDelete = false;
     }
 
-//    @PrePersist
-//    public void prePersist() {
-//        if (this.createdAt == null) {
-//            this.createdAt = LocalDateTime.now();
-//        }
-//        if (this.createdBy == null) {
-//            this.createdBy = Long.parseLong(getUser()); // 현재 로그인한 사용자 설정
-//        }
-//    }
 //
 //    private String getUser() {
 //        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
