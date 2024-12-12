@@ -1,22 +1,23 @@
-package com.rush.logistic.client.company_product.domain.service;
+package com.rush.logistic.client.company_product.domain.product.service;
 
-import com.rush.logistic.client.company_product.domain.dto.ProductDto;
-import com.rush.logistic.client.company_product.domain.dto.request.ProductCreateRequest;
-import com.rush.logistic.client.company_product.domain.dto.request.ProductUpdateRequest;
-import com.rush.logistic.client.company_product.domain.dto.response.ProductSearchResponse;
-import com.rush.logistic.client.company_product.domain.entity.Product;
-import com.rush.logistic.client.company_product.domain.repository.ProductRepository;
+import com.rush.logistic.client.company_product.domain.product.dto.ProductDto;
+import com.rush.logistic.client.company_product.domain.product.dto.request.ProductCreateRequest;
+import com.rush.logistic.client.company_product.domain.product.dto.request.ProductUpdateRequest;
+import com.rush.logistic.client.company_product.domain.product.dto.response.ProductSearchResponse;
+import com.rush.logistic.client.company_product.domain.product.entity.Product;
+import com.rush.logistic.client.company_product.domain.product.repository.ProductRepository;
 import com.rush.logistic.client.company_product.global.exception.ApplicationException;
 import com.rush.logistic.client.company_product.global.exception.ErrorCode;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -47,6 +48,14 @@ public class ProductService {
 
     //상품 전체 조회
     public Page<ProductDto> getAllProduct(Pageable pageable) {
+        // 페이지 사이즈 제한
+        int[] allowedPageSizes = {10, 30, 50};
+        int pageSize = pageable.getPageSize();
+
+        // 허용되지 않은 페이지 사이즈일 경우 기본값 10으로 설정
+        if (!Arrays.stream(allowedPageSizes).anyMatch(size -> size == pageSize)) {
+            pageable = PageRequest.of(pageable.getPageNumber(), 10, pageable.getSort());
+        }
         Page<Product> products = productRepository.findAll(pageable);
         return products.map(ProductDto::from);
     }

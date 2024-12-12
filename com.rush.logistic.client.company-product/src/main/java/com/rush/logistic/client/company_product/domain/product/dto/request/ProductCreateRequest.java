@@ -1,6 +1,6 @@
-package com.rush.logistic.client.company_product.domain.dto.request;
+package com.rush.logistic.client.company_product.domain.product.dto.request;
 
-import com.rush.logistic.client.company_product.domain.dto.ProductDto;
+import com.rush.logistic.client.company_product.domain.product.dto.ProductDto;
 
 import java.util.UUID;
 
