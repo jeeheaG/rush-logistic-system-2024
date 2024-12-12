@@ -10,6 +10,4 @@ import lombok.NoArgsConstructor;
 public class HubInfoRequestDto {
     private String name;
     private String address;
-    private double latitude;
-    private double longitude;
 }

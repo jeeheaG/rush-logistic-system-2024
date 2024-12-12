@@ -1,6 +1,7 @@
 package com.rush.logistic.client.hub.model;
 
 import com.rush.logistic.client.hub.dto.HubInfoRequestDto;
+import com.rush.logistic.client.hub.dto.LatLonDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -35,12 +36,12 @@ public class Hub extends BaseEntity{
     @Column(name = "longitude", nullable = false)
     private double longitude;
 
-    public static Hub from(HubInfoRequestDto requestDto) {
+    public static Hub from(HubInfoRequestDto requestDto, LatLonDto latLonDto) {
         Hub hub = Hub.builder()
             .name(requestDto.getName())
             .address(requestDto.getAddress())
-            .latitude(requestDto.getLatitude())
-            .longitude(requestDto.getLongitude())
+            .latitude(Double.parseDouble(latLonDto.getLatitude()))
+            .longitude(Double.parseDouble(latLonDto.getLongitude()))
             .build();
 
         hub.setDelete(false);
@@ -48,11 +49,11 @@ public class Hub extends BaseEntity{
         return hub;
     }
 
-    public void update(HubInfoRequestDto requestDto) {
+    public void update(HubInfoRequestDto requestDto, LatLonDto latLonDto) {
         this.name = requestDto.getName();
         this.address = requestDto.getAddress();
-        this.latitude = requestDto.getLatitude();
-        this.longitude = requestDto.getLongitude();
+        this.latitude = Double.parseDouble(latLonDto.getLatitude());
+        this.longitude = Double.parseDouble(latLonDto.getLongitude());
     }
 
     public void delete() {
