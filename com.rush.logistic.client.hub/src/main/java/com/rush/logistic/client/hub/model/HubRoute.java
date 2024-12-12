@@ -34,6 +34,8 @@ public class HubRoute extends BaseEntity {
     private String timeTaken;
     @Column(name = "distance", nullable = false)
     private int distance;
+    @Column(name = "milliseconds", nullable = false)
+    private String milliseconds;
 
     public static String formatDuration(Duration duration) {
         long totalMinutes = duration.toMinutes();
@@ -44,7 +46,7 @@ public class HubRoute extends BaseEntity {
         return String.format("%dD %dH %dM", days, hours, minutes);
     }
 
-    public static HubRoute from(HubPointRequestDto requestDto, Duration timeTaken, int distance) {
+    public static HubRoute from(HubPointRequestDto requestDto, Duration timeTaken, int distance, String milliseconds) {
         String timeTakenString = formatDuration(timeTaken);
 
         HubRoute hubRoute = HubRoute.builder()
@@ -52,6 +54,7 @@ public class HubRoute extends BaseEntity {
             .endHubId(requestDto.getEndHubId())
             .timeTaken(timeTakenString)
             .distance(distance)
+            .milliseconds(milliseconds)
             .build();
 
         hubRoute.setDelete(false);
