@@ -34,7 +34,7 @@ public class SlackController {
     }
 
     @GetMapping("/slacks")
-    public ResponseEntity<BaseResponseDto<SlackInfoListResponseDto<SlackInfoResponseDto>>> getSlackMessage(@RequestHeader(value = "role", required = true) String role                                                                                                 ){
+    public ResponseEntity<BaseResponseDto<SlackInfoListResponseDto<SlackInfoResponseDto>>> getAllSlackMessages(@RequestHeader(value = "role", required = true) String role                                                                                                 ){
 
         if(!Objects.equals(role, UserRoleEnum.MASTER.name())){
 
@@ -42,6 +42,20 @@ public class SlackController {
         }
 
         BaseResponseDto<SlackInfoListResponseDto<SlackInfoResponseDto>> responseDto = slackService.getAllSlacks();
+
+        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+    }
+
+    @GetMapping("/slacks/{slackId}")
+    public ResponseEntity<BaseResponseDto<SlackInfoResponseDto>> getSlackMessage(@RequestHeader(value = "role", required = true) String role,
+                                                                                 @PathVariable String userId){
+
+        if(!Objects.equals(role, UserRoleEnum.MASTER.name())){
+
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(BaseResponseDto.error("일치하지 않는 권한입니다.", HttpStatus.UNAUTHORIZED.value()));
+        }
+
+        BaseResponseDto<SlackInfoResponseDto> responseDto = slackService.getSlack(userId);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }

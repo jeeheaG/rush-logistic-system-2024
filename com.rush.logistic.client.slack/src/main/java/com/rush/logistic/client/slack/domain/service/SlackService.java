@@ -1,5 +1,7 @@
 package com.rush.logistic.client.slack.domain.service;
 
+import com.rush.logistic.client.domain.user.dto.UserInfoResponseDto;
+import com.rush.logistic.client.domain.user.entity.User;
 import com.rush.logistic.client.slack.domain.dto.SlackInfoListResponseDto;
 import com.rush.logistic.client.slack.domain.dto.SlackInfoResponseDto;
 import com.rush.logistic.client.slack.domain.entity.BaseResponseDto;
@@ -21,6 +23,7 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -92,6 +95,7 @@ public class SlackService {
                         .build();
 
                 // TODO : prepersist로 하는법?
+                //  또는 인증객체 사용해서 자동으로 들어가게 수정 필요함.
                 slack.setCreatedAt(LocalDateTime.now());
                 slack.setCreatedBy(Long.parseLong(userId));
 
@@ -114,5 +118,17 @@ public class SlackService {
 
         return  BaseResponseDto
                 .success(SlackInfoListResponseDto.of(slackList));
+    }
+
+    public BaseResponseDto<SlackInfoResponseDto> getSlack(String slackId) {
+
+        Optional<SlackEntity> slack = slackRepository.findById(Long.valueOf(slackId));
+
+        if (slack.isEmpty()) {
+            return BaseResponseDto.error("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND.value());
+        }
+
+        SlackInfoResponseDto slackInfoResponseDto = SlackInfoResponseDto.of(slack.get());
+        return BaseResponseDto.success(slackInfoResponseDto);
     }
 }
