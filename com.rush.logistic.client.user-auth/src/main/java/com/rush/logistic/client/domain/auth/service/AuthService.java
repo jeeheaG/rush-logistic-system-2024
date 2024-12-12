@@ -3,7 +3,7 @@ package com.rush.logistic.client.domain.auth.service;
 import com.rush.logistic.client.domain.auth.dto.SignInResponseDto;
 import com.rush.logistic.client.domain.auth.dto.SignUpRequestDto;
 import com.rush.logistic.client.domain.auth.dto.SignUpResponseDto;
-import com.rush.logistic.client.domain.global.BaseResponseDto;
+import com.rush.logistic.client.domain.global.exception.user.FailedLoginException;
 import com.rush.logistic.client.domain.user.entity.User;
 import com.rush.logistic.client.domain.user.enums.UserRoleEnum;
 import com.rush.logistic.client.domain.user.repository.UserRepository;
@@ -50,7 +50,7 @@ public class AuthService {
                 .compact();
     }
 
-    public BaseResponseDto<SignUpResponseDto> signUp(SignUpRequestDto signUpRequestDto) {
+    public SignUpResponseDto signUp(SignUpRequestDto signUpRequestDto) {
 
         String encodedPassword = passwordEncoder.encode(signUpRequestDto.getPassword());
 
@@ -62,28 +62,22 @@ public class AuthService {
                 .email(signUpRequestDto.getEmail())
                 .build();
 
-//        user.setDelete(false);
-
         User savedUser = userRepository.save(user);
 
-        SignUpResponseDto responseDto = SignUpResponseDto.of(savedUser);
-
-        return BaseResponseDto.success(responseDto);
+        return SignUpResponseDto.of(savedUser);
     }
 
-    public BaseResponseDto<SignInResponseDto> signIn(Long userId, String password) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid user ID or password"));
+    public SignInResponseDto signIn(String username, String password) {
+
+        User user = userRepository.findByUsername(username).orElseThrow(FailedLoginException::new);
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new IllegalArgumentException("Invalid user ID or password");
+            throw new FailedLoginException();
         }
 
         String token = createAccessToken(user.getUserId(), user.getUsername() ,user.getRole());
 
-        SignInResponseDto responseDto = SignInResponseDto.of(token);
-
-        return BaseResponseDto.success(responseDto);
+        return SignInResponseDto.of(token);
 
     }
 }
