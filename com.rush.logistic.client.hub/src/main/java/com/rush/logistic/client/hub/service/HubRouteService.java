@@ -126,6 +126,34 @@ public class HubRouteService {
         }
     }
 
+    public BaseResponseDto<HubRouteInfoResponseDto> getHubRouteInfoById(UUID hubRouteId) {
+        try {
+            HubRoute hubRoute = hubRouteRepository.findById(hubRouteId)
+                    .orElseThrow(() ->
+                            new IllegalArgumentException(HubRouteMessage.HUB_ROUTE_NOT_FOUND.getMessage())
+                    );
+
+            UUID startHubId = hubRoute.getStartHubId();
+            UUID endHubId = hubRoute.getEndHubId();
+
+            String startHubName = hubRepository.findById(startHubId).get().getName();
+            String startHubAddress = hubRepository.findById(startHubId).get().getAddress();
+            String endHubName = hubRepository.findById(endHubId).get().getName();
+            String endHubAddress = hubRepository.findById(endHubId).get().getAddress();
+
+            HubRouteInfoResponseDto responseDto = HubRouteInfoResponseDto.from(
+                    hubRoute, startHubName, startHubAddress, endHubName, endHubAddress);
+
+            return BaseResponseDto
+                    .from(HttpStatus.OK.value(), HttpStatus.OK, HubRouteMessage.HUB_ROUTE_FOUND.getMessage(),
+                            responseDto);
+        } catch (IllegalArgumentException e) {
+            return BaseResponseDto
+                    .from(HttpStatus.NOT_FOUND.value(), HttpStatus.NOT_FOUND,
+                            HubRouteMessage.HUB_ROUTE_NOT_FOUND.getMessage(), null);
+        }
+    }
+
     private Duration stringToDuration(String timeTaken) {
         long days = TimeUnit.MILLISECONDS.toDays(Long.parseLong(timeTaken));
         long hours = TimeUnit.MILLISECONDS.toHours(Long.parseLong(timeTaken)) % 24;
