@@ -19,7 +19,6 @@ public abstract class BaseEntity {
 
     @CreatedDate
     @Column(name = "create_at", updatable = false)
-    @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime createdAt;
 
     @CreatedBy
@@ -28,7 +27,6 @@ public abstract class BaseEntity {
 
     @LastModifiedDate
     @Column(name = "update_at")
-    @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime updatedAt;
 
     @LastModifiedBy
@@ -44,15 +42,10 @@ public abstract class BaseEntity {
     @Column(name = "is_delete", nullable = false)
     private boolean isDelete;
 
-//    @PrePersist
-//    public void prePersist() {
-//        if (this.createdAt == null) {
-//            this.createdAt = LocalDateTime.now();
-//        }
-//        if (this.createdBy == null) {
-//            this.createdBy = Long.parseLong(getUser()); // 현재 로그인한 사용자 설정
-//        }
-//    }
+    public BaseEntity(){
+        this.isDelete = false;
+    }
+
 //
 //    private String getUser() {
 //        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

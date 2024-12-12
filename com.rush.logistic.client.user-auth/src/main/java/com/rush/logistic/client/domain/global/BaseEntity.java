@@ -44,6 +44,10 @@ public abstract class BaseEntity {
     @Column(name = "is_delete", nullable = false)
     private boolean isDelete;
 
+    public BaseEntity(){
+        this.isDelete = false;
+    }
+
 //    @PrePersist
 //    public void prePersist() {
 //        if (this.createdAt == null) {

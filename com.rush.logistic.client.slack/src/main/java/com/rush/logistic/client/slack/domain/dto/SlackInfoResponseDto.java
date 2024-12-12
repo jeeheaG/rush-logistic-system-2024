@@ -1,5 +1,6 @@
 package com.rush.logistic.client.slack.domain.dto;
 
+import com.rush.logistic.client.slack.domain.entity.SlackEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,15 +14,19 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class SlackInfoResponseDto {
 
-    private String slackId;
+    private Long slackId;
     private String message;
     private LocalDateTime createdAt;
+    private String sendUserId;
+    private String receiveUserId;
 
-    public static SlackInfoResponseDto from(String slackId, String message) {
+    public static SlackInfoResponseDto of(SlackEntity slack) {
         return SlackInfoResponseDto.builder()
-                .slackId(slackId)
-                .message(message)
-                .createdAt(LocalDateTime.now())
+                .slackId(slack.getSlackId())
+                .message(slack.getMessage())
+                .createdAt(slack.getCreatedAt())
+                .sendUserId(slack.getSendUserId())
+                .receiveUserId(slack.getReceiveUserSlackId())
                 .build();
     }
 }

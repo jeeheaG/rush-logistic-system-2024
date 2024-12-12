@@ -1,5 +1,6 @@
 package com.rush.logistic.client.slack.domain.service;
 
+import com.rush.logistic.client.slack.domain.dto.SlackInfoListResponseDto;
 import com.rush.logistic.client.slack.domain.dto.SlackInfoResponseDto;
 import com.rush.logistic.client.slack.domain.entity.BaseResponseDto;
 import com.rush.logistic.client.slack.domain.entity.SlackEntity;
@@ -18,6 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -55,11 +59,11 @@ public class SlackService {
     }
 
     @Transactional(readOnly = false)
-    public BaseResponseDto<SlackInfoResponseDto> sendSlackMessage(String userId, String message, String email) {
+    public BaseResponseDto<SlackInfoResponseDto> sendSlackMessage(String userId,String username, String message, String email) {
 
         String slackId = getSlackIdByEmail(email);
         String channelAddress;
-
+        log.info(username);
         if (slackId == null || slackId.isEmpty()) {
             log.error("Slack ID를 찾을 수 없습니다. 이메일: " + email);
             return BaseResponseDto.error("Slack ID를 찾을 수 없습니다. 이메일: " + email, HttpStatus.NOT_FOUND.value());
@@ -79,7 +83,7 @@ public class SlackService {
 
             if (response.isOk()) {
 
-                SlackInfoResponseDto slackInfoResponseDto = SlackInfoResponseDto.from(slackId,message);
+
 
                 SlackEntity slack = SlackEntity.builder()
                         .sendUserId(userId)
@@ -87,7 +91,12 @@ public class SlackService {
                         .message(message)
                         .build();
 
+                // TODO : prepersist로 하는법?
+                slack.setCreatedAt(LocalDateTime.now());
+                slack.setCreatedBy(Long.parseLong(userId));
+
                 slackRepository.save(slack);
+                SlackInfoResponseDto slackInfoResponseDto = SlackInfoResponseDto.of(slack);
 
                 return BaseResponseDto.success(slackInfoResponseDto);
             } else {
@@ -97,5 +106,13 @@ public class SlackService {
         } catch (SlackApiException | IOException e) {
             return BaseResponseDto.error("Slack 메시지 전송 실패: " +  e.getMessage(), HttpStatus.BAD_REQUEST.value());
         }
+    }
+
+    public BaseResponseDto<SlackInfoListResponseDto<SlackInfoResponseDto>> getAllSlacks() {
+
+        List<SlackInfoResponseDto> slackList = slackRepository.findAll().stream().map(SlackInfoResponseDto::of).collect(Collectors.toList());
+
+        return  BaseResponseDto
+                .success(SlackInfoListResponseDto.of(slackList));
     }
 }

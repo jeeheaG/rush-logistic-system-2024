@@ -38,9 +38,10 @@ public class AuthService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public String createAccessToken(Long userId, UserRoleEnum role) {
+    public String createAccessToken(Long userId, String username, UserRoleEnum role) {
         return Jwts.builder()
                 .claim("user_id", userId)
+                .claim("user_name", username)
                 .claim("role", role)
                 .issuer(issuer)
                 .issuedAt(new Date(System.currentTimeMillis()))
@@ -61,7 +62,7 @@ public class AuthService {
                 .email(signUpRequestDto.getEmail())
                 .build();
 
-        user.setDelete(false);
+//        user.setDelete(false);
 
         User savedUser = userRepository.save(user);
 
@@ -78,7 +79,7 @@ public class AuthService {
             throw new IllegalArgumentException("Invalid user ID or password");
         }
 
-        String token = createAccessToken(user.getUserId(), user.getRole());
+        String token = createAccessToken(user.getUserId(), user.getUsername() ,user.getRole());
 
         SignInResponseDto responseDto = SignInResponseDto.of(token);
 

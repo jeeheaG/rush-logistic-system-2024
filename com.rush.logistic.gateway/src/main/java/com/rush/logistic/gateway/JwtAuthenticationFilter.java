@@ -54,6 +54,7 @@ public class JwtAuthenticationFilter implements GlobalFilter {
 
         ServerHttpRequest request = exchange.getRequest().mutate()
                 .header("USER_ID", claims.get("user_id").toString())
+                .header("USER_NAME", claims.get("user_name").toString())
                 .header("role", claims.get("role").toString())
                 .build();
 
