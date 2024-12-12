@@ -1,10 +1,10 @@
-package com.rush.logistic.client.company_product.domain.controller;
+package com.rush.logistic.client.company_product.domain.company.controller;
 
-import com.rush.logistic.client.company_product.domain.dto.CompanyDto;
-import com.rush.logistic.client.company_product.domain.dto.request.CompanyCreateRequest;
-import com.rush.logistic.client.company_product.domain.dto.request.CompanyUpdateRequest;
-import com.rush.logistic.client.company_product.domain.dto.response.CompanySearchResponse;
-import com.rush.logistic.client.company_product.domain.service.CompanyService;
+import com.rush.logistic.client.company_product.domain.company.dto.CompanyDto;
+import com.rush.logistic.client.company_product.domain.company.dto.request.CompanyCreateRequest;
+import com.rush.logistic.client.company_product.domain.company.dto.request.CompanyUpdateRequest;
+import com.rush.logistic.client.company_product.domain.company.dto.response.CompanySearchResponse;
+import com.rush.logistic.client.company_product.domain.company.service.CompanyService;
 import com.rush.logistic.client.company_product.global.exception.Response;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;

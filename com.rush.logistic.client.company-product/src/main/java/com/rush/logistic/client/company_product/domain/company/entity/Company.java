@@ -1,6 +1,7 @@
-package com.rush.logistic.client.company_product.domain.entity;
+package com.rush.logistic.client.company_product.domain.company.entity;
 
-import com.rush.logistic.client.company_product.domain.type.CompanyType;
+import com.rush.logistic.client.company_product.global.entity.BaseEntity;
+import com.rush.logistic.client.company_product.global.type.CompanyType;
 import jakarta.persistence.*;
 import lombok.*;
 

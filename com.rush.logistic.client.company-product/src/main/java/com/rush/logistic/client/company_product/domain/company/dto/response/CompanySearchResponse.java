@@ -1,7 +1,7 @@
-package com.rush.logistic.client.company_product.domain.dto.response;
+package com.rush.logistic.client.company_product.domain.company.dto.response;
 
-import com.rush.logistic.client.company_product.domain.entity.Company;
-import com.rush.logistic.client.company_product.domain.type.CompanyType;
+import com.rush.logistic.client.company_product.domain.company.entity.Company;
+import com.rush.logistic.client.company_product.global.type.CompanyType;
 import lombok.Builder;
 
 import java.util.UUID;

@@ -1,4 +1,4 @@
-package com.rush.logistic.client.company_product.domain.type;
+package com.rush.logistic.client.company_product.global.type;
 
 public enum CompanyType {
     MANUFACTURER,  // 생산

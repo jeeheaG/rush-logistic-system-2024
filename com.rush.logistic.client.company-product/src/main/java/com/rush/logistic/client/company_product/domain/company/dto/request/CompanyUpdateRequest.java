@@ -1,7 +1,7 @@
-package com.rush.logistic.client.company_product.domain.dto.request;
+package com.rush.logistic.client.company_product.domain.company.dto.request;
 
-import com.rush.logistic.client.company_product.domain.dto.CompanyDto;
-import com.rush.logistic.client.company_product.domain.type.CompanyType;
+import com.rush.logistic.client.company_product.domain.company.dto.CompanyDto;
+import com.rush.logistic.client.company_product.global.type.CompanyType;
 
 import java.util.UUID;
 

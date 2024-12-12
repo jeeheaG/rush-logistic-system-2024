@@ -1,7 +1,7 @@
-package com.rush.logistic.client.company_product.domain.dto;
+package com.rush.logistic.client.company_product.domain.company.dto;
 
-import com.rush.logistic.client.company_product.domain.entity.Company;
-import com.rush.logistic.client.company_product.domain.type.CompanyType;
+import com.rush.logistic.client.company_product.domain.company.entity.Company;
+import com.rush.logistic.client.company_product.global.type.CompanyType;
 import lombok.Builder;
 
 import java.time.LocalDateTime;

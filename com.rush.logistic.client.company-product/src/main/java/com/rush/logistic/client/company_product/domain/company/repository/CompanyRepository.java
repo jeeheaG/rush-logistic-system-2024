@@ -1,6 +1,6 @@
-package com.rush.logistic.client.company_product.domain.repository;
+package com.rush.logistic.client.company_product.domain.company.repository;
 
-import com.rush.logistic.client.company_product.domain.entity.Company;
+import com.rush.logistic.client.company_product.domain.company.entity.Company;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
