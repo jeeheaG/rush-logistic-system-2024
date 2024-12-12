@@ -3,6 +3,7 @@ package com.rush.logistic.client.hub.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rush.logistic.client.hub.dto.BaseResponseDto;
+import com.rush.logistic.client.hub.dto.HubListResponseDto;
 import com.rush.logistic.client.hub.dto.HubPointRequestDto;
 import com.rush.logistic.client.hub.dto.HubRouteIdResponseDto;
 import com.rush.logistic.client.hub.dto.HubRouteInfoResponseDto;
@@ -17,10 +18,18 @@ import com.rush.logistic.client.hub.repository.HubRouteRepository;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -351,4 +360,39 @@ public class HubRouteService {
         }
     }
 
+    public BaseResponseDto<HubListResponseDto<HubRouteInfoResponseDto>> getHubRouteInfoList(
+            int page, int size, String sortBy, boolean isAsc
+    ) {
+        try {
+            Direction direction = isAsc ? Direction.ASC : Direction.DESC;
+            Sort sort = Sort.by(direction, sortBy);
+            Pageable pageable = PageRequest.of(page, size, sort);
+
+            // 허브 경로 리스트 조회
+            Page<HubRoute> hubRouteList = hubRouteRepository.findAllByIsDeleteFalse(pageable).orElseThrow(() ->
+                    new NoSuchElementException(HubRouteMessage.HUB_ROUTE_LIST_NOT_FOUND.getMessage())
+            );
+
+            List<HubRouteInfoResponseDto> hubRouteInfoList = new ArrayList<>();
+            for(HubRoute hubRoute : hubRouteList){
+                UUID startHubId = hubRoute.getStartHubId();
+                UUID endHubId = hubRoute.getEndHubId();
+
+                String startHubName = hubRepository.findById(startHubId).get().getName();
+                String startHubAddress = hubRepository.findById(startHubId).get().getAddress();
+                String endHubName = hubRepository.findById(endHubId).get().getName();
+                String endHubAddress = hubRepository.findById(endHubId).get().getAddress();
+
+                hubRouteInfoList.add(HubRouteInfoResponseDto.from(hubRoute, startHubName, startHubAddress, endHubName, endHubAddress));
+            }
+
+            return BaseResponseDto
+                    .from(HttpStatus.OK.value(), HttpStatus.OK, HubRouteMessage.HUB_ROUTE_INFO_LIST_FOUND.getMessage(),
+                            HubListResponseDto.from(hubRouteInfoList));
+        } catch (NoSuchElementException e) {
+            return BaseResponseDto
+                    .from(HttpStatus.NOT_FOUND.value(), HttpStatus.NOT_FOUND,
+                            HubRouteMessage.HUB_ROUTE_LIST_NOT_FOUND.getMessage(), null);
+        }
+    }
 }

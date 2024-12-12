@@ -54,14 +54,14 @@ public class HubController {
         return ResponseEntity.ok(responseDto);
     }
 
-  @DeleteMapping("/{hubId}")
+    @DeleteMapping("/{hubId}")
     public ResponseEntity<BaseResponseDto<HubIdResponseDto>> deleteHub(@PathVariable("hubId") UUID hubId) {
         BaseResponseDto<HubIdResponseDto> responseDto = hubService.deleteHub(hubId);
 
         return ResponseEntity.ok(responseDto);
     }
   
-  @GetMapping
+    @GetMapping
     public ResponseEntity<BaseResponseDto<HubListResponseDto<HubInfoResponseDto>>> getHubInfoList(
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
