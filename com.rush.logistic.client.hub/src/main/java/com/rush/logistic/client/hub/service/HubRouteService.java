@@ -195,6 +195,33 @@ public class HubRouteService {
         }
     }
 
+    @Transactional
+    public BaseResponseDto<HubRouteIdResponseDto> deleteHubRoute(UUID hubRouteId) {
+        // TODO: MASTER USER 확인 로직 추가
+        try {
+            // 허브 조회
+            HubRoute hubRoute = hubRouteRepository.findById(hubRouteId)
+                    .orElseThrow(() ->
+                            new IllegalArgumentException(HubRouteMessage.HUB_ROUTE_NOT_FOUND.getMessage())
+                    );
+
+            // soft delete된 허브 경로 입니다.
+            if (hubRoute.isDelete()){
+                return BaseResponseDto
+                        .from(HttpStatus.GONE.value(), HttpStatus.GONE, HubRouteMessage.HUB_ROUTE_ALREADY_DELETED.getMessage(), null);
+            }
+
+            // 허브 경로 삭제정보 업데이트
+            hubRoute.delete();
+
+            return BaseResponseDto
+                    .from(HttpStatus.OK.value(), HttpStatus.OK, HubRouteMessage.HUB_ROUTE_DELETED_SUCCESS.getMessage(), HubRouteIdResponseDto.from(hubRoute.getHubRouteId()));
+        } catch (Exception e) {
+            return BaseResponseDto
+                    .from(HttpStatus.NOT_FOUND.value(), HttpStatus.NOT_FOUND, HubRouteMessage.HUB_ROUTE_NOT_FOUND.getMessage(), null);
+        }
+    }
+
     private Duration stringToDuration(String timeTaken) {
         long days = TimeUnit.MILLISECONDS.toDays(Long.parseLong(timeTaken));
         long hours = TimeUnit.MILLISECONDS.toHours(Long.parseLong(timeTaken)) % 24;

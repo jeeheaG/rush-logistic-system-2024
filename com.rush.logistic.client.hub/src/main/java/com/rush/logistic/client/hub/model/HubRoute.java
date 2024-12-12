@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -69,5 +70,11 @@ public class HubRoute extends BaseEntity {
         this.timeTaken = timeTakenString;
         this.distance = Integer.parseInt(timeTakenAndDistDto.getDistance());
         this.milliseconds = timeTakenAndDistDto.getTimeTaken();
+    }
+
+    public void delete() {
+        LocalDateTime now = LocalDateTime.now();
+        this.setDelete(true);
+        this.setDeletedAt(now);
     }
 }
