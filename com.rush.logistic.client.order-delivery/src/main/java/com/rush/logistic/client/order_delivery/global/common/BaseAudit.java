@@ -29,12 +29,12 @@ public class BaseAudit {
 
     @CreatedBy
     @Column(updatable = false) // TODO : nullable = false,
-    protected UUID createdBy;
+    protected String createdBy;
 
     @LastModifiedBy
-    protected UUID updatedBy;
+    protected String updatedBy;
 
-    protected UUID deletedBy;
+    protected String deletedBy;
 
     @PrePersist
     protected void prePersist() {
@@ -47,7 +47,7 @@ public class BaseAudit {
         this.updatedAt = ZonedDateTime.now(ZoneId.of(TIME_ZONE_ID));
     }
 
-    public void softDelete(UUID deleteUserId) {
+    public void softDelete(String deleteUserId) {
         this.deletedAt = ZonedDateTime.now(ZoneId.of(TIME_ZONE_ID));
         this.deletedBy = deleteUserId;
         this.isDelete = true;
