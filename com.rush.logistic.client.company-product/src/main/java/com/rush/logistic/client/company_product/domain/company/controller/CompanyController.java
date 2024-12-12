@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -31,8 +32,13 @@ public class CompanyController {
     }
 
     @GetMapping
-    public Response<Page<CompanyDto>> getAllCompanies(Pageable pageable) {
-        Page<CompanyDto> companies = companyService.getAllCompany(pageable);
+    public Response<Page<CompanyDto>> getAllCompanies(
+            @PageableDefault(size = 10) Pageable pageable,
+            @RequestParam(required = false) String searchKeyword,
+            @RequestParam(required = false) UUID hubId,
+            @RequestParam(required = false) String sortType
+    ) {
+        Page<CompanyDto> companies = companyService.getAllCompany(pageable, searchKeyword, hubId, sortType);
         return Response.success(companies, "업체 조회에 성공하였습니다.");
     }
 
