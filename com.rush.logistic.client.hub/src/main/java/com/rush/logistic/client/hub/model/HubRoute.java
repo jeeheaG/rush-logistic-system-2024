@@ -1,6 +1,7 @@
 package com.rush.logistic.client.hub.model;
 
 import com.rush.logistic.client.hub.dto.HubPointRequestDto;
+import com.rush.logistic.client.hub.dto.TimeTakenAndDistDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -60,5 +61,13 @@ public class HubRoute extends BaseEntity {
         hubRoute.setDelete(false);
 
         return hubRoute;
+    }
+
+    public void update(TimeTakenAndDistDto timeTakenAndDistDto, Duration timeTaken) {
+        String timeTakenString = formatDuration(timeTaken);
+
+        this.timeTaken = timeTakenString;
+        this.distance = Integer.parseInt(timeTakenAndDistDto.getDistance());
+        this.milliseconds = timeTakenAndDistDto.getTimeTaken();
     }
 }

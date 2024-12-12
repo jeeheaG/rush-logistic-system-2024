@@ -154,6 +154,47 @@ public class HubRouteService {
         }
     }
 
+    @Transactional
+    public BaseResponseDto<HubRouteInfoResponseDto> updateHubRouteById(UUID hubRouteId) {
+        try {
+            HubRoute hubRoute = hubRouteRepository.findById(hubRouteId)
+                    .orElseThrow(() ->
+                            new IllegalArgumentException(HubRouteMessage.HUB_ROUTE_NOT_FOUND.getMessage())
+                    );
+
+            String startHubName = hubRepository.findById(hubRoute.getStartHubId()).get().getName();
+            String endHubName = hubRepository.findById(hubRoute.getEndHubId()).get().getName();
+
+            String startHubAddress = extractAddress(hubRoute.getStartHubId());
+            String endHubAddress = extractAddress(hubRoute.getEndHubId());
+
+            String startCoordinates = getCoordinates(startHubAddress);
+            String endCoordinates = getCoordinates(endHubAddress);
+
+            LatLonDto startLatLon = extractCoordinates(startCoordinates);
+            LatLonDto endLatLon = extractCoordinates(endCoordinates);
+
+            String timeTakenAndDistance = getTimeTackenAndDistance(startLatLon, endLatLon);
+            TimeTakenAndDistDto timeTakenAndDistDto = extractTimeTakenAndDistance(timeTakenAndDistance);
+
+            // 허브 경로 정보 업데이트
+            Duration timeTaken = stringToDuration(timeTakenAndDistDto.getTimeTaken());
+            hubRoute.update(timeTakenAndDistDto, timeTaken);
+
+            // 업데이트 저장
+            hubRouteRepository.save(hubRoute);
+
+            // 업데이트된 허브 경로 반환
+            return BaseResponseDto
+                    .from(HttpStatus.OK.value(), HttpStatus.OK, HubRouteMessage.HUB_ROUTE_UPDATED.getMessage(),
+                            HubRouteInfoResponseDto.from(hubRoute, startHubName, startHubAddress, endHubName, endHubAddress));
+        } catch (IllegalArgumentException e) {
+            return BaseResponseDto
+                    .from(HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST,
+                            HubRouteMessage.HUB_ROUTE_NOT_UPDATED.getMessage(), null);
+        }
+    }
+
     private Duration stringToDuration(String timeTaken) {
         long days = TimeUnit.MILLISECONDS.toDays(Long.parseLong(timeTaken));
         long hours = TimeUnit.MILLISECONDS.toHours(Long.parseLong(timeTaken)) % 24;
@@ -263,4 +304,5 @@ public class HubRouteService {
             throw new IllegalArgumentException("좌표 추출에 실패했습니다.");
         }
     }
+
 }
