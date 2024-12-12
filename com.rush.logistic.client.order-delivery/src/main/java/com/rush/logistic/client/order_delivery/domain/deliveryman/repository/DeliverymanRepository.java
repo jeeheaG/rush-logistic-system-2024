@@ -8,6 +8,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface DeliverymanRepository extends JpaRepository<Deliveryman, UUID> {
+public interface DeliverymanRepository extends JpaRepository<Deliveryman, UUID>, DeliverymanRepositoryCustom {
     Optional<Deliveryman> findByUserId(Long userId);
 }
