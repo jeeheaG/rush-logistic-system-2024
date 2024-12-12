@@ -9,9 +9,9 @@ import com.rush.logistic.client.order_delivery.domain.deliveryman.domain.Deliver
 import java.util.UUID;
 
 public record DeliveryRouteCreateReq(
-//        Deliveryman deliveryman,
+        Deliveryman deliveryman,
         Integer sequence,
-//        Delivery delivery,
+        Delivery delivery,
         UUID startHubId,
         UUID endHubId,
         Integer expectedDistance,
