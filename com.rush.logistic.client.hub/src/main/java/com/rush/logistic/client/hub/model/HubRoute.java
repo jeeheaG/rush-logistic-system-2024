@@ -50,12 +50,12 @@ public class HubRoute extends BaseEntity {
         String timeTakenString = formatDuration(timeTaken);
 
         HubRoute hubRoute = HubRoute.builder()
-            .startHubId(requestDto.getStartHubId())
-            .endHubId(requestDto.getEndHubId())
-            .timeTaken(timeTakenString)
-            .distance(distance)
-            .milliseconds(milliseconds)
-            .build();
+                .startHubId(requestDto.getStartHubId())
+                .endHubId(requestDto.getEndHubId())
+                .timeTaken(timeTakenString)
+                .distance(distance)
+                .milliseconds(milliseconds)
+                .build();
 
         hubRoute.setDelete(false);
 
