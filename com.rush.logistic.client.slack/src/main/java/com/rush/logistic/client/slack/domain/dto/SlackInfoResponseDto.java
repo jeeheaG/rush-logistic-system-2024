@@ -20,7 +20,7 @@ public class SlackInfoResponseDto {
     private String sendUserId;
     private String receiveUserId;
 
-    public static SlackInfoResponseDto of(SlackEntity slack) {
+    public static SlackInfoResponseDto from(SlackEntity slack) {
         return SlackInfoResponseDto.builder()
                 .slackId(slack.getSlackId())
                 .message(slack.getMessage())

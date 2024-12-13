@@ -1,17 +1,18 @@
 package com.rush.logistic.client.slack.domain.client;
 
-import com.rush.logistic.client.domain.global.BaseResponseDto;
-import com.rush.logistic.client.domain.user.dto.UserInfoResponseDto;
+import com.rush.logistic.client.slack.domain.global.ApiResponse;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 
 @FeignClient(name = "user-auth")
 public interface UserClient {
 
     @GetMapping("/users/{userId}")
-    ResponseEntity<BaseResponseDto<UserInfoResponseDto>> getUser(@PathVariable("id") String id);
-
+    ApiResponse<UserResponseDto> getUserById(
+            @RequestHeader(value = "USER_ID") String authenticatedUserId,
+            @RequestHeader(value = "role") String role,
+            @PathVariable String userId);
 }

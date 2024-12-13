@@ -1,10 +1,7 @@
 package com.rush.logistic.client.domain.user.service;
 
-import com.rush.logistic.client.domain.global.ApiResponse;
-import com.rush.logistic.client.domain.global.exception.user.FailedLoginException;
 import com.rush.logistic.client.domain.global.exception.user.NoAuthorizationException;
 import com.rush.logistic.client.domain.global.exception.user.NotFoundUserException;
-import com.rush.logistic.client.domain.user.dto.UserInfoListResponseDto;
 import com.rush.logistic.client.domain.user.dto.UserInfoResponseDto;
 import com.rush.logistic.client.domain.user.dto.UserUpdateRequestDto;
 import com.rush.logistic.client.domain.user.entity.User;
@@ -13,15 +10,10 @@ import com.rush.logistic.client.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

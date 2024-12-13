@@ -31,6 +31,7 @@ public class SlackEntity extends BaseEntity {
     @Column(name = "receiveUserSlackId")
     private String receiveUserSlackId;
 
+    // TODO
 //    @ManyToOne(fetch = FetchType.LAZY)
 //    @JoinColumn(name = "user_id")
 //    private User user;
