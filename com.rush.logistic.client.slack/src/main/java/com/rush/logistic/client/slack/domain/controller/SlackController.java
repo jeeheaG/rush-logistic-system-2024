@@ -1,9 +1,9 @@
 package com.rush.logistic.client.slack.domain.controller;
 
 
-import com.rush.logistic.client.slack.domain.dto.SlackInfoResponseDto;
 import com.rush.logistic.client.slack.domain.dto.SlackRequestDto;
 import com.rush.logistic.client.slack.domain.dto.SlackUpdateRequestDto;
+import com.rush.logistic.client.slack.domain.entity.SlackEntity;
 import com.rush.logistic.client.slack.domain.global.ApiResponse;
 import com.rush.logistic.client.slack.domain.service.SlackService;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +37,7 @@ public class SlackController {
                                                       direction = Sort.Direction.DESC) Pageable pageable,
                                               @RequestParam Integer size){
 
-        Page<SlackInfoResponseDto> slacks = slackService.getAllSlacks(role, authenticatedUserId, pageable, size);
+        Page<SlackEntity> slacks = slackService.getAllSlacks(role, authenticatedUserId, pageable, size);
 
         return ApiResponse.ok(slacks);
     }
@@ -48,6 +48,14 @@ public class SlackController {
                                           @PathVariable String slackId) {
 
         return ApiResponse.ok(slackService.getSlack(role, authenticatedUserId, slackId));
+    }
+
+    @GetMapping("/slacks/message/{message}")
+    public ApiResponse<?> getSlackMessageByMessage(@RequestHeader(value = "role", required = true) String role,
+                                          @RequestHeader(value = "USER_ID", required = true) String authenticatedUserId,
+                                          @PathVariable String message) {
+
+        return ApiResponse.ok(slackService.getSlackByMessage(role, authenticatedUserId, message));
     }
 
     @PatchMapping("/slacks/{slackId}")
