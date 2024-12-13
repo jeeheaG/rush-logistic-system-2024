@@ -8,6 +8,7 @@ import com.rush.logistic.client.company_product.domain.company.entity.Company;
 import com.rush.logistic.client.company_product.domain.company.repository.CompanyRepository;
 import com.rush.logistic.client.company_product.global.exception.ApplicationException;
 import com.rush.logistic.client.company_product.global.exception.ErrorCode;
+import com.rush.logistic.client.company_product.global.type.CompanyType;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -52,9 +53,10 @@ public class CompanyService {
     //업체 전체 조회
     @Transactional
     public Page<CompanyDto> getAllCompany(
-            Pageable pageable,
-            String searchKeyword,
+            String name,
             UUID hubId,
+            CompanyType companyType,
+            Pageable pageable,
             String sortType
     ) {
         // 페이지 사이즈 제한
@@ -71,21 +73,12 @@ public class CompanyService {
         pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
 
         // 검색 조건 처리
-        Page<Company> companies;
-
-        if (StringUtils.hasText(searchKeyword) && hubId != null) {
-            // 검색어와 hubId가 모두 있을 경우
-            companies = companyRepository.findByNameContainingAndHubIdAndIsDeleteFalse(searchKeyword, hubId, pageable);
-        } else if (StringUtils.hasText(searchKeyword)) {
-            // 검색어만 있을 경우
-            companies = companyRepository.findByNameContainingAndIsDeleteFalse(searchKeyword, pageable);
-        } else if (hubId != null) {
-            // hubId만 있을 경우
-            companies = companyRepository.findByHubIdAndIsDeleteFalse(hubId, pageable);
-        } else {
-            // 검색어와 hubId가 모두 없을 경우
-            companies = companyRepository.findByIsDeleteFalse(pageable);
-        }
+        Page<Company> companies = companyRepository.searchCompany(
+                name,           // 회사명
+                hubId,          // 허브 ID
+                companyType,    // 회사 타입
+                pageable
+        );
 
         // DTO 변환
         return companies.map(CompanyDto::from);
