@@ -178,7 +178,7 @@ public class HubService {
             Pageable pageable = PageRequest.of(page, size, sort);
 
             // 허브 리스트 조회
-            Page<Hub> hubList = hubRepository.findAllByIsDeleteFalse(pageable).orElseThrow(() ->
+            Page<Hub> hubList = hubRepository.findPagedByIsDeleteFalse(pageable).orElseThrow(() ->
                     new NoSuchElementException(HubMessage.HUB_INFO_LIST_NOT_FOUND.getMessage())
             );
 
