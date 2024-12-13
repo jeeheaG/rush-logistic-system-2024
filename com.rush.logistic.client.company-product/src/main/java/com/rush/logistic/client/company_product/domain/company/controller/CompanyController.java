@@ -2,7 +2,9 @@ package com.rush.logistic.client.company_product.domain.company.controller;
 
 import com.rush.logistic.client.company_product.domain.company.dto.CompanyDto;
 import com.rush.logistic.client.company_product.domain.company.dto.request.CompanyCreateRequest;
+import com.rush.logistic.client.company_product.domain.company.dto.request.CompanyHubMappingRequest;
 import com.rush.logistic.client.company_product.domain.company.dto.request.CompanyUpdateRequest;
+import com.rush.logistic.client.company_product.domain.company.dto.response.CompanyHubMappingResponse;
 import com.rush.logistic.client.company_product.domain.company.dto.response.CompanySearchResponse;
 import com.rush.logistic.client.company_product.domain.company.service.CompanyService;
 import com.rush.logistic.client.company_product.global.exception.Response;
@@ -29,6 +31,14 @@ public class CompanyController {
     public Response<?> createCompany(@RequestBody CompanyCreateRequest request) {
         CompanyDto result = companyService.createCompany(request);
         return Response.success(result, "업체 생성에 성공하였습니다.");
+    }
+
+    @PostMapping("/mapping")
+    public Response<CompanyHubMappingResponse> getCompanyHubMapping(
+            @RequestBody CompanyHubMappingRequest request
+    ) {
+        CompanyHubMappingResponse response = companyService.getCompanyHubMapping(request);
+        return Response.success(response, "업체 허브 매핑 조회에 성공하였습니다.");
     }
 
     @GetMapping

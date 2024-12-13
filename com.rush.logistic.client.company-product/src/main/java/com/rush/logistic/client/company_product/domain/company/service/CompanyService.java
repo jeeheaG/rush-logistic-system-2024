@@ -2,7 +2,9 @@ package com.rush.logistic.client.company_product.domain.company.service;
 
 import com.rush.logistic.client.company_product.domain.company.dto.CompanyDto;
 import com.rush.logistic.client.company_product.domain.company.dto.request.CompanyCreateRequest;
+import com.rush.logistic.client.company_product.domain.company.dto.request.CompanyHubMappingRequest;
 import com.rush.logistic.client.company_product.domain.company.dto.request.CompanyUpdateRequest;
+import com.rush.logistic.client.company_product.domain.company.dto.response.CompanyHubMappingResponse;
 import com.rush.logistic.client.company_product.domain.company.dto.response.CompanySearchResponse;
 import com.rush.logistic.client.company_product.domain.company.entity.Company;
 import com.rush.logistic.client.company_product.domain.company.repository.CompanyRepository;
@@ -151,5 +153,23 @@ public class CompanyService {
         }
         company.setIsDelete(true);
         company.setDeletedAt(LocalDateTime.now());
+    }
+
+    //업체 - 허브 맵핑
+    @Transactional(readOnly = true)
+    public CompanyHubMappingResponse getCompanyHubMapping(CompanyHubMappingRequest request) {
+        // 출발 업체 허브 조회
+        Company departureCompany = companyRepository.findById(request.departureCompanyId())
+                .orElseThrow(() -> new RuntimeException("출발 업체를 찾을 수 없습니다: " + request.departureCompanyId()));
+
+        // 도착 업체 허브 조회
+        Company arrivalCompany = companyRepository.findById(request.arrivalCompanyId())
+                .orElseThrow(() -> new RuntimeException("도착 업체를 찾을 수 없습니다: " + request.arrivalCompanyId()));
+
+        // 응답 생성 및 반환
+        return new CompanyHubMappingResponse(
+                departureCompany.getHubId(),
+                arrivalCompany.getHubId()
+        );
     }
 }
