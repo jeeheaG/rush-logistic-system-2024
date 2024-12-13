@@ -4,6 +4,8 @@ import com.rush.logistic.client.slack.domain.client.UserClient;
 import com.rush.logistic.client.slack.domain.client.UserResponseDto;
 import com.rush.logistic.client.slack.domain.dto.SlackInfoResponseDto;
 import com.rush.logistic.client.slack.domain.dto.SlackRequestDto;
+import com.rush.logistic.client.slack.domain.dto.SlackUpdateRequestDto;
+import com.rush.logistic.client.slack.domain.dto.SlackUpdateResponseDto;
 import com.rush.logistic.client.slack.domain.entity.SlackEntity;
 import com.rush.logistic.client.slack.domain.global.ApiResponse;
 import com.rush.logistic.client.slack.domain.global.exception.slack.NotFoundSlackException;
@@ -128,10 +130,29 @@ public class SlackService {
         return SlackInfoResponseDto.from(slackentity);
     }
 
-//    @Transactional(readOnly = false)
-//    public SlackUpdateResponseDto updateSlack(String role, String authenticatedUserId, String slackId, SlackUpdateRequestDto slackUpdateRequestDto) {
-//
-//
-//
-//    }
+    @Transactional(readOnly = false)
+    public SlackInfoResponseDto updateSlack(String role, String authenticatedUserId, String slackId, SlackUpdateRequestDto slackUpdateRequestDto) {
+
+        ApiResponse<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
+
+        SlackEntity slackentity = slackRepository.findById(Long.valueOf(slackId)).orElseThrow(NotFoundSlackException::new);
+
+        slackentity.updateSlackEntity(slackUpdateRequestDto);
+        slackRepository.save(slackentity);
+
+        return SlackInfoResponseDto.from(slackentity);
+    }
+
+    @Transactional(readOnly = false)
+    public SlackInfoResponseDto deleteSlack(String role, String authenticatedUserId, String slackId) {
+
+        ApiResponse<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
+
+        SlackEntity slackentity = slackRepository.findById(Long.valueOf(slackId)).orElseThrow(NotFoundSlackException::new);
+
+        slackentity.setDelete(true);
+        slackRepository.save(slackentity);
+
+        return SlackInfoResponseDto.from(slackentity);
+    }
 }

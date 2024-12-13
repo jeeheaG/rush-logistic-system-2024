@@ -50,21 +50,21 @@ public class SlackController {
         return ApiResponse.ok(slackService.getSlack(role, authenticatedUserId, slackId));
     }
 
-//    @PatchMapping("/slacks/{slackId}")
-//    public ApiResponse<?> updateSlackMessage(@RequestHeader(value = "role", required = true) String role,
-//                                             @RequestHeader(value = "USER_ID", required = true) String authenticatedUserId,
-//                                             @PathVariable String slackId,
-//                                             @RequestBody SlackUpdateRequestDto slackUpdateRequestDto) {
-//
-//        return ApiResponse.ok(slackService.updateSlack(role, authenticatedUserId, slackId, slackUpdateRequestDto));
-//    }
-//
-//    @DeleteMapping("/slacks/{slackId}")
-//    public ApiResponse<?> deleteSlackMessage(@RequestHeader(value = "role", required = true) String role,
-//                                             @RequestHeader(value = "USER_ID", required = true) String authenticatedUserId,
-//                                             @PathVariable String slackId) {
-//
-//        return ApiResponse.ok(slackService.deleteSlack(role, authenticatedUserId, slackId));
-//    }
+    @PatchMapping("/slacks/{slackId}")
+    public ApiResponse<?> updateSlackMessage(@RequestHeader(value = "role", required = true) String role,
+                                             @RequestHeader(value = "USER_ID", required = true) String authenticatedUserId,
+                                             @PathVariable String slackId,
+                                             @RequestBody SlackUpdateRequestDto slackUpdateRequestDto) {
+
+        return ApiResponse.ok(slackService.updateSlack(role, authenticatedUserId, slackId, slackUpdateRequestDto));
+    }
+
+    @DeleteMapping("/slacks/{slackId}")
+    public ApiResponse<?> deleteSlackMessage(@RequestHeader(value = "role", required = true) String role,
+                                             @RequestHeader(value = "USER_ID", required = true) String authenticatedUserId,
+                                             @PathVariable String slackId) {
+
+        return ApiResponse.ok(slackService.deleteSlack(role, authenticatedUserId, slackId));
+    }
 }
 
