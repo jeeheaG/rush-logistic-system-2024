@@ -2,15 +2,15 @@ package com.rush.logistic.client.slack.domain.service;
 
 import com.rush.logistic.client.slack.domain.client.UserClient;
 import com.rush.logistic.client.slack.domain.client.UserResponseDto;
-import com.rush.logistic.client.slack.domain.client.UserRoleEnum;
 import com.rush.logistic.client.slack.domain.dto.SlackInfoResponseDto;
 import com.rush.logistic.client.slack.domain.dto.SlackRequestDto;
+import com.rush.logistic.client.slack.domain.dto.SlackUpdateRequestDto;
+import com.rush.logistic.client.slack.domain.dto.SlackUpdateResponseDto;
 import com.rush.logistic.client.slack.domain.entity.SlackEntity;
 import com.rush.logistic.client.slack.domain.global.ApiResponse;
 import com.rush.logistic.client.slack.domain.global.exception.slack.NotFoundSlackException;
 import com.rush.logistic.client.slack.domain.global.exception.slack.NotFoundSlackIdException;
 import com.rush.logistic.client.slack.domain.global.exception.slack.SlackSendErrorException;
-import com.rush.logistic.client.slack.domain.global.exception.user.NoAuthorizationException;
 import com.rush.logistic.client.slack.domain.repository.SlackRepository;
 import com.slack.api.Slack;
 import com.slack.api.methods.MethodsClient;
@@ -31,7 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
-import java.util.Objects;
 
 
 @Service
@@ -70,7 +69,7 @@ public class SlackService {
     }
 
     @Transactional(readOnly = false)
-    public SlackInfoResponseDto sendSlackMessage(String userId, String username, SlackRequestDto slackRequestDto) {
+    public SlackInfoResponseDto sendSlackMessage(String authenticatedUserId, String username, SlackRequestDto slackRequestDto) {
 
         String email = slackRequestDto.getEmail();
         String message = slackRequestDto.getMessage();
@@ -98,7 +97,7 @@ public class SlackService {
             if (response.isOk()) {
 
                 SlackEntity slack = SlackEntity.builder()
-                        .sendUserId(userId)
+                        .sendUserId(authenticatedUserId)
                         .receiveUserSlackId(slackId)
                         .message(message)
                         .build();
@@ -115,28 +114,44 @@ public class SlackService {
         }
     }
 
-    public Page<SlackInfoResponseDto> getAllSlacks(String role, String userId, Pageable pageable, Integer size) {
+    public Page<SlackInfoResponseDto> getAllSlacks(String role, String authenticatedUserId, Pageable pageable, Integer size) {
 
-        ApiResponse<UserResponseDto> response = userClient.getUserById(userId, role, userId);
-        UserResponseDto user = response.getData();
-
-        if(!Objects.equals(user.getRole(), UserRoleEnum.MASTER.name())){
-            throw new NoAuthorizationException();
-        }
+        ApiResponse<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
 
         return slackRepository.findAll(pageable).map(SlackInfoResponseDto::from);
     }
 
-    public SlackInfoResponseDto getSlack(String role, String userId, String slackId) {
+    public SlackInfoResponseDto getSlack(String role, String authenticatedUserId, String slackId) {
 
-        ApiResponse<UserResponseDto> response = userClient.getUserById(userId, role, userId);
-        UserResponseDto user = response.getData();
-
-        if(!Objects.equals(user.getRole(), UserRoleEnum.MASTER.name())){
-            throw new NoAuthorizationException();
-        }
+        ApiResponse<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
 
         SlackEntity slackentity = slackRepository.findById(Long.valueOf(slackId)).orElseThrow(NotFoundSlackException::new);
+
+        return SlackInfoResponseDto.from(slackentity);
+    }
+
+    @Transactional(readOnly = false)
+    public SlackInfoResponseDto updateSlack(String role, String authenticatedUserId, String slackId, SlackUpdateRequestDto slackUpdateRequestDto) {
+
+        ApiResponse<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
+
+        SlackEntity slackentity = slackRepository.findById(Long.valueOf(slackId)).orElseThrow(NotFoundSlackException::new);
+
+        slackentity.updateSlackEntity(slackUpdateRequestDto);
+        slackRepository.save(slackentity);
+
+        return SlackInfoResponseDto.from(slackentity);
+    }
+
+    @Transactional(readOnly = false)
+    public SlackInfoResponseDto deleteSlack(String role, String authenticatedUserId, String slackId) {
+
+        ApiResponse<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
+
+        SlackEntity slackentity = slackRepository.findById(Long.valueOf(slackId)).orElseThrow(NotFoundSlackException::new);
+
+        slackentity.setDelete(true);
+        slackRepository.save(slackentity);
 
         return SlackInfoResponseDto.from(slackentity);
     }
