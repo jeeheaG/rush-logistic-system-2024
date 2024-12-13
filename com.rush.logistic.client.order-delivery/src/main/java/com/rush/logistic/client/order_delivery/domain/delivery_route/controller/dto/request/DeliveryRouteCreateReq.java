@@ -5,25 +5,34 @@ import com.rush.logistic.client.order_delivery.domain.delivery_route.domain.Deli
 import com.rush.logistic.client.order_delivery.domain.deliveryman.domain.DeliveryRouteStatusEnum;
 import com.rush.logistic.client.order_delivery.domain.deliveryman.domain.DeliveryTypeEnum;
 import com.rush.logistic.client.order_delivery.domain.deliveryman.domain.Deliveryman;
+import com.rush.logistic.client.order_delivery.domain.order.service.model.HubRouteModel;
+import lombok.Builder;
 
 import java.util.UUID;
 
+@Builder
 public record DeliveryRouteCreateReq(
-//        Deliveryman deliveryman,
+        Deliveryman deliveryman,
         Integer sequence,
-//        Delivery delivery,
+        Delivery delivery,
         UUID startHubId,
         UUID endHubId,
         Integer expectedDistance,
         Integer expectedTime,
         DeliveryTypeEnum type
 ) {
+    public static DeliveryRouteCreateReq toDto(Deliveryman deliveryman, Delivery delivery, HubRouteModel hubRouteModel) {
+        return DeliveryRouteCreateReq.builder()
+
+                .build();
+    }
+
     public DeliveryRoute toEntity() {
         return DeliveryRoute.builder()
-//                .deliveryman(deliveryman)
+                .deliveryman(deliveryman)
                 .sequence(sequence)
                 .status(DeliveryRouteStatusEnum.WAITING)
-//                .delivery(delivery)
+                .delivery(delivery)
                 .startHubId(startHubId)
                 .endHubId(endHubId)
                 .expectedDistance(expectedDistance)

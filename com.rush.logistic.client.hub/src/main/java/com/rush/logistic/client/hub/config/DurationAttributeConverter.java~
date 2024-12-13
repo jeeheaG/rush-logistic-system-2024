@@ -1,0 +1,4 @@
+package com.rush.logistic.client.hub.config;
+
+public class DurationAttributeConverter {
+}

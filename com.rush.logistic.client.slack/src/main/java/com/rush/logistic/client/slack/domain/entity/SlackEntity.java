@@ -1,10 +1,11 @@
 package com.rush.logistic.client.slack.domain.entity;
 
 
+import com.rush.logistic.client.slack.domain.dto.SlackUpdateRequestDto;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Entity
 @Getter
@@ -22,16 +23,16 @@ public class SlackEntity extends BaseEntity {
     @Column(name = "message")
     private String message;
 
-    @Column(name = "password")
-    private String password;
-
     @Column(name = "sendUserId")
     private String sendUserId;
 
     @Column(name = "receiveUserSlackId")
     private String receiveUserSlackId;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "user_id")
-//    private User user;
+    public void updateSlackEntity(SlackUpdateRequestDto requestDto){
+
+        Optional.ofNullable(requestDto.getMessage()).ifPresent(message -> this.message = message);
+        Optional.ofNullable(requestDto.getReceiveUserSlackId()).ifPresent(sendUserId -> this.sendUserId = sendUserId);
+        Optional.ofNullable(requestDto.getSendUserId()).ifPresent(receiveUserSlackId -> this.receiveUserSlackId = receiveUserSlackId);
+    }
 }

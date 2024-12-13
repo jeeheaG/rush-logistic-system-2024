@@ -1,5 +1,6 @@
 package com.rush.logistic.client.company_product.domain.product.service;
 
+import com.rush.logistic.client.company_product.domain.company.dto.CompanyDto;
 import com.rush.logistic.client.company_product.domain.product.dto.ProductDto;
 import com.rush.logistic.client.company_product.domain.product.dto.request.ProductCreateRequest;
 import com.rush.logistic.client.company_product.domain.product.dto.request.ProductUpdateRequest;
@@ -13,8 +14,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -47,7 +50,13 @@ public class ProductService {
     }
 
     //상품 전체 조회
-    public Page<ProductDto> getAllProduct(Pageable pageable) {
+    public Page<ProductDto> getAllProduct(
+            String name,
+            UUID companyId,
+            UUID hubId,
+            Pageable pageable,
+            String sortType
+    ) {
         // 페이지 사이즈 제한
         int[] allowedPageSizes = {10, 30, 50};
         int pageSize = pageable.getPageSize();
@@ -56,8 +65,40 @@ public class ProductService {
         if (!Arrays.stream(allowedPageSizes).anyMatch(size -> size == pageSize)) {
             pageable = PageRequest.of(pageable.getPageNumber(), 10, pageable.getSort());
         }
-        Page<Product> products = productRepository.findAll(pageable);
+
+        // 정렬 로직 추가
+        Sort sort = determineSort(sortType);
+        pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+
+        //검색 조건 처리
+        Page<Product> products = productRepository.searchProduct(
+                name,
+                companyId,
+                hubId,
+                pageable
+        );
+
+        // DTO 변환
         return products.map(ProductDto::from);
+    }
+
+    // 정렬 타입에 따른 Sort 결정 메서드
+    private Sort determineSort(String sortType) {
+        if (StringUtils.isEmpty(sortType)) {
+            // 기본 정렬: 생성일 내림차순
+            return Sort.by("createdAt").descending();
+        }
+
+        switch (sortType) {
+            case "createdAtAsc":
+                return Sort.by("createdAt").ascending();
+            case "updatedAtDesc":
+                return Sort.by("updatedAt").descending();
+            case "updatedAtAsc":
+                return Sort.by("updatedAt").ascending();
+            default:
+                return Sort.by("createdAt").descending();
+        }
     }
 
     //상품 단건 조회

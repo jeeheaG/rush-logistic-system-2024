@@ -1,10 +1,14 @@
 package com.rush.logistic.client.order_delivery.domain.order.controller.dto.response;
 
 import com.rush.logistic.client.order_delivery.domain.delivery.controller.dto.response.DeliveryAllRes;
+import com.rush.logistic.client.order_delivery.domain.delivery_route.controller.dto.response.DeliveryRouteAllRes;
+import com.rush.logistic.client.order_delivery.domain.delivery_route.controller.dto.response.DeliveryRouteCreateRes;
+import com.rush.logistic.client.order_delivery.domain.delivery_route.domain.DeliveryRoute;
 import com.rush.logistic.client.order_delivery.domain.order.domain.Order;
 import lombok.Builder;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Builder
@@ -14,9 +18,11 @@ public record OrderAllRes(
         Integer quantity,
         UUID receiveCompanyId,
         UUID produceCompanyId,
-        DeliveryAllRes delivery,
         String requestDeadLine,
         String requestNote,
+        DeliveryAllRes delivery,
+        List<DeliveryRouteCreateRes> deliveryRoutes,
+
         String createdBy,
         ZonedDateTime createdAt,
         String updatedBy,
@@ -25,6 +31,32 @@ public record OrderAllRes(
         ZonedDateTime deletedAt,
         Boolean isDelete
 ) {
+    public static OrderAllRes fromEntity(Order order, List<DeliveryRoute> deliveryRoutes) {
+        DeliveryAllRes deliveryAllRes = DeliveryAllRes.fromEntity(order.getDelivery());
+        List<DeliveryRouteCreateRes> deliveryRouteAllResList = DeliveryRouteCreateRes.fromEntities(deliveryRoutes);
+
+        return OrderAllRes.builder()
+                .orderId(order.getId())
+                .productId(order.getProductId())
+                .quantity(order.getQuantity())
+                .receiveCompanyId(order.getReceiveCompanyId())
+                .produceCompanyId(order.getProduceCompanyId())
+                .requestDeadLine(order.getRequestDeadLine())
+                .requestNote(order.getRequestNote())
+                .delivery(deliveryAllRes)
+                .deliveryRoutes(deliveryRouteAllResList)
+
+                .createdAt(order.getCreatedAt())
+                .createdBy(order.getCreatedBy())
+                .updatedAt(order.getUpdatedAt())
+                .updatedBy(order.getUpdatedBy())
+                .deletedAt(order.getDeletedAt())
+                .deletedBy(order.getDeletedBy())
+                .isDelete(order.isDelete())
+                .build();
+    }
+
+
     public static OrderAllRes fromEntity(Order order) {
         DeliveryAllRes deliveryAllRes = DeliveryAllRes.fromEntity(order.getDelivery());
 
@@ -34,9 +66,10 @@ public record OrderAllRes(
                 .quantity(order.getQuantity())
                 .receiveCompanyId(order.getReceiveCompanyId())
                 .produceCompanyId(order.getProduceCompanyId())
-                .delivery(deliveryAllRes)
                 .requestDeadLine(order.getRequestDeadLine())
                 .requestNote(order.getRequestNote())
+                .delivery(deliveryAllRes)
+
                 .createdAt(order.getCreatedAt())
                 .createdBy(order.getCreatedBy())
                 .updatedAt(order.getUpdatedAt())
