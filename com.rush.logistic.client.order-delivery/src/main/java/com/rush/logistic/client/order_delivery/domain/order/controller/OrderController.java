@@ -5,6 +5,7 @@ import com.rush.logistic.client.order_delivery.domain.order.controller.dto.reque
 import com.rush.logistic.client.order_delivery.domain.order.controller.dto.response.OrderAllRes;
 import com.rush.logistic.client.order_delivery.domain.order.controller.dto.response.OrderIdRes;
 import com.rush.logistic.client.order_delivery.domain.order.controller.dto.response.OrderUpdateRes;
+import com.rush.logistic.client.order_delivery.domain.order.service.OrderCreateService;
 import com.rush.logistic.client.order_delivery.domain.order.service.OrderService;
 import com.rush.logistic.client.order_delivery.global.response.BaseResponse;
 import com.rush.logistic.client.order_delivery.domain.order.exception.OrderCode;
@@ -20,13 +21,14 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/orders")
 public class OrderController {
+    private final OrderCreateService orderCreateService;
     private final OrderService orderService;
 
     @PostMapping
     public ResponseEntity<Object> createOrder(@RequestBody OrderAndDeliveryCreateReq requestDto) {
         log.info("OrderController createOrder");
 
-        OrderAllRes responseDto = orderService.createDeliveryAndOrder(requestDto);
+        OrderAllRes responseDto = orderCreateService.createDeliveryAndOrder(requestDto);
         return ResponseEntity.ok().body(BaseResponse.toResponse(OrderCode.CREATE_ORDER_OK, responseDto));
     }
 
