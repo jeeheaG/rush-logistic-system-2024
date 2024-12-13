@@ -43,8 +43,8 @@ public class UserService {
 
     public UserInfoResponseDto getUserById(String role, String userId, String authenticatedUserId) {
 
-        if(!Objects.equals(role, UserRoleEnum.MASTER.name())){
-            if (!authenticatedUserId.equals(userId)) {
+        if(!authenticatedUserId.equals(userId)){
+            if(!Objects.equals(role, UserRoleEnum.MASTER.name())) {
                 throw new NoAuthorizationException();
             }
         }
