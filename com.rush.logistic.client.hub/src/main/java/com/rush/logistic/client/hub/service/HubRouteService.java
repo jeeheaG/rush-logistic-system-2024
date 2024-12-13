@@ -10,6 +10,7 @@ import com.rush.logistic.client.hub.dto.HubRouteInfoResponseDto;
 import com.rush.logistic.client.hub.dto.LatLonDto;
 import com.rush.logistic.client.hub.dto.TimeTakenAndDistDto;
 import com.rush.logistic.client.hub.message.HubMessage;
+import com.rush.logistic.client.hub.message.HubName;
 import com.rush.logistic.client.hub.message.HubRouteMessage;
 import com.rush.logistic.client.hub.model.Hub;
 import com.rush.logistic.client.hub.model.HubRoute;
@@ -21,8 +22,10 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import javax.swing.text.html.Option;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -415,10 +418,21 @@ public class HubRouteService {
                         continue;
                     }
 
-                    System.out.print(startHub.getName() + " -> " + endHub.getName() + " 경로 생성");
-                    HubPointRequestDto requestDto = new HubPointRequestDto(startHub.getHubId(), endHub.getHubId());
-                    createHubRoute(requestDto);
-                    System.out.println("---- 경로 생성 완료");
+                    Optional<HubRoute> connectedHubRoute = hubRouteRepository.findByStartHubIdAndEndHubId(startHub.getHubId(), endHub.getHubId());
+                    if(!connectedHubRoute.isPresent()){
+                        // 아직 생성되지 않았다면 신규 경로 생성
+                        System.out.print(startHub.getName() + " -> " + endHub.getName() + " 경로 생성");
+                        HubPointRequestDto requestDto = new HubPointRequestDto(startHub.getHubId(), endHub.getHubId());
+                        createHubRoute(requestDto);
+                        System.out.println("---- 경로 생성 완료");
+                    } else {
+                        if(connectedHubRoute.get().isDelete()){
+                            // 생성했었지만 soft delete되어 있으면 다시 생성
+                            connectedHubRoute.get().restore();
+                            hubRouteRepository.save(connectedHubRoute.get());
+                        }
+                        // TODO: 생성한지 오래됐으면 최근 경로 반영
+                    }
                 }
             }
 
