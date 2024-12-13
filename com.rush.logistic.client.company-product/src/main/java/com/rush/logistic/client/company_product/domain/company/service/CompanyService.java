@@ -8,8 +8,11 @@ import com.rush.logistic.client.company_product.domain.company.dto.response.Comp
 import com.rush.logistic.client.company_product.domain.company.dto.response.CompanySearchResponse;
 import com.rush.logistic.client.company_product.domain.company.entity.Company;
 import com.rush.logistic.client.company_product.domain.company.repository.CompanyRepository;
+import com.rush.logistic.client.company_product.global.client.UserClient;
+import com.rush.logistic.client.company_product.global.client.UserResponseDto;
 import com.rush.logistic.client.company_product.global.exception.ApplicationException;
 import com.rush.logistic.client.company_product.global.exception.ErrorCode;
+import com.rush.logistic.client.company_product.global.exception.Response;
 import com.rush.logistic.client.company_product.global.type.CompanyType;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -31,13 +34,14 @@ import java.util.UUID;
 public class CompanyService {
 
     private final CompanyRepository companyRepository;
-
+    private final UserClient userClient;
 
     private final EntityManager entityManager;
 
     //업체 추가
     @Transactional
-    public CompanyDto createCompany(CompanyCreateRequest request) {
+    public CompanyDto createCompany(CompanyCreateRequest request, String role, String authenticatedUserId) {
+        Response<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
         // TODO: MASTER, HUB-MANAGER 확인 로직 추가
         CompanyDto dto = CompanyCreateRequest.toDto(request);
 
@@ -59,8 +63,12 @@ public class CompanyService {
             UUID hubId,
             CompanyType companyType,
             Pageable pageable,
-            String sortType
+            String sortType,
+            String role,
+            String authenticatedUserId
     ) {
+        Response<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
+
         // 페이지 사이즈 제한
         int[] allowedPageSizes = {10, 30, 50};
         int pageSize = pageable.getPageSize();
@@ -107,7 +115,8 @@ public class CompanyService {
 
     //업체 단건 조회
     @Transactional
-    public CompanySearchResponse getCompany(UUID id) {
+    public CompanySearchResponse getCompany(UUID id, String role, String authenticatedUserId) {
+        Response<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
         Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.COMPANY_NOT_FOUND));
 
@@ -120,7 +129,10 @@ public class CompanyService {
 
     //업체 수정
     @Transactional
-    public CompanyDto updateCompany(UUID id, CompanyUpdateRequest request) {
+    public CompanyDto updateCompany(UUID id, CompanyUpdateRequest request, String role, String authenticatedUserId) {
+
+        Response<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
+
         Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.COMPANY_NOT_FOUND));
 
@@ -145,7 +157,10 @@ public class CompanyService {
 
     //업체 삭제
     @Transactional
-    public void deleteCompany(UUID id) {
+    public void deleteCompany(UUID id, String role, String authenticatedUserId) {
+
+        Response<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
+
         Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.INVALID_REQUEST));
         if (company.getIsDelete()){

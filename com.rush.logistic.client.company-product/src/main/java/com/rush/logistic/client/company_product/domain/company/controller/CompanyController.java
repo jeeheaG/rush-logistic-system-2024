@@ -28,8 +28,11 @@ public class CompanyController {
     private final CompanyService companyService;
 
     @PostMapping
-    public Response<?> createCompany(@RequestBody CompanyCreateRequest request) {
-        CompanyDto result = companyService.createCompany(request);
+    public Response<?> createCompany(@RequestBody CompanyCreateRequest request,
+                                     @RequestHeader(value = "role", required = true) String role,
+                                     @RequestHeader(value = "USER_ID", required = true) String authenticatedUserId
+    ) {
+        CompanyDto result = companyService.createCompany(request,role,authenticatedUserId);
         return Response.success(result, "업체 생성에 성공하였습니다.");
     }
 
@@ -46,25 +49,36 @@ public class CompanyController {
                                                       UUID hubId,
                                                       CompanyType companyType,
                                                       Pageable pageable,
-                                                      String sortType) {
-        Page<CompanyDto> companies = companyService.getAllCompany(name, hubId, companyType, pageable, sortType);
+                                                      String sortType,
+                                                      @RequestHeader(value = "role", required = true) String role,
+                                                      @RequestHeader(value = "USER_ID", required = true) String authenticatedUserId
+    ) {
+        Page<CompanyDto> companies = companyService.getAllCompany(name, hubId, companyType, pageable, sortType, role, authenticatedUserId);
 
         return Response.success(companies, "업체 조회에 성공하였습니다.");
     }
 
     @GetMapping("/{id}")
-    public Response<CompanySearchResponse> getCompany(@PathVariable UUID id) {
-        return Response.success(companyService.getCompany(id), "업체 단건 조회에 성공하였습니다.");
+    public Response<CompanySearchResponse> getCompany(@PathVariable UUID id,
+                                                      @RequestHeader(value = "role", required = true) String role,
+                                                      @RequestHeader(value = "USER_ID", required = true) String authenticatedUserId
+    ) {
+        return Response.success(companyService.getCompany(id,role,authenticatedUserId), "업체 단건 조회에 성공하였습니다.");
     }
 
     @PutMapping("/{id}")
-    public Response<?> updateCompany(@PathVariable UUID id, @RequestBody CompanyUpdateRequest request) {
-        return Response.success(companyService.updateCompany(id, request), "업체 수정에 성공하였습니다");
+    public Response<?> updateCompany(@PathVariable UUID id, @RequestBody CompanyUpdateRequest request,
+                                     @RequestHeader(value = "role", required = true) String role,
+                                     @RequestHeader(value = "USER_ID", required = true) String authenticatedUserId) {
+        return Response.success(companyService.updateCompany(id, request, role, authenticatedUserId), "업체 수정에 성공하였습니다");
     }
 
     @DeleteMapping("/{id}")
-    public Response<?> deleteCompany(@PathVariable UUID id) {
-        companyService.deleteCompany(id);
+    public Response<?> deleteCompany(@PathVariable UUID id,
+                                     @RequestHeader(value = "role", required = true) String role,
+                                     @RequestHeader(value = "USER_ID", required = true) String authenticatedUserId
+    ) {
+        companyService.deleteCompany(id,role,authenticatedUserId);
         return Response.success(null, "업체 삭제에 성공하였습니다.");
     }
 
