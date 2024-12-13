@@ -31,8 +31,13 @@ public class ProductController {
     }
 
     @GetMapping
-    public Response<Page<ProductDto>> getAllProducts(Pageable pageable){
-        Page<ProductDto> products = productService.getAllProduct(pageable);
+    public Response<Page<ProductDto>> getAllProducts(String name,
+                                                     UUID companyId,
+                                                     UUID hubId,
+                                                     Pageable pageable,
+                                                     String sortType
+    ){
+        Page<ProductDto> products = productService.getAllProduct(name,companyId,hubId,pageable,sortType);
         return Response.success(products, "상품 조회에 성공하였습니다");
     }
 
