@@ -2,11 +2,13 @@ package com.rush.logistic.client.order_delivery.domain.order.controller.client.d
 
 import lombok.Builder;
 
+import java.util.List;
+
 @Builder
 public record UserSlackResWrapper<T> (
         Boolean success,
         String httpStatus,
-        String errorMessage,
+        List<String> errorMessage,
         T data
 ) {
 }
