@@ -92,4 +92,19 @@ public class HubRouteController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
+
+    @PostMapping("/createHubToHubRelay")
+    public ResponseEntity<BaseResponseDto<HubListResponseDto<HubRouteIdResponseDto>>> createHubToHubRelay(
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "20") int size,
+            @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
+            @RequestParam(value = "isAsc", defaultValue = "true") boolean isAsc,
+            Sort sort
+    ) {
+        BaseResponseDto<HubListResponseDto<HubRouteIdResponseDto>> responseDto = hubRouteService.createHubToHubRelay(
+                page - 1, size, sortBy, isAsc
+        );
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+    }
 }

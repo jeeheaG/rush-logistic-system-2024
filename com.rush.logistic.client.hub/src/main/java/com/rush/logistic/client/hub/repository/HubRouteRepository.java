@@ -11,4 +11,6 @@ public interface HubRouteRepository extends JpaRepository<HubRoute, UUID> {
     Optional<HubRoute> findByStartHubIdAndEndHubId(UUID startHubId, UUID endHubId);
 
     Optional<Page<HubRoute>> findAllByIsDeleteFalse(Pageable pageable);
+
+    Optional<HubRoute> findByStartHubIdAndEndHubIdAndIsDeleteFalse(UUID startHubId, UUID endHubId);
 }

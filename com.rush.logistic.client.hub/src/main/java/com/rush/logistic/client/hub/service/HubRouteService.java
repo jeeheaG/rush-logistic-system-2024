@@ -430,4 +430,207 @@ public class HubRouteService {
                             HubMessage.HUB_LIST_NOT_FOUND.getMessage(), null);
         }
     }
+
+    @Transactional
+    public BaseResponseDto<HubListResponseDto<HubRouteIdResponseDto>> createHubToHubRelay(
+            int page, int size, String sortBy, boolean isAsc
+    ) {
+        try {
+            Direction direction = isAsc ? Direction.ASC : Direction.DESC;
+            Sort sort = Sort.by(direction, sortBy);
+            Pageable pageable = PageRequest.of(page, size, sort);
+
+            Page<Hub> hubList = hubRepository.findAllByIsDeleteFalse(pageable).orElseThrow(
+                    () -> new NoSuchElementException(HubMessage.HUB_LIST_NOT_FOUND.getMessage())
+            );
+
+            for(Hub startHub : hubList){
+                for(Hub endHub : hubList){
+                    if(startHub.getHubId().equals(endHub.getHubId())){
+                        continue;
+                    }
+
+                    if(isLinkedRoute(startHub, endHub)){
+                        // 연결된 허브라면 생성
+                        Optional<HubRoute> connectedHubRoute = hubRouteRepository.findByStartHubIdAndEndHubId(startHub.getHubId(), endHub.getHubId());
+                        if(!connectedHubRoute.isPresent()){
+                            // 아직 생성되지 않았다면 신규 경로 생성
+                            System.out.print(startHub.getName() + " -> " + endHub.getName() + " 경로 생성");
+                            HubPointRequestDto requestDto = new HubPointRequestDto(startHub.getHubId(), endHub.getHubId());
+                            createHubRoute(requestDto);
+                            System.out.println("---- 경로 생성 완료");
+                        } else {
+                            if(connectedHubRoute.get().isDelete()){
+                                // 생성했었지만 soft delete되어 있으면 다시 생성
+                                connectedHubRoute.get().restore();
+                                hubRouteRepository.save(connectedHubRoute.get());
+                            }
+                            // TODO: 생성한지 오래됐으면 최근 경로 반영
+                        }
+
+                    } else {
+                        // 연결되지 않은 허브경로인데 존재 한다면 softDelete처리. isDelete -> true
+                        Optional<HubRoute> unconnectedHubRoute = hubRouteRepository.findByStartHubIdAndEndHubIdAndIsDeleteFalse(startHub.getHubId(), endHub.getHubId());
+                        if(unconnectedHubRoute.isPresent()){
+                            unconnectedHubRoute.get().delete();
+                            hubRouteRepository.save(unconnectedHubRoute.get());
+                        }
+                    }
+                }
+            }
+
+            return BaseResponseDto
+                    .from(HttpStatus.CREATED.value(), HttpStatus.CREATED, HubRouteMessage.HUB_ROUTE_CREATED_SUCCESS.getMessage(), null);
+        } catch (NoSuchElementException e){
+            return BaseResponseDto
+                    .from(HttpStatus.NOT_FOUND.value(), HttpStatus.NOT_FOUND,
+                            HubMessage.HUB_LIST_NOT_FOUND.getMessage(), null);
+        }
+    }
+
+    private boolean isLinkedRoute(Hub startHub, Hub endHub) {
+        // 서울
+        if(startHub.getName().equals(HubName.SEOUL_HUB.getMessage()) && endHub.getName().equals(HubName.SOUTH_GYEONGGI_HUB.getMessage())){
+            return true;
+        }
+
+        // 경기 북부
+        if(startHub.getName().equals(HubName.NORTH_GYEONGGI_HUB.getMessage()) && endHub.getName().equals(HubName.SOUTH_GYEONGGI_HUB.getMessage())){
+            return true;
+        }
+
+        // 경기 남부
+        if(startHub.getName().equals(HubName.SOUTH_GYEONGGI_HUB.getMessage()) && endHub.getName().equals(HubName.SEOUL_HUB.getMessage())){
+            return true;
+        }
+        if(startHub.getName().equals(HubName.SOUTH_GYEONGGI_HUB.getMessage()) && endHub.getName().equals(HubName.NORTH_GYEONGGI_HUB.getMessage())){
+            return true;
+        }
+        if(startHub.getName().equals(HubName.SOUTH_GYEONGGI_HUB.getMessage()) && endHub.getName().equals(HubName.DAEGU_HUB.getMessage())){
+            return true;
+        }
+        if(startHub.getName().equals(HubName.SOUTH_GYEONGGI_HUB.getMessage()) && endHub.getName().equals(HubName.INCHEON_HUB.getMessage())){
+            return true;
+        }
+        if(startHub.getName().equals(HubName.SOUTH_GYEONGGI_HUB.getMessage()) && endHub.getName().equals(HubName.DAEJEON_HUB.getMessage())){
+            return true;
+        }
+        if(startHub.getName().equals(HubName.SOUTH_GYEONGGI_HUB.getMessage()) && endHub.getName().equals(HubName.GANGWON_HUB.getMessage())){
+            return true;
+        }
+        if(startHub.getName().equals(HubName.SOUTH_GYEONGGI_HUB.getMessage()) && endHub.getName().equals(HubName.GYEONGBUK_HUB.getMessage())){
+            return true;
+        }
+
+        // 부산
+        if(startHub.getName().equals(HubName.PUSAN_HUB.getMessage()) && endHub.getName().equals(HubName.DAEGU_HUB.getMessage())){
+            return true;
+        }
+
+        // 대구
+        if(startHub.getName().equals(HubName.DAEGU_HUB.getMessage()) && endHub.getName().equals(HubName.SOUTH_GYEONGGI_HUB.getMessage())){
+            return true;
+        }
+        if(startHub.getName().equals(HubName.DAEGU_HUB.getMessage()) && endHub.getName().equals(HubName.PUSAN_HUB.getMessage())){
+            return true;
+        }
+        if(startHub.getName().equals(HubName.DAEGU_HUB.getMessage()) && endHub.getName().equals(HubName.DAEJEON_HUB.getMessage())){
+            return true;
+        }
+        if(startHub.getName().equals(HubName.DAEGU_HUB.getMessage()) && endHub.getName().equals(HubName.ULSAN_HUB.getMessage())){
+            return true;
+        }
+        if(startHub.getName().equals(HubName.DAEGU_HUB.getMessage()) && endHub.getName().equals(HubName.GYEONGBUK_HUB.getMessage())){
+            return true;
+        }
+        if(startHub.getName().equals(HubName.DAEGU_HUB.getMessage()) && endHub.getName().equals(HubName.GYEONGNAM_HUB.getMessage())){
+            return true;
+        }
+
+        // 인천
+        if(startHub.getName().equals(HubName.INCHEON_HUB.getMessage()) && endHub.getName().equals(HubName.SOUTH_GYEONGGI_HUB.getMessage())){
+            return true;
+        }
+
+        // 광주
+        if(startHub.getName().equals(HubName.GWANGJU_HUB.getMessage()) && endHub.getName().equals(HubName.DAEJEON_HUB.getMessage())){
+            return true;
+        }
+
+        // 대전
+        if(startHub.getName().equals(HubName.DAEJEON_HUB.getMessage()) && endHub.getName().equals(HubName.SOUTH_GYEONGGI_HUB.getMessage())){
+            return true;
+        }
+        if(startHub.getName().equals(HubName.DAEJEON_HUB.getMessage()) && endHub.getName().equals(HubName.DAEGU_HUB.getMessage())){
+            return true;
+        }
+        if(startHub.getName().equals(HubName.DAEJEON_HUB.getMessage()) && endHub.getName().equals(HubName.GWANGJU_HUB.getMessage())){
+            return true;
+        }
+        if(startHub.getName().equals(HubName.DAEJEON_HUB.getMessage()) && endHub.getName().equals(HubName.SEJONG_HUB.getMessage())){
+            return true;
+        }
+        if(startHub.getName().equals(HubName.DAEJEON_HUB.getMessage()) && endHub.getName().equals(HubName.CHUNGBUK_HUB.getMessage())) {
+            return true;
+        }
+        if(startHub.getName().equals(HubName.DAEJEON_HUB.getMessage()) && endHub.getName().equals(HubName.CHUNGNAM_HUB.getMessage())){
+            return true;
+        }
+        if(startHub.getName().equals(HubName.DAEJEON_HUB.getMessage()) && endHub.getName().equals(HubName.JEONBUK_HUB.getMessage())){
+            return true;
+        }
+        if(startHub.getName().equals(HubName.DAEJEON_HUB.getMessage()) && endHub.getName().equals(HubName.JEONNAM_HUB.getMessage())){
+            return true;
+        }
+
+        // 울산
+        if(startHub.getName().equals(HubName.ULSAN_HUB.getMessage()) && endHub.getName().equals(HubName.DAEGU_HUB.getMessage())){
+            return true;
+        }
+
+        // 세종
+        if(startHub.getName().equals(HubName.SEJONG_HUB.getMessage()) && endHub.getName().equals(HubName.DAEJEON_HUB.getMessage())){
+            return true;
+        }
+
+        // 강원
+        if(startHub.getName().equals(HubName.GANGWON_HUB.getMessage()) && endHub.getName().equals(HubName.SOUTH_GYEONGGI_HUB.getMessage())){
+            return true;
+        }
+
+        // 충북
+        if(startHub.getName().equals(HubName.CHUNGBUK_HUB.getMessage()) && endHub.getName().equals(HubName.DAEJEON_HUB.getMessage())){
+            return true;
+        }
+
+        // 충남
+        if(startHub.getName().equals(HubName.CHUNGNAM_HUB.getMessage()) && endHub.getName().equals(HubName.DAEJEON_HUB.getMessage())){
+            return true;
+        }
+
+        // 전북
+        if(startHub.getName().equals(HubName.JEONBUK_HUB.getMessage()) && endHub.getName().equals(HubName.DAEJEON_HUB.getMessage())){
+            return true;
+        }
+
+        // 전남
+        if(startHub.getName().equals(HubName.JEONNAM_HUB.getMessage()) && endHub.getName().equals(HubName.DAEJEON_HUB.getMessage())){
+            return true;
+        }
+
+        // 경북
+        if(startHub.getName().equals(HubName.GYEONGBUK_HUB.getMessage()) && endHub.getName().equals(HubName.SOUTH_GYEONGGI_HUB.getMessage())){
+            return true;
+        }
+        if(startHub.getName().equals(HubName.GYEONGBUK_HUB.getMessage()) && endHub.getName().equals(HubName.DAEGU_HUB.getMessage())){
+            return true;
+        }
+
+        // 경남
+        if(startHub.getName().equals(HubName.GYEONGNAM_HUB.getMessage()) && endHub.getName().equals(HubName.DAEGU_HUB.getMessage())){
+            return true;
+        }
+
+        return false;
+    }
 }
