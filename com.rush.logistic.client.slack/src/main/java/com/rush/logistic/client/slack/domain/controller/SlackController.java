@@ -1,20 +1,17 @@
 package com.rush.logistic.client.slack.domain.controller;
 
 
-import com.rush.logistic.client.domain.user.enums.UserRoleEnum;
-import com.rush.logistic.client.slack.domain.client.UserClient;
-import com.rush.logistic.client.slack.domain.dto.SlackInfoListResponseDto;
+import com.rush.logistic.client.slack.domain.global.ApiResponse;
 import com.rush.logistic.client.slack.domain.dto.SlackInfoResponseDto;
 import com.rush.logistic.client.slack.domain.dto.SlackRequestDto;
-import com.rush.logistic.client.slack.domain.entity.BaseResponseDto;
 import com.rush.logistic.client.slack.domain.service.SlackService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Objects;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,38 +22,30 @@ public class SlackController {
     private final SlackService slackService;
 
     @PostMapping("/slacks")
-    public ResponseEntity<BaseResponseDto<SlackInfoResponseDto>> sendSlackMessage(@RequestHeader(value = "USER_ID", required = true) String userId,
-                                                                                  @RequestHeader(value = "USER_NAME", required = true) String username,
-                                                                                  @RequestBody SlackRequestDto slackRequestDto){
+    public ApiResponse<?> sendSlackMessage(@RequestHeader(value = "USER_ID", required = true) String userId,
+                                           @RequestHeader(value = "USER_NAME", required = true) String username,
+                                           @RequestBody SlackRequestDto slackRequestDto){
 
-        BaseResponseDto<SlackInfoResponseDto> responseDto = slackService.sendSlackMessage(userId,username, slackRequestDto.getMessage(), slackRequestDto.getEmail());
-
-        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+        return ApiResponse.ok(slackService.sendSlackMessage(userId, username, slackRequestDto));
     }
 
     @GetMapping("/slacks")
-    public ResponseEntity<BaseResponseDto<SlackInfoListResponseDto<SlackInfoResponseDto>>> getAllSlackMessages(@RequestHeader(value = "role", required = true) String role,
-                                                                                                               @RequestHeader(value = "USER_ID", required = true) String userId){
+    public ApiResponse<?> getAllSlackMessages(@RequestHeader(value = "role", required = true) String role,
+                                              @RequestHeader(value = "USER_ID", required = true) String userId,
+                                              @PageableDefault(page = 0, size = 10, sort = "createdAt",
+                                                      direction = Sort.Direction.DESC) Pageable pageable,
+                                              @RequestParam Integer size){
 
-        BaseResponseDto<SlackInfoListResponseDto<SlackInfoResponseDto>> responseDto = slackService.getAllSlacks(userId, role);
+        Page<SlackInfoResponseDto> slacks = slackService.getAllSlacks(role, userId, pageable, size);
 
-        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+        return ApiResponse.ok(slacks);
     }
 
     @GetMapping("/slacks/{slackId}")
-    public ResponseEntity<BaseResponseDto<SlackInfoResponseDto>> getSlackMessage(@RequestHeader(value = "role", required = true) String role,
-                                                                                 @RequestHeader(value = "USER_ID", required = true) String userId,
-                                                                                 @PathVariable String slackId){
+    public ApiResponse<?> getSlackMessage(@RequestHeader(value = "role", required = true) String role,
+                                          @RequestHeader(value = "USER_ID", required = true) String userId,
+                                          @PathVariable String slackId) {
 
-        if(!Objects.equals(role, UserRoleEnum.MASTER.name())){
-
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(BaseResponseDto.error("일치하지 않는 권한입니다.", HttpStatus.UNAUTHORIZED.value()));
-        }
-
-        BaseResponseDto<SlackInfoResponseDto> responseDto = slackService.getSlack(slackId);
-
-        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+        return ApiResponse.ok(slackService.getSlack(role, userId, slackId));
     }
-
-
 }

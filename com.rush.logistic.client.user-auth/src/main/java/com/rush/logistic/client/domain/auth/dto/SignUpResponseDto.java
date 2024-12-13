@@ -13,12 +13,12 @@ import lombok.NoArgsConstructor;
 public class SignUpResponseDto {
 
     private String username;
-    private String slackId;
+    private String email;
 
     public static SignUpResponseDto of(User user) {
         return SignUpResponseDto.builder()
                 .username(user.getUsername())
-                .slackId(user.getSlackId())
+                .email(user.getEmail())
                 .build();
     }
 }
