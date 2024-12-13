@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class HubRouteInfoResponseDto {
+    private UUID hubRouteId;
     private UUID startHubId;
     private String startHubName;
     private String startHubAddress;
@@ -26,6 +27,7 @@ public class HubRouteInfoResponseDto {
                                                String startHubName, String startHubAddress,
                                                String endHubName, String endHubAddress) {
         return HubRouteInfoResponseDto.builder()
+                .hubRouteId(hubRoute.getHubRouteId())
                 .startHubId(hubRoute.getStartHubId())
                 .startHubName(startHubName)
                 .startHubAddress(startHubAddress)
