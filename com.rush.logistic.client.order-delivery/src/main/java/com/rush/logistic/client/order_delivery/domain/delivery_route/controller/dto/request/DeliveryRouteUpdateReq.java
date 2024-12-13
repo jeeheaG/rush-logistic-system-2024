@@ -8,10 +8,10 @@ import com.rush.logistic.client.order_delivery.domain.deliveryman.domain.Deliver
 import java.util.UUID;
 
 public record DeliveryRouteUpdateReq(
-//        Deliveryman deliveryman,
+        Deliveryman deliveryman,
         Integer sequence,
         DeliveryRouteStatusEnum status,
-//        Delivery delivery,
+        Delivery delivery,
         UUID startHubId,
         UUID endHubId,
         Integer expectedDistance,

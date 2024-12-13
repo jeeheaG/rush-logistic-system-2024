@@ -4,11 +4,35 @@
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/com.rush.logistic.client.company-product" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/com.rush.logistic.client.company-product" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/com.rush.logistic.client.hub" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/com.rush.logistic.client.hub" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
         <option name="externalProjectPath" value="$PROJECT_DIR$/com.rush.logistic.client.order-delivery" />
         <option name="gradleJvm" value="corretto-17" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$/com.rush.logistic.client.order-delivery" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/com.rush.logistic.client.user-auth" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/com.rush.logistic.client.user-auth" />
           </set>
         </option>
       </GradleProjectSettings>

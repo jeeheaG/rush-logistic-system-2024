@@ -18,7 +18,7 @@ public enum DeliverymanCode implements StatusCode {
     //4xx
     DELIVERYMAN_NOT_EXIST(HttpStatus.NOT_FOUND, "존재하지 않는 배송담당자"),
     DELIVERYMAN_ALREADY_EXIST(HttpStatus.CONFLICT, "이미 존재하는 배송담당자"),
-    ;
+    AVAILABLE_DELIVERYMAN_NOT_EXIST(HttpStatus.CONFLICT, "현재 배정 가능한 배송담당자가 없음");
 
     private final HttpStatus httpStatus;
     private final String message;

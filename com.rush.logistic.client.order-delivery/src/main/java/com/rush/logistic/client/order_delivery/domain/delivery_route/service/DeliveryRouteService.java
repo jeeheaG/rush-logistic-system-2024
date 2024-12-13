@@ -20,16 +20,16 @@ import java.util.UUID;
 public class DeliveryRouteService {
     private final DeliveryRouteRepository deliveryRouteRepository;
 
-    /**
-     * 아마 api없이 주문or배달 쪽에서 내부호출 될 예정
-     * @param requestDto
-     * @return
-     */
-    @Transactional
-    public DeliveryRouteAllRes createDeliveryRoute(DeliveryRouteCreateReq requestDto) {
-        DeliveryRoute deliveryRouteSaved = deliveryRouteRepository.save(requestDto.toEntity());
-        return DeliveryRouteAllRes.fromEntity(deliveryRouteSaved);
-    }
+//    /**
+//     * api없이 주문or배달 쪽에서 내부호출 될 예정
+//     * @param requestDto
+//     * @return
+//     */
+//    @Transactional
+//    public DeliveryRouteAllRes createDeliveryRoute(DeliveryRouteCreateReq requestDto) {
+//        DeliveryRoute deliveryRouteSaved = deliveryRouteRepository.save(requestDto.toEntity());
+//        return DeliveryRouteAllRes.fromEntity(deliveryRouteSaved);
+//    }
 
     public DeliveryRouteAllRes getDeliveryRouteDetail(UUID deliveryRouteId) {
         DeliveryRoute deliveryRoute = getDeliveryRouteEntityById(deliveryRouteId);
