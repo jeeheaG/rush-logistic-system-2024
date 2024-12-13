@@ -23,6 +23,6 @@ public class SignUpRequestDto {
     @NotBlank(message = "비밀번호를 입력해주세요!")
     private String password;
 
-    @NotBlank(message = "슬랙ID를 입력해주세요!")
-    private String slackId;
+    @NotBlank(message = "슬랙에 등록되어있는 email을 입력해주세요!")
+    private String email;
 }

@@ -1,19 +1,19 @@
 package com.rush.logistic.client.domain.user.service;
 
-import com.rush.logistic.client.domain.global.BaseResponseDto;
-import com.rush.logistic.client.domain.user.dto.UserInfoListResponseDto;
+import com.rush.logistic.client.domain.global.exception.user.NoAuthorizationException;
+import com.rush.logistic.client.domain.global.exception.user.NotFoundUserException;
 import com.rush.logistic.client.domain.user.dto.UserInfoResponseDto;
 import com.rush.logistic.client.domain.user.dto.UserUpdateRequestDto;
 import com.rush.logistic.client.domain.user.entity.User;
+import com.rush.logistic.client.domain.user.enums.UserRoleEnum;
 import com.rush.logistic.client.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -32,56 +32,55 @@ public class UserService {
         return userRepository.findByUsername(username).orElseThrow(() -> new IllegalArgumentException("사용자가 없습니다."));
     }
 
-    public BaseResponseDto<UserInfoListResponseDto<UserInfoResponseDto>> getAllUsers() {
+    public Page<UserInfoResponseDto> getAllUsers(String role, Pageable pageable, Integer size) {
 
-        List<UserInfoResponseDto> userList = userRepository.findAll().stream().map(UserInfoResponseDto::from).collect(Collectors.toList());
-
-        return  BaseResponseDto
-                .success(UserInfoListResponseDto.of(userList));
-    }
-
-    public BaseResponseDto<UserInfoResponseDto> getUserById(String userId) {
-
-        Optional<User> user = userRepository.findById(Long.valueOf(userId));
-
-        if (user.isEmpty()) {
-            return BaseResponseDto.error("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND.value());
+        if(!Objects.equals(role, UserRoleEnum.MASTER.name())){
+            throw new NoAuthorizationException();
         }
 
-        UserInfoResponseDto userInfoResponseDto = UserInfoResponseDto.from(user.get());
-        return BaseResponseDto.success(userInfoResponseDto);
+        return userRepository.findAll(pageable).map(UserInfoResponseDto::from);
     }
 
-    @Transactional(readOnly = false)
-    public BaseResponseDto<UserInfoResponseDto> updateUser(String userId, UserUpdateRequestDto updateRequestDto) {
+    public UserInfoResponseDto getUserById(String role, String userId, String authenticatedUserId) {
 
-        Optional<User> user = userRepository.findById(Long.valueOf(userId));
-
-        if (user.isEmpty()) {
-            return BaseResponseDto.error("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND.value());
+        if(!authenticatedUserId.equals(userId)){
+            if(!Objects.equals(role, UserRoleEnum.MASTER.name())) {
+                throw new NoAuthorizationException();
+            }
         }
 
-        User getUser = user.get();
-        getUser.updateUser(updateRequestDto);
-        userRepository.save(getUser);
+        User user = userRepository.findById(Long.valueOf(userId)).orElseThrow(NotFoundUserException::new);
 
-        UserInfoResponseDto userInfoResponseDto = UserInfoResponseDto.from(getUser);
-        return BaseResponseDto.success(userInfoResponseDto);
+        return UserInfoResponseDto.from(user);
     }
 
     @Transactional(readOnly = false)
-    public BaseResponseDto<UserInfoResponseDto> deleteUser(String userId) {
+    public UserInfoResponseDto updateUser(String role, String userId, UserUpdateRequestDto updateRequestDto) {
 
-        Optional<User> user = userRepository.findById(Long.valueOf(userId));
-
-        if (user.isEmpty()) {
-            return BaseResponseDto.error("사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND.value());
+        if(!Objects.equals(role, UserRoleEnum.MASTER.name())){
+            throw new NoAuthorizationException();
         }
 
-        User getUser = user.get();
-        getUser.setDelete(true);
-        userRepository.save(getUser);
-        UserInfoResponseDto userInfoResponseDto = UserInfoResponseDto.from(getUser);
-        return BaseResponseDto.success(userInfoResponseDto);
+        User user = userRepository.findById(Long.valueOf(userId)).orElseThrow(NotFoundUserException::new);
+
+        user.updateUser(updateRequestDto);
+        userRepository.save(user);
+
+        return UserInfoResponseDto.from(user);
+    }
+
+    @Transactional(readOnly = false)
+    public UserInfoResponseDto deleteUser(String role, String userId) {
+
+        if(!Objects.equals(role, UserRoleEnum.MASTER.name())){
+            throw new NoAuthorizationException();
+        }
+
+        User user = userRepository.findById(Long.valueOf(userId)).orElseThrow(NotFoundUserException::new);
+
+        user.setDelete(true);
+        userRepository.save(user);
+
+        return UserInfoResponseDto.from(user);
     }
 }

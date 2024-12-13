@@ -1,12 +1,14 @@
 package com.rush.logistic.client.hub.model;
 
 import com.rush.logistic.client.hub.dto.HubPointRequestDto;
+import com.rush.logistic.client.hub.dto.TimeTakenAndDistDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -60,5 +62,19 @@ public class HubRoute extends BaseEntity {
         hubRoute.setDelete(false);
 
         return hubRoute;
+    }
+
+    public void update(TimeTakenAndDistDto timeTakenAndDistDto, Duration timeTaken) {
+        String timeTakenString = formatDuration(timeTaken);
+
+        this.timeTaken = timeTakenString;
+        this.distance = Integer.parseInt(timeTakenAndDistDto.getDistance());
+        this.milliseconds = timeTakenAndDistDto.getTimeTaken();
+    }
+
+    public void delete() {
+        LocalDateTime now = LocalDateTime.now();
+        this.setDelete(true);
+        this.setDeletedAt(now);
     }
 }

@@ -1,6 +1,5 @@
 package com.rush.logistic.client.domain.user.dto;
 
-import com.rush.logistic.client.domain.auth.dto.SignInResponseDto;
 import com.rush.logistic.client.domain.user.entity.User;
 import com.rush.logistic.client.domain.user.enums.UserRoleEnum;
 import lombok.AllArgsConstructor;
@@ -17,16 +16,16 @@ public class UserInfoResponseDto {
     private Long userId;
     private String username;
     private String password;
-    private String slackId;
     private UserRoleEnum role;
+    private String email;
 
     public static UserInfoResponseDto from(User user) {
         return UserInfoResponseDto.builder()
                 .userId(user.getUserId())
                 .username(user.getUsername())
                 .password(user.getPassword())
-                .slackId(user.getSlackId())
                 .role(user.getRole())
+                .email(user.getEmail())
                 .build();
     }
 }

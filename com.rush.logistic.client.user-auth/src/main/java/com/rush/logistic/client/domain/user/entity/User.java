@@ -26,50 +26,20 @@ public class User extends BaseEntity {
     @Column(name = "username", nullable = false, unique = true)
     private String username;
 
-    @Column(name = "password")
+    @Column(name = "password", nullable = false)
     private String password;
 
-//    @Column(name = "nickname", nullable = false, unique = true)
-//    private String nickname;
-
-    @Column(name = "slackId", nullable = false, unique = true)
-    private String slackId;
-
-    @Column(name = "role", nullable = false)
+    @Column(name = "role")
     @Enumerated(value = EnumType.STRING)
     private UserRoleEnum role;
+
+    @Column(name = "email", nullable = false, unique = true)
+    private String email;
 
     public void updateUser(UserUpdateRequestDto requestDto){
 
         Optional.ofNullable(requestDto.getUsername()).ifPresent(username -> this.username = username);
-        Optional.ofNullable(requestDto.getSlackId()).ifPresent(slackId -> this.slackId = slackId);
         Optional.ofNullable(requestDto.getRole()).ifPresent(role -> this.role = role);
+        Optional.ofNullable(requestDto.getEmail()).ifPresent(email -> this.email = email);
     }
-
-    // TODO : 로그인한 유저 받아서 넣기
-//    @PrePersist
-//    public void createField(){
-//        this.setCreatedBy(getUserId());
-//    }
-
-//    private static String getUserId() {
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        if (authentication != null && authentication.getPrincipal() instanceof UserDetailsImpl userDetailsImpl) {
-//            return userDetailsImpl.getUser().getUsername();
-//        }
-//        return null;
-//    }
-
-    // TODO : 로그인한 유저
-    @PreUpdate
-    public void updateDeleteField(){
-        if(this.isDelete()) {
-            this.setDeletedAt(LocalDateTime.now());
-//            this.setDeletedBy(getUserName);
-        }
-        this.setUpdatedAt(LocalDateTime.now());
-//        this.setUpdatedBy(getUserName());
-    }
-
-
 }

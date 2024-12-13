@@ -3,8 +3,10 @@ package com.rush.logistic.client.hub.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rush.logistic.client.hub.dto.BaseResponseDto;
+import com.rush.logistic.client.hub.dto.HubListResponseDto;
 import com.rush.logistic.client.hub.dto.HubPointRequestDto;
 import com.rush.logistic.client.hub.dto.HubRouteIdResponseDto;
+import com.rush.logistic.client.hub.dto.HubRouteInfoResponseDto;
 import com.rush.logistic.client.hub.dto.LatLonDto;
 import com.rush.logistic.client.hub.dto.TimeTakenAndDistDto;
 import com.rush.logistic.client.hub.message.HubMessage;
@@ -16,10 +18,18 @@ import com.rush.logistic.client.hub.repository.HubRouteRepository;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -56,6 +66,7 @@ public class HubRouteService {
         // TODO: MASTER USER 확인 로직 추가
         try {
             // TODO: 이미 생성한 경로는 다시 생성할 필요 없음
+            // TODO: 이미 생성한 경로가 soft delete되었다면 다시 생성해야함.
             // TODO: 일정 주기로 소요시간이 업데이트 될 순 있을거 같다.
 
 
@@ -96,6 +107,146 @@ public class HubRouteService {
         } catch (IllegalArgumentException e) {
             return BaseResponseDto
                     .from(HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST, HubRouteMessage.HUB_ROUTE_NOT_CREATED.getMessage(), null);
+        }
+    }
+
+    public BaseResponseDto<HubRouteInfoResponseDto> getHubRouteInfo(HubPointRequestDto requestDto) {
+        try {
+            HubRoute hubRoute = hubRouteRepository.findByStartHubIdAndEndHubId(requestDto.getStartHubId(),
+                            requestDto.getEndHubId())
+                    .orElseThrow(() ->
+                            new IllegalArgumentException(HubRouteMessage.HUB_ROUTE_NOT_FOUND.getMessage())
+                    );
+
+            // soft delete된 허브 경로 입니다.
+            if (hubRoute.isDelete()){
+                return BaseResponseDto
+                        .from(HttpStatus.GONE.value(), HttpStatus.GONE, HubRouteMessage.HUB_ROUTE_ALREADY_DELETED.getMessage(), null);
+            }
+
+            String startHubName = hubRepository.findById(requestDto.getStartHubId()).get().getName();
+            String startHubAddress = hubRepository.findById(requestDto.getStartHubId()).get().getAddress();
+            String endHubName = hubRepository.findById(requestDto.getEndHubId()).get().getName();
+            String endHubAddress = hubRepository.findById(requestDto.getEndHubId()).get().getAddress();
+
+            HubRouteInfoResponseDto responseDto = HubRouteInfoResponseDto.from(
+                    hubRoute, startHubName, startHubAddress, endHubName, endHubAddress);
+
+            return BaseResponseDto
+                    .from(HttpStatus.OK.value(), HttpStatus.OK, HubRouteMessage.HUB_ROUTE_FOUND.getMessage(),
+                            responseDto);
+        } catch (IllegalArgumentException e) {
+            return BaseResponseDto
+                    .from(HttpStatus.NOT_FOUND.value(), HttpStatus.NOT_FOUND,
+                            HubRouteMessage.HUB_ROUTE_NOT_FOUND.getMessage(), null);
+        }
+    }
+
+    public BaseResponseDto<HubRouteInfoResponseDto> getHubRouteInfoById(UUID hubRouteId) {
+        try {
+            HubRoute hubRoute = hubRouteRepository.findById(hubRouteId)
+                    .orElseThrow(() ->
+                            new IllegalArgumentException(HubRouteMessage.HUB_ROUTE_NOT_FOUND.getMessage())
+                    );
+
+            // soft delete된 허브 경로 입니다.
+            if (hubRoute.isDelete()){
+                return BaseResponseDto
+                        .from(HttpStatus.GONE.value(), HttpStatus.GONE, HubRouteMessage.HUB_ROUTE_ALREADY_DELETED.getMessage(), null);
+            }
+
+            UUID startHubId = hubRoute.getStartHubId();
+            UUID endHubId = hubRoute.getEndHubId();
+
+            String startHubName = hubRepository.findById(startHubId).get().getName();
+            String startHubAddress = hubRepository.findById(startHubId).get().getAddress();
+            String endHubName = hubRepository.findById(endHubId).get().getName();
+            String endHubAddress = hubRepository.findById(endHubId).get().getAddress();
+
+            HubRouteInfoResponseDto responseDto = HubRouteInfoResponseDto.from(
+                    hubRoute, startHubName, startHubAddress, endHubName, endHubAddress);
+
+            return BaseResponseDto
+                    .from(HttpStatus.OK.value(), HttpStatus.OK, HubRouteMessage.HUB_ROUTE_FOUND.getMessage(),
+                            responseDto);
+        } catch (IllegalArgumentException e) {
+            return BaseResponseDto
+                    .from(HttpStatus.NOT_FOUND.value(), HttpStatus.NOT_FOUND,
+                            HubRouteMessage.HUB_ROUTE_NOT_FOUND.getMessage(), null);
+        }
+    }
+
+    @Transactional
+    public BaseResponseDto<HubRouteInfoResponseDto> updateHubRouteById(UUID hubRouteId) {
+        try {
+            HubRoute hubRoute = hubRouteRepository.findById(hubRouteId)
+                    .orElseThrow(() ->
+                            new IllegalArgumentException(HubRouteMessage.HUB_ROUTE_NOT_FOUND.getMessage())
+                    );
+
+            // soft delete된 허브 경로 입니다.
+            if (hubRoute.isDelete()){
+                return BaseResponseDto
+                        .from(HttpStatus.GONE.value(), HttpStatus.GONE, HubRouteMessage.HUB_ROUTE_ALREADY_DELETED.getMessage(), null);
+            }
+
+            String startHubName = hubRepository.findById(hubRoute.getStartHubId()).get().getName();
+            String endHubName = hubRepository.findById(hubRoute.getEndHubId()).get().getName();
+
+            String startHubAddress = extractAddress(hubRoute.getStartHubId());
+            String endHubAddress = extractAddress(hubRoute.getEndHubId());
+
+            String startCoordinates = getCoordinates(startHubAddress);
+            String endCoordinates = getCoordinates(endHubAddress);
+
+            LatLonDto startLatLon = extractCoordinates(startCoordinates);
+            LatLonDto endLatLon = extractCoordinates(endCoordinates);
+
+            String timeTakenAndDistance = getTimeTackenAndDistance(startLatLon, endLatLon);
+            TimeTakenAndDistDto timeTakenAndDistDto = extractTimeTakenAndDistance(timeTakenAndDistance);
+
+            // 허브 경로 정보 업데이트
+            Duration timeTaken = stringToDuration(timeTakenAndDistDto.getTimeTaken());
+            hubRoute.update(timeTakenAndDistDto, timeTaken);
+
+            // 업데이트 저장
+            hubRouteRepository.save(hubRoute);
+
+            // 업데이트된 허브 경로 반환
+            return BaseResponseDto
+                    .from(HttpStatus.OK.value(), HttpStatus.OK, HubRouteMessage.HUB_ROUTE_UPDATED.getMessage(),
+                            HubRouteInfoResponseDto.from(hubRoute, startHubName, startHubAddress, endHubName, endHubAddress));
+        } catch (IllegalArgumentException e) {
+            return BaseResponseDto
+                    .from(HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST,
+                            HubRouteMessage.HUB_ROUTE_NOT_UPDATED.getMessage(), null);
+        }
+    }
+
+    @Transactional
+    public BaseResponseDto<HubRouteIdResponseDto> deleteHubRoute(UUID hubRouteId) {
+        // TODO: MASTER USER 확인 로직 추가
+        try {
+            // 허브 조회
+            HubRoute hubRoute = hubRouteRepository.findById(hubRouteId)
+                    .orElseThrow(() ->
+                            new IllegalArgumentException(HubRouteMessage.HUB_ROUTE_NOT_FOUND.getMessage())
+                    );
+
+            // soft delete된 허브 경로 입니다.
+            if (hubRoute.isDelete()){
+                return BaseResponseDto
+                        .from(HttpStatus.GONE.value(), HttpStatus.GONE, HubRouteMessage.HUB_ROUTE_ALREADY_DELETED.getMessage(), null);
+            }
+
+            // 허브 경로 삭제정보 업데이트
+            hubRoute.delete();
+
+            return BaseResponseDto
+                    .from(HttpStatus.OK.value(), HttpStatus.OK, HubRouteMessage.HUB_ROUTE_DELETED_SUCCESS.getMessage(), HubRouteIdResponseDto.from(hubRoute.getHubRouteId()));
+        } catch (Exception e) {
+            return BaseResponseDto
+                    .from(HttpStatus.NOT_FOUND.value(), HttpStatus.NOT_FOUND, HubRouteMessage.HUB_ROUTE_NOT_FOUND.getMessage(), null);
         }
     }
 
@@ -206,6 +357,42 @@ public class HubRouteService {
         } catch (Exception e) {
             e.printStackTrace();
             throw new IllegalArgumentException("좌표 추출에 실패했습니다.");
+        }
+    }
+
+    public BaseResponseDto<HubListResponseDto<HubRouteInfoResponseDto>> getHubRouteInfoList(
+            int page, int size, String sortBy, boolean isAsc
+    ) {
+        try {
+            Direction direction = isAsc ? Direction.ASC : Direction.DESC;
+            Sort sort = Sort.by(direction, sortBy);
+            Pageable pageable = PageRequest.of(page, size, sort);
+
+            // 허브 경로 리스트 조회
+            Page<HubRoute> hubRouteList = hubRouteRepository.findAllByIsDeleteFalse(pageable).orElseThrow(() ->
+                    new NoSuchElementException(HubRouteMessage.HUB_ROUTE_LIST_NOT_FOUND.getMessage())
+            );
+
+            List<HubRouteInfoResponseDto> hubRouteInfoList = new ArrayList<>();
+            for(HubRoute hubRoute : hubRouteList){
+                UUID startHubId = hubRoute.getStartHubId();
+                UUID endHubId = hubRoute.getEndHubId();
+
+                String startHubName = hubRepository.findById(startHubId).get().getName();
+                String startHubAddress = hubRepository.findById(startHubId).get().getAddress();
+                String endHubName = hubRepository.findById(endHubId).get().getName();
+                String endHubAddress = hubRepository.findById(endHubId).get().getAddress();
+
+                hubRouteInfoList.add(HubRouteInfoResponseDto.from(hubRoute, startHubName, startHubAddress, endHubName, endHubAddress));
+            }
+
+            return BaseResponseDto
+                    .from(HttpStatus.OK.value(), HttpStatus.OK, HubRouteMessage.HUB_ROUTE_INFO_LIST_FOUND.getMessage(),
+                            HubListResponseDto.from(hubRouteInfoList));
+        } catch (NoSuchElementException e) {
+            return BaseResponseDto
+                    .from(HttpStatus.NOT_FOUND.value(), HttpStatus.NOT_FOUND,
+                            HubRouteMessage.HUB_ROUTE_LIST_NOT_FOUND.getMessage(), null);
         }
     }
 }
