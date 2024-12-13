@@ -400,15 +400,10 @@ public class HubRouteService {
     }
 
     @Transactional
-    public BaseResponseDto<HubListResponseDto<HubRouteIdResponseDto>> createHubRouteP2P(
-            int page, int size, String sortBy, boolean isAsc
-    ) {
+    public BaseResponseDto<HubListResponseDto<HubRouteIdResponseDto>> createHubRouteP2P() {
         try {
-            Direction direction = isAsc ? Direction.ASC : Direction.DESC;
-            Sort sort = Sort.by(direction, sortBy);
-            Pageable pageable = PageRequest.of(page, size, sort);
 
-            Page<Hub> hubList = hubRepository.findAllByIsDeleteFalse(pageable).orElseThrow(
+            List<Hub> hubList = hubRepository.findAllAsListByIsDeleteFalse().orElseThrow(
                     () -> new NoSuchElementException(HubMessage.HUB_LIST_NOT_FOUND.getMessage())
             );
 
@@ -446,15 +441,9 @@ public class HubRouteService {
     }
 
     @Transactional
-    public BaseResponseDto<HubListResponseDto<HubRouteIdResponseDto>> createHubToHubRelay(
-            int page, int size, String sortBy, boolean isAsc
-    ) {
+    public BaseResponseDto<HubListResponseDto<HubRouteIdResponseDto>> createHubToHubRelay() {
         try {
-            Direction direction = isAsc ? Direction.ASC : Direction.DESC;
-            Sort sort = Sort.by(direction, sortBy);
-            Pageable pageable = PageRequest.of(page, size, sort);
-
-            Page<Hub> hubList = hubRepository.findAllByIsDeleteFalse(pageable).orElseThrow(
+            List<Hub> hubList = hubRepository.findAllAsListByIsDeleteFalse().orElseThrow(
                     () -> new NoSuchElementException(HubMessage.HUB_LIST_NOT_FOUND.getMessage())
             );
 

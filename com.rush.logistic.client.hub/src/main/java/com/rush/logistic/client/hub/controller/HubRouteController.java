@@ -79,31 +79,15 @@ public class HubRouteController {
     }
 
     @PostMapping("/createP2P")
-    public ResponseEntity<BaseResponseDto<HubListResponseDto<HubRouteIdResponseDto>>> createHubRouteP2P(
-            @RequestParam(value = "page", defaultValue = "1") int page,
-            @RequestParam(value = "size", defaultValue = "20") int size,
-            @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
-            @RequestParam(value = "isAsc", defaultValue = "true") boolean isAsc,
-            Sort sort
-    ) {
-        BaseResponseDto<HubListResponseDto<HubRouteIdResponseDto>> responseDto = hubRouteService.createHubRouteP2P(
-                page - 1, size, sortBy, isAsc
-        );
+    public ResponseEntity<BaseResponseDto<HubListResponseDto<HubRouteIdResponseDto>>> createHubRouteP2P() {
+        BaseResponseDto<HubListResponseDto<HubRouteIdResponseDto>> responseDto = hubRouteService.createHubRouteP2P();
 
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
     @PostMapping("/createHubToHubRelay")
-    public ResponseEntity<BaseResponseDto<HubListResponseDto<HubRouteIdResponseDto>>> createHubToHubRelay(
-            @RequestParam(value = "page", defaultValue = "1") int page,
-            @RequestParam(value = "size", defaultValue = "20") int size,
-            @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
-            @RequestParam(value = "isAsc", defaultValue = "true") boolean isAsc,
-            Sort sort
-    ) {
-        BaseResponseDto<HubListResponseDto<HubRouteIdResponseDto>> responseDto = hubRouteService.createHubToHubRelay(
-                page - 1, size, sortBy, isAsc
-        );
+    public ResponseEntity<BaseResponseDto<HubListResponseDto<HubRouteIdResponseDto>>> createHubToHubRelay() {
+        BaseResponseDto<HubListResponseDto<HubRouteIdResponseDto>> responseDto = hubRouteService.createHubToHubRelay();
 
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
