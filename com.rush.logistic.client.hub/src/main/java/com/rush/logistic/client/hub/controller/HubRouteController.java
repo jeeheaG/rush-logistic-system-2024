@@ -5,6 +5,7 @@ import com.rush.logistic.client.hub.dto.HubListResponseDto;
 import com.rush.logistic.client.hub.dto.HubPointRequestDto;
 import com.rush.logistic.client.hub.dto.HubRouteIdResponseDto;
 import com.rush.logistic.client.hub.dto.HubRouteInfoResponseDto;
+import com.rush.logistic.client.hub.dto.HubRouteListResponseDto;
 import com.rush.logistic.client.hub.service.HubRouteService;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -86,8 +87,8 @@ public class HubRouteController {
     }
 
     @PostMapping("/createHubToHubRelay")
-    public ResponseEntity<BaseResponseDto<HubListResponseDto<HubRouteIdResponseDto>>> createHubToHubRelay() {
-        BaseResponseDto<HubListResponseDto<HubRouteIdResponseDto>> responseDto = hubRouteService.createHubToHubRelay();
+    public ResponseEntity<BaseResponseDto<HubRouteListResponseDto<HubRouteInfoResponseDto>>> createHubToHubRelay(@RequestBody HubPointRequestDto requestDto) {
+        BaseResponseDto<HubRouteListResponseDto<HubRouteInfoResponseDto>> responseDto = hubRouteService.createHubToHubRelay(requestDto);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }

@@ -3,10 +3,12 @@ package com.rush.logistic.client.hub.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rush.logistic.client.hub.dto.BaseResponseDto;
+import com.rush.logistic.client.hub.dto.EdgeDto;
 import com.rush.logistic.client.hub.dto.HubListResponseDto;
 import com.rush.logistic.client.hub.dto.HubPointRequestDto;
 import com.rush.logistic.client.hub.dto.HubRouteIdResponseDto;
 import com.rush.logistic.client.hub.dto.HubRouteInfoResponseDto;
+import com.rush.logistic.client.hub.dto.HubRouteListResponseDto;
 import com.rush.logistic.client.hub.dto.LatLonDto;
 import com.rush.logistic.client.hub.dto.TimeTakenAndDistDto;
 import com.rush.logistic.client.hub.message.HubMessage;
@@ -20,9 +22,11 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.PriorityQueue;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import javax.swing.text.html.Option;
@@ -99,7 +103,6 @@ public class HubRouteService {
             // 허브 경로 저장
             Duration timeTaken = stringToDuration(timeTakenAndDistDto.getTimeTaken());
             int distance = Integer.parseInt(timeTakenAndDistDto.getDistance()); // 400Km
-            System.out.println("소요시간 : " + timeTaken);
             HubRoute hubRoute = hubRouteRepository.save(HubRoute.from(requestDto, timeTaken, distance, timeTakenAndDistDto.getTimeTaken()));
 
             // 허브 경로 생성 반환
@@ -416,10 +419,8 @@ public class HubRouteService {
                     Optional<HubRoute> connectedHubRoute = hubRouteRepository.findByStartHubIdAndEndHubId(startHub.getHubId(), endHub.getHubId());
                     if(!connectedHubRoute.isPresent()){
                         // 아직 생성되지 않았다면 신규 경로 생성
-                        System.out.print(startHub.getName() + " -> " + endHub.getName() + " 경로 생성");
                         HubPointRequestDto requestDto = new HubPointRequestDto(startHub.getHubId(), endHub.getHubId());
                         createHubRoute(requestDto);
-                        System.out.println("---- 경로 생성 완료");
                     } else {
                         if(connectedHubRoute.get().isDelete()){
                             // 생성했었지만 soft delete되어 있으면 다시 생성
@@ -441,7 +442,7 @@ public class HubRouteService {
     }
 
     @Transactional
-    public BaseResponseDto<HubListResponseDto<HubRouteIdResponseDto>> createHubToHubRelay() {
+    public BaseResponseDto<HubRouteListResponseDto<HubRouteInfoResponseDto>> createHubToHubRelay(HubPointRequestDto requestDto) {
         try {
             List<Hub> hubList = hubRepository.findAllAsListByIsDeleteFalse().orElseThrow(
                     () -> new NoSuchElementException(HubMessage.HUB_LIST_NOT_FOUND.getMessage())
@@ -458,10 +459,8 @@ public class HubRouteService {
                         Optional<HubRoute> connectedHubRoute = hubRouteRepository.findByStartHubIdAndEndHubId(startHub.getHubId(), endHub.getHubId());
                         if(!connectedHubRoute.isPresent()){
                             // 아직 생성되지 않았다면 신규 경로 생성
-                            System.out.print(startHub.getName() + " -> " + endHub.getName() + " 경로 생성");
-                            HubPointRequestDto requestDto = new HubPointRequestDto(startHub.getHubId(), endHub.getHubId());
-                            createHubRoute(requestDto);
-                            System.out.println("---- 경로 생성 완료");
+                            HubPointRequestDto hubPointReq = new HubPointRequestDto(startHub.getHubId(), endHub.getHubId());
+                            createHubRoute(hubPointReq);
                         } else {
                             if(connectedHubRoute.get().isDelete()){
                                 // 생성했었지만 soft delete되어 있으면 다시 생성
@@ -482,8 +481,10 @@ public class HubRouteService {
                 }
             }
 
+            HubRouteListResponseDto<HubRouteInfoResponseDto> responseDto = getHubToHubPath(requestDto);
+
             return BaseResponseDto
-                    .from(HttpStatus.CREATED.value(), HttpStatus.CREATED, HubRouteMessage.HUB_ROUTE_CREATED_SUCCESS.getMessage(), null);
+                    .from(HttpStatus.CREATED.value(), HttpStatus.CREATED, HubRouteMessage.HUB_ROUTE_CREATED_SUCCESS.getMessage(), responseDto);
         } catch (NoSuchElementException e){
             return BaseResponseDto
                     .from(HttpStatus.NOT_FOUND.value(), HttpStatus.NOT_FOUND,
@@ -635,5 +636,164 @@ public class HubRouteService {
         }
 
         return false;
+    }
+
+    public HubRouteListResponseDto<HubRouteInfoResponseDto> getHubToHubPath(HubPointRequestDto requestDto) {
+        Optional<HubRoute> hubRoute = hubRouteRepository.findByStartHubIdAndEndHubIdAndIsDeleteFalse(requestDto.getStartHubId(), requestDto.getEndHubId());
+
+        List<HubRouteInfoResponseDto> hubRouteInfoList = new ArrayList<>();
+
+        if (hubRoute.isPresent()) {
+            // Hub간 직접 연결되어 있음.
+            String startHubName = hubRepository.findById(requestDto.getStartHubId()).get().getName();
+            String startHubAddress = hubRepository.findById(requestDto.getStartHubId()).get().getAddress();
+            String endHubName = hubRepository.findById(requestDto.getEndHubId()).get().getName();
+            String endHubAddress = hubRepository.findById(requestDto.getEndHubId()).get().getAddress();
+
+            HubRouteInfoResponseDto hubRouteInfoRes = HubRouteInfoResponseDto.from(
+                    hubRoute.get(), startHubName, startHubAddress, endHubName, endHubAddress);
+
+            hubRouteInfoList.add(hubRouteInfoRes);
+
+            return HubRouteListResponseDto.from(hubRouteInfoList, hubRoute.get().getDistance(), Long.parseLong(hubRoute.get().getMilliseconds()), hubRoute.get().getTimeTaken());
+        }
+
+        // Hub간 경로가 없음. -> 경유지가 필요함
+        HubRouteListResponseDto<HubRouteInfoResponseDto> responseDto = dijkstra(requestDto.getStartHubId(), requestDto.getEndHubId());
+
+        return responseDto;
+    }
+
+    private HubRouteListResponseDto<HubRouteInfoResponseDto> dijkstra(UUID startHubId, UUID endHubId) {
+        List<Hub> hubList = hubRepository.findAllAsListByIsDeleteFalse().orElseThrow(
+                () -> new NoSuchElementException(HubMessage.HUB_LIST_NOT_FOUND.getMessage())
+        );
+
+        List<EdgeDto>[] edges = new ArrayList[hubList.size()];
+        for(int i = 0; i < hubList.size(); i++){
+            edges[i] = new ArrayList<>();
+            for(int j = 0; j < hubList.size(); j++){
+                if(i == j){
+                    continue;
+                }
+
+                Optional<HubRoute> hubRoute = hubRouteRepository.findByStartHubIdAndEndHubIdAndIsDeleteFalse(hubList.get(i).getHubId(), hubList.get(j).getHubId());
+                if(hubRoute.isPresent()){
+                    edges[i].add(new EdgeDto(j, hubRoute.get().getDistance(), Integer.parseInt(hubRoute.get().getMilliseconds())));
+                }
+            }
+        }
+
+        int[] distance = new int[hubList.size()];
+        int[] timeTaken = new int[hubList.size()];
+        boolean[] visited = new boolean[hubList.size()];
+        int[] path = new int[hubList.size()];
+
+        for(int i = 0; i < hubList.size(); i++){
+            distance[i] = Integer.MAX_VALUE;
+            timeTaken[i] = Integer.MAX_VALUE;
+            visited[i] = false;
+            path[i] = -1;
+        }
+
+        int startIdx = -1;
+        int endIdx = -1;
+
+        for(int i = 0; i < hubList.size(); i++){
+            if(hubList.get(i).getHubId().equals(startHubId)){
+                startIdx = i;
+            }
+            if(hubList.get(i).getHubId().equals(endHubId)){
+                endIdx = i;
+            }
+        }
+
+        PriorityQueue<EdgeDto> pq = new PriorityQueue<>();
+        distance[startIdx] = 0;
+        timeTaken[startIdx] = 0;
+        pq.add(new EdgeDto(startIdx, 0, 0));
+
+        while(!pq.isEmpty()){
+            EdgeDto now = pq.poll();
+            int to = now.getTo();
+            if(visited[to]){
+                continue;
+            }
+
+            visited[to] = true;
+
+            for(EdgeDto nextEdge : edges[to]){
+                int nextTo = nextEdge.getTo();
+                int nextDistance = nextEdge.getDistance();
+                int nextTimeTaken = nextEdge.getMilliseconds();
+
+                if(timeTaken[nextTo] > now.getMilliseconds() + nextTimeTaken){
+                    timeTaken[nextTo] = now.getMilliseconds() + nextTimeTaken;
+                    distance[nextTo] = now.getDistance() + nextDistance;
+                    pq.add(new EdgeDto(nextTo, distance[nextTo], timeTaken[nextTo]));
+                    path[nextTo] = to;
+                }
+                else if (timeTaken[nextTo] == now.getMilliseconds() + nextTimeTaken){
+                    if(distance[nextTo] > now.getDistance() + nextDistance){
+                        distance[nextTo] = now.getDistance() + nextDistance;
+                        timeTaken[nextTo] = now.getMilliseconds() + nextTimeTaken;
+                        pq.add(new EdgeDto(nextTo, distance[nextTo], timeTaken[nextTo]));
+                        path[nextTo] = to;
+                    }
+                }
+            }
+        }
+
+        List<HubRouteInfoResponseDto> hubRouteInfoResponseDtoList = new ArrayList<>();
+
+        int startHubIdx = path[endIdx];
+        int endHubIdx = endIdx;
+        int totalDistance = 0;
+        Long totalMilliseconds = 0L;
+        String totalTimeTaken;
+
+        while(true) {
+            if(startHubIdx == -1){
+                break;
+            }
+
+            UUID pathStartHubId = hubList.get(startHubIdx).getHubId();
+            UUID pathEndHubId = hubList.get(endHubIdx).getHubId();
+
+            Optional<HubRoute> hubRoute = hubRouteRepository.findByStartHubIdAndEndHubIdAndIsDeleteFalse(pathStartHubId, pathEndHubId);
+            totalDistance += hubRoute.get().getDistance();
+            totalMilliseconds += Long.parseLong(hubRoute.get().getMilliseconds());
+            if(hubRoute.isPresent()){
+                String startHubName = hubRepository.findById(pathStartHubId).get().getName();
+                String startHubAddress = hubRepository.findById(pathStartHubId).get().getAddress();
+                String endHubName = hubRepository.findById(pathEndHubId).get().getName();
+                String endHubAddress = hubRepository.findById(pathEndHubId).get().getAddress();
+
+                hubRouteInfoResponseDtoList.add(HubRouteInfoResponseDto.from(
+                        hubRoute.get(), startHubName, startHubAddress, endHubName, endHubAddress));
+
+            }
+
+            endHubIdx = startHubIdx;
+            startHubIdx = path[startHubIdx];
+        }
+
+        Collections.reverse(hubRouteInfoResponseDtoList);
+
+        Duration totalDuration = Duration.ofMillis(totalMilliseconds);
+        totalTimeTaken = formatDuration(totalDuration);
+
+        HubRouteListResponseDto<HubRouteInfoResponseDto> responseDto = HubRouteListResponseDto.from(hubRouteInfoResponseDtoList, totalDistance, totalMilliseconds, totalTimeTaken);
+
+        return responseDto;
+    }
+
+    private String formatDuration(Duration duration) {
+        long totalMinutes = duration.toMinutes();
+        long days = totalMinutes / (24 * 60);
+        long hours = (totalMinutes % (24 * 60)) / 60;
+        long minutes = totalMinutes % 60;
+
+        return String.format("%dD %dH %dM", days, hours, minutes);
     }
 }
