@@ -25,7 +25,7 @@ public abstract class BaseEntity {
 
     @CreatedBy
     @Column(name = "create_by", updatable = false)
-    private Long createdBy;
+    private String createdBy;
 
     @LastModifiedDate
     @Column(name = "update_at")
@@ -33,13 +33,13 @@ public abstract class BaseEntity {
 
     @LastModifiedBy
     @Column(name = "update_by")
-    private Long updatedBy;
+    private String updatedBy;
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
     @Column(name = "deleted_by")
-    private Long deletedBy;
+    private String deletedBy;
 
     @Column(name = "is_delete", nullable = false)
     private boolean isDelete;
@@ -53,17 +53,20 @@ public abstract class BaseEntity {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         if (attributes != null) {
             String userId = attributes.getRequest().getHeader("USER_ID");
-
-            this.createdBy = Long.valueOf(userId);
             this.createdAt = LocalDateTime.now();
+            this.createdBy = userId;
         }
     }
 
     @PreUpdate
     public void updateDelete(){
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        String userId = attributes.getRequest().getHeader("USER_ID");
         if(this.isDelete()) {
             this.setDeletedAt(LocalDateTime.now());
+            this.setDeletedBy(userId);
         }
+        this.setUpdatedBy(userId);
         this.setUpdatedAt(LocalDateTime.now());
     }
 }

@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Service
@@ -57,10 +58,11 @@ public class AuthService {
         User user = User.builder()
                 .username(signUpRequestDto.getUsername())
                 .password(encodedPassword)
-                .slackId(signUpRequestDto.getSlackId())
-                .role(UserRoleEnum.MASTER)
                 .email(signUpRequestDto.getEmail())
                 .build();
+
+        user.setCreatedAt(LocalDateTime.now());
+        user.setCreatedBy(user.getUsername());
 
         User savedUser = userRepository.save(user);
 

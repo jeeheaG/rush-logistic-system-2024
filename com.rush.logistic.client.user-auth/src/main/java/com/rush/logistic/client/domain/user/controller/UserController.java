@@ -1,10 +1,8 @@
 package com.rush.logistic.client.domain.user.controller;
 
 import com.rush.logistic.client.domain.global.ApiResponse;
-import com.rush.logistic.client.domain.user.dto.UserInfoListResponseDto;
 import com.rush.logistic.client.domain.user.dto.UserInfoResponseDto;
 import com.rush.logistic.client.domain.user.dto.UserUpdateRequestDto;
-import com.rush.logistic.client.domain.user.enums.UserRoleEnum;
 import com.rush.logistic.client.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,11 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Objects;
 
 @RestController
 @RequiredArgsConstructor
