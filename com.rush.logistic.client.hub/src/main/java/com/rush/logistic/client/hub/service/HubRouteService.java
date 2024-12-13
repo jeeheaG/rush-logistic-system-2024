@@ -395,4 +395,39 @@ public class HubRouteService {
                             HubRouteMessage.HUB_ROUTE_LIST_NOT_FOUND.getMessage(), null);
         }
     }
+
+    @Transactional
+    public BaseResponseDto<HubListResponseDto<HubRouteIdResponseDto>> createHubRouteP2P(
+            int page, int size, String sortBy, boolean isAsc
+    ) {
+        try {
+            Direction direction = isAsc ? Direction.ASC : Direction.DESC;
+            Sort sort = Sort.by(direction, sortBy);
+            Pageable pageable = PageRequest.of(page, size, sort);
+
+            Page<Hub> hubList = hubRepository.findAllByIsDeleteFalse(pageable).orElseThrow(
+                    () -> new NoSuchElementException(HubMessage.HUB_LIST_NOT_FOUND.getMessage())
+            );
+
+            for(Hub startHub : hubList){
+                for(Hub endHub : hubList){
+                    if(startHub.getHubId().equals(endHub.getHubId())){
+                        continue;
+                    }
+
+                    System.out.print(startHub.getName() + " -> " + endHub.getName() + " 경로 생성");
+                    HubPointRequestDto requestDto = new HubPointRequestDto(startHub.getHubId(), endHub.getHubId());
+                    createHubRoute(requestDto);
+                    System.out.println("---- 경로 생성 완료");
+                }
+            }
+
+            return BaseResponseDto
+                    .from(HttpStatus.CREATED.value(), HttpStatus.CREATED, HubRouteMessage.HUB_ROUTE_CREATED_SUCCESS.getMessage(), null);
+        } catch (NoSuchElementException e){
+            return BaseResponseDto
+                    .from(HttpStatus.NOT_FOUND.value(), HttpStatus.NOT_FOUND,
+                            HubMessage.HUB_LIST_NOT_FOUND.getMessage(), null);
+        }
+    }
 }
