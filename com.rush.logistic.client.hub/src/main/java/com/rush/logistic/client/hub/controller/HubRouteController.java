@@ -80,8 +80,8 @@ public class HubRouteController {
     }
 
     @PostMapping("/createP2P")
-    public ResponseEntity<BaseResponseDto<HubListResponseDto<HubRouteIdResponseDto>>> createHubRouteP2P() {
-        BaseResponseDto<HubListResponseDto<HubRouteIdResponseDto>> responseDto = hubRouteService.createHubRouteP2P();
+    public ResponseEntity<BaseResponseDto<HubRouteListResponseDto<HubRouteInfoResponseDto>>> createHubRouteP2P(@RequestBody HubPointRequestDto requestDto) {
+        BaseResponseDto<HubRouteListResponseDto<HubRouteInfoResponseDto>> responseDto = hubRouteService.createHubRouteP2P(requestDto);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }

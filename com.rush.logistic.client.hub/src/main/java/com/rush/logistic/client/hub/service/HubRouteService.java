@@ -403,7 +403,7 @@ public class HubRouteService {
     }
 
     @Transactional
-    public BaseResponseDto<HubListResponseDto<HubRouteIdResponseDto>> createHubRouteP2P() {
+    public BaseResponseDto<HubRouteListResponseDto<HubRouteInfoResponseDto>> createHubRouteP2P(HubPointRequestDto requestDto) {
         try {
 
             List<Hub> hubList = hubRepository.findAllAsListByIsDeleteFalse().orElseThrow(
@@ -419,8 +419,8 @@ public class HubRouteService {
                     Optional<HubRoute> connectedHubRoute = hubRouteRepository.findByStartHubIdAndEndHubId(startHub.getHubId(), endHub.getHubId());
                     if(!connectedHubRoute.isPresent()){
                         // 아직 생성되지 않았다면 신규 경로 생성
-                        HubPointRequestDto requestDto = new HubPointRequestDto(startHub.getHubId(), endHub.getHubId());
-                        createHubRoute(requestDto);
+                        HubPointRequestDto hubPointReq = new HubPointRequestDto(startHub.getHubId(), endHub.getHubId());
+                        createHubRoute(hubPointReq);
                     } else {
                         if(connectedHubRoute.get().isDelete()){
                             // 생성했었지만 soft delete되어 있으면 다시 생성
@@ -432,8 +432,25 @@ public class HubRouteService {
                 }
             }
 
+            HubRoute hubRoute = hubRouteRepository.findByStartHubIdAndEndHubIdAndIsDeleteFalse(requestDto.getStartHubId(), requestDto.getEndHubId())
+                    .orElseThrow(
+                            () -> new NoSuchElementException(HubRouteMessage.HUB_ROUTE_NOT_FOUND.getMessage())
+                    );
+            HubRouteInfoResponseDto hubRouteInfo = HubRouteInfoResponseDto.from(hubRoute,
+                    hubRepository.findById(requestDto.getStartHubId()).get().getName(),
+                    hubRepository.findById(requestDto.getStartHubId()).get().getAddress(),
+                    hubRepository.findById(requestDto.getEndHubId()).get().getName(),
+                    hubRepository.findById(requestDto.getEndHubId()).get().getAddress());
+
+
+            List<HubRouteInfoResponseDto> hubRouteList = new ArrayList<>();
+            hubRouteList.add(hubRouteInfo);
+
+            HubRouteListResponseDto<HubRouteInfoResponseDto> responseDto = HubRouteListResponseDto.from(
+                    hubRouteList, hubRoute.getDistance(), Long.parseLong(hubRoute.getMilliseconds()), hubRoute.getTimeTaken());
+
             return BaseResponseDto
-                    .from(HttpStatus.CREATED.value(), HttpStatus.CREATED, HubRouteMessage.HUB_ROUTE_CREATED_SUCCESS.getMessage(), null);
+                    .from(HttpStatus.CREATED.value(), HttpStatus.CREATED, HubRouteMessage.HUB_ROUTE_CREATED_SUCCESS.getMessage(), responseDto);
         } catch (NoSuchElementException e){
             return BaseResponseDto
                     .from(HttpStatus.NOT_FOUND.value(), HttpStatus.NOT_FOUND,
