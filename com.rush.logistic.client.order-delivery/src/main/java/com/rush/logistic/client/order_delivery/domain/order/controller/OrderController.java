@@ -27,8 +27,9 @@ public class OrderController {
     @PostMapping
     public ResponseEntity<Object> createOrder(@RequestBody OrderAndDeliveryCreateReq requestDto) {
         log.info("OrderController createOrder");
+        Long tempUserId = 0L; // TODO : 사용자 정보 header 에서 받기
 
-        OrderAllRes responseDto = orderCreateService.createDeliveryAndOrder(requestDto);
+        OrderAllRes responseDto = orderCreateService.createDeliveryAndOrder(tempUserId, requestDto);
         return ResponseEntity.ok().body(BaseResponse.toResponse(OrderCode.CREATE_ORDER_OK, responseDto));
     }
 
@@ -52,7 +53,7 @@ public class OrderController {
     public ResponseEntity<Object> deleteOrder(@PathVariable UUID orderId) {
         log.info("OrderController deleteOrder");
 
-        UUID userId = UUID.randomUUID(); // TODO : 임시 UUID
+        Long userId = 10L; // TODO : 사용자 정보 header 에서 받기
 
         UUID deletedId = orderService.deleteOrder(orderId, userId);
         return ResponseEntity.ok().body(BaseResponse.toResponse(OrderCode.DELETE_ORDER_OK, OrderIdRes.toDto(deletedId)));

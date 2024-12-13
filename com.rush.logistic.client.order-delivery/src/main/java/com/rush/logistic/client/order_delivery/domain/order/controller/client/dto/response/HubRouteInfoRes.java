@@ -6,6 +6,7 @@ import java.util.UUID;
 
 @Builder
 public record HubRouteInfoRes(
+        UUID hubRouteId,
         UUID startHubId,
         UUID endHubId,
         String startHubName,

@@ -4,32 +4,19 @@ import com.rush.logistic.client.order_delivery.domain.delivery.domain.Delivery;
 import com.rush.logistic.client.order_delivery.domain.delivery.exception.DeliveryCode;
 import com.rush.logistic.client.order_delivery.domain.delivery.exception.DeliveryException;
 import com.rush.logistic.client.order_delivery.domain.delivery.repository.DeliveryRepository;
-import com.rush.logistic.client.order_delivery.domain.delivery_route.domain.DeliveryRoute;
-import com.rush.logistic.client.order_delivery.domain.delivery_route.repository.DeliveryRouteRepository;
-import com.rush.logistic.client.order_delivery.domain.deliveryman.domain.Deliveryman;
-import com.rush.logistic.client.order_delivery.domain.deliveryman.domain.DeliverymanStatusEnum;
-import com.rush.logistic.client.order_delivery.domain.deliveryman.exception.DeliverymanCode;
-import com.rush.logistic.client.order_delivery.domain.deliveryman.exception.DeliverymanException;
-import com.rush.logistic.client.order_delivery.domain.deliveryman.repository.DeliverymanRepository;
 import com.rush.logistic.client.order_delivery.domain.order.controller.dto.request.OrderAllReq;
-import com.rush.logistic.client.order_delivery.domain.order.controller.dto.request.OrderAndDeliveryCreateReq;
 import com.rush.logistic.client.order_delivery.domain.order.controller.dto.response.OrderAllRes;
 import com.rush.logistic.client.order_delivery.domain.order.controller.dto.response.OrderUpdateRes;
 import com.rush.logistic.client.order_delivery.domain.order.domain.Order;
 import com.rush.logistic.client.order_delivery.domain.order.exception.OrderCode;
 import com.rush.logistic.client.order_delivery.domain.order.exception.OrderException;
 import com.rush.logistic.client.order_delivery.domain.order.repository.OrderRepository;
-import com.rush.logistic.client.order_delivery.domain.order.service.model.HubRouteModel;
-import com.rush.logistic.client.order_delivery.domain.order.service.model.StartEndHubIdModel;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -60,7 +47,7 @@ public class OrderService {
     }
 
     @Transactional
-    public UUID deleteOrder(UUID orderId, UUID userId) {
+    public UUID deleteOrder(UUID orderId, Long userId) {
         Order order = getOrderEntityById(orderId);
         order.softDelete(userId.toString());
         return order.getId();

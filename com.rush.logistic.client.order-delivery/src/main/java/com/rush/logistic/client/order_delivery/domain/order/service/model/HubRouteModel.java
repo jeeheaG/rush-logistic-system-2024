@@ -5,16 +5,20 @@ import com.rush.logistic.client.order_delivery.domain.delivery_route.domain.Deli
 import com.rush.logistic.client.order_delivery.domain.deliveryman.domain.DeliveryRouteStatusEnum;
 import com.rush.logistic.client.order_delivery.domain.deliveryman.domain.DeliveryTypeEnum;
 import com.rush.logistic.client.order_delivery.domain.deliveryman.domain.Deliveryman;
+import com.rush.logistic.client.order_delivery.domain.order.controller.client.dto.response.HubRouteInfoRes;
+import lombok.Builder;
 
+import java.util.List;
 import java.util.UUID;
 
+@Builder
 public record HubRouteModel(
-    UUID id,
+//    UUID id,
     Integer sequence,
     UUID startHubId,
     UUID endHubId,
     Integer expectedDistance,
-    Integer expectedTime
+    String expectedTime
 ) {
 
     public DeliveryRoute toDeliveryRouteEntity(Delivery delivery, Deliveryman deliveryman) {
@@ -29,5 +33,19 @@ public record HubRouteModel(
                 .delivery(delivery)
                 .deliveryman(deliveryman)
                 .build();
+    }
+
+    public static HubRouteModel fromDto(HubRouteInfoRes dto) {
+        return HubRouteModel.builder()
+                .sequence(0)
+                .startHubId(dto.startHubId())
+                .endHubId(dto.endHubId())
+                .expectedTime(dto.timeTaken())
+                .expectedDistance(dto.distance())
+                .build();
+    }
+
+    public static List<HubRouteModel> fromDtos(List<HubRouteInfoRes> dtos) {
+        return dtos.stream().map(HubRouteModel::fromDto).toList();
     }
 }

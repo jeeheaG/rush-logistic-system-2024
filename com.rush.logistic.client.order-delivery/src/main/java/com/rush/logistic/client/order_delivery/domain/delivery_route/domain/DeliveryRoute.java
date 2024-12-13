@@ -53,11 +53,11 @@ public class DeliveryRoute extends BaseAudit {
     private Integer expectedDistance;
 
     @Column(nullable = false)
-    private Integer expectedTime;
+    private String expectedTime;
 
     private Integer realDistance;
 
-    private Integer realTime;
+    private String realTime;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
