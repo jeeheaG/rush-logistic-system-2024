@@ -1,8 +1,6 @@
 package com.rush.logistic.client.company_product.domain.company.repository;
 
-import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Predicate;
-import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPQLQuery;
 import com.rush.logistic.client.company_product.domain.company.entity.Company;
 import com.rush.logistic.client.company_product.global.type.CompanyType;

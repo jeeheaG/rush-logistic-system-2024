@@ -14,16 +14,4 @@ public interface CompanyRepository extends JpaRepository<Company, UUID>, Company
 
     Optional<Company> findByName(String name);
 
-    Page<Company> findByNameContainingAndHubIdAndIsDeleteFalse(String name, UUID hubId, Pageable pageable);
-
-    // 검색어와 isDelete가 false인 조건
-    Page<Company> findByNameContainingAndIsDeleteFalse(String name, Pageable pageable);
-
-    // HubId와 isDelete가 false인 조건
-    Page<Company> findByHubIdAndIsDeleteFalse(UUID hubId, Pageable pageable);
-
-    // isDelete가 false인 모든 업체 조회
-    Page<Company> findByIsDeleteFalse(Pageable pageable);
-
-    Optional<Company> findByIdAndIsDeleteFalse(UUID id);
 }
