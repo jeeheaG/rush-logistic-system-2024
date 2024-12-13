@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 @FeignClient(name = "user-auth")
 public interface UserClient {
 
-    @GetMapping("/users/{userId}")
+    @GetMapping("/api/users/{userId}")
     ApiResponse<UserResponseDto> getUserById(
             @RequestHeader(value = "USER_ID") String authenticatedUserId,
             @RequestHeader(value = "role") String role,

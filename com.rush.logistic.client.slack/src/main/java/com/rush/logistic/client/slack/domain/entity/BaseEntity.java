@@ -8,6 +8,8 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.time.LocalDateTime;
 
@@ -46,21 +48,22 @@ public abstract class BaseEntity {
         this.isDelete = false;
     }
 
-//
-//    private String getUser() {
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
-//            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-//            return userDetails.getUsername(); // 사용자 이름을 반환 (예: 이메일, ID 등)
-//        }
-//        return "anonymous"; // 인증되지 않은 경우 기본값 설정
-//    }
+    @PrePersist
+    public void prePersist() {
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if (attributes != null) {
+            String userId = attributes.getRequest().getHeader("USER_ID");
 
-//    @PreUpdate
-//    public void updateDelete(){
-//        if(this.isDelete()) {
-//            this.setDeletedAt(LocalDateTime.now());
-//        }
-//        this.setUpdatedAt(LocalDateTime.now());
-//    }
+            this.createdBy = Long.valueOf(userId);
+            this.createdAt = LocalDateTime.now();
+        }
+    }
+
+    @PreUpdate
+    public void updateDelete(){
+        if(this.isDelete()) {
+            this.setDeletedAt(LocalDateTime.now());
+        }
+        this.setUpdatedAt(LocalDateTime.now());
+    }
 }

@@ -103,11 +103,6 @@ public class SlackService {
                         .message(message)
                         .build();
 
-                // TODO : prepersist로 하는법?
-                //  또는 인증객체 사용해서 자동으로 들어가게 수정 필요함.
-//                slack.setCreatedAt(LocalDateTime.now());
-//                slack.setCreatedBy(Long.parseLong(userId));
-
                 slackRepository.save(slack);
 
                 return SlackInfoResponseDto.from(slack);
