@@ -6,4 +6,9 @@ import lombok.Builder;
 public record SendSlackMessageReq(
 
 ) {
+    public static SendSlackMessageReq toDto() {
+        return SendSlackMessageReq.builder()
+
+                .build();
+    }
 }

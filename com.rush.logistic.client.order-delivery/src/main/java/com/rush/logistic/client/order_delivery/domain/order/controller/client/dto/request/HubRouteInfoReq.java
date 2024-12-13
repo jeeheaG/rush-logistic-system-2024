@@ -9,5 +9,11 @@ public record HubRouteInfoReq(
         UUID startHubId,
         UUID endHubId
 ) {
+    public static HubRouteInfoReq toDto(UUID startHubId, UUID endHubId) {
+        return HubRouteInfoReq.builder()
+                .startHubId(startHubId)
+                .endHubId(endHubId)
+                .build();
+    }
 
 }

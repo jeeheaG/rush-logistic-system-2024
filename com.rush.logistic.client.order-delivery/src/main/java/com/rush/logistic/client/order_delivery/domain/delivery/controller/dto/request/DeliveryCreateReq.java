@@ -2,7 +2,7 @@ package com.rush.logistic.client.order_delivery.domain.delivery.controller.dto.r
 
 import com.rush.logistic.client.order_delivery.domain.delivery.domain.Delivery;
 import com.rush.logistic.client.order_delivery.domain.delivery.domain.DeliveryStatusEnum;
-import com.rush.logistic.client.order_delivery.domain.order.service.model.StartEndHubIdModel;
+import com.rush.logistic.client.order_delivery.domain.order.controller.client.dto.response.GetStartEndHubIdOfCompanyResWrapper;
 
 import java.util.UUID;
 
@@ -15,12 +15,12 @@ public record DeliveryCreateReq(
         String receiverSlackId,
         UUID receiverId
 ) {
-    public Delivery toEntity(StartEndHubIdModel startEndHubIdModel ) { //Order order
+    public Delivery toEntity(GetStartEndHubIdOfCompanyResWrapper startEndHubIdDto) { //Order order
         return Delivery.builder()
 //                .order(order)
                 .status(DeliveryStatusEnum.WAITING)
-                .startHubId(startEndHubIdModel.startHubId())
-                .endHubId(startEndHubIdModel.endHubId())
+                .startHubId(startEndHubIdDto.result().departureHubId())
+                .endHubId(startEndHubIdDto.result().arrivalHubId())
                 .address(address)
                 .receiverSlackId(receiverSlackId)
                 .receiverId(receiverId)

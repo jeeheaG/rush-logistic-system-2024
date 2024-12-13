@@ -1,8 +1,6 @@
 package com.rush.logistic.client.order_delivery.domain.order.service;
 
 import com.rush.logistic.client.order_delivery.domain.delivery.domain.Delivery;
-import com.rush.logistic.client.order_delivery.domain.delivery.exception.DeliveryCode;
-import com.rush.logistic.client.order_delivery.domain.delivery.exception.DeliveryException;
 import com.rush.logistic.client.order_delivery.domain.delivery.repository.DeliveryRepository;
 import com.rush.logistic.client.order_delivery.domain.delivery_route.domain.DeliveryRoute;
 import com.rush.logistic.client.order_delivery.domain.delivery_route.repository.DeliveryRouteRepository;
@@ -11,13 +9,15 @@ import com.rush.logistic.client.order_delivery.domain.deliveryman.domain.Deliver
 import com.rush.logistic.client.order_delivery.domain.deliveryman.exception.DeliverymanCode;
 import com.rush.logistic.client.order_delivery.domain.deliveryman.exception.DeliverymanException;
 import com.rush.logistic.client.order_delivery.domain.deliveryman.repository.DeliverymanRepository;
-import com.rush.logistic.client.order_delivery.domain.order.controller.dto.request.OrderAllReq;
+import com.rush.logistic.client.order_delivery.domain.order.controller.client.CompanyClient;
+import com.rush.logistic.client.order_delivery.domain.order.controller.client.HubClient;
+import com.rush.logistic.client.order_delivery.domain.order.controller.client.SlackClient;
+import com.rush.logistic.client.order_delivery.domain.order.controller.client.UserClient;
+import com.rush.logistic.client.order_delivery.domain.order.controller.client.dto.request.GetStartEndHubIdOfCompanyReq;
+import com.rush.logistic.client.order_delivery.domain.order.controller.client.dto.response.GetStartEndHubIdOfCompanyResWrapper;
 import com.rush.logistic.client.order_delivery.domain.order.controller.dto.request.OrderAndDeliveryCreateReq;
 import com.rush.logistic.client.order_delivery.domain.order.controller.dto.response.OrderAllRes;
-import com.rush.logistic.client.order_delivery.domain.order.controller.dto.response.OrderUpdateRes;
 import com.rush.logistic.client.order_delivery.domain.order.domain.Order;
-import com.rush.logistic.client.order_delivery.domain.order.exception.OrderCode;
-import com.rush.logistic.client.order_delivery.domain.order.exception.OrderException;
 import com.rush.logistic.client.order_delivery.domain.order.repository.OrderRepository;
 import com.rush.logistic.client.order_delivery.domain.order.service.model.HubRouteModel;
 import com.rush.logistic.client.order_delivery.domain.order.service.model.StartEndHubIdModel;
@@ -43,15 +43,20 @@ public class OrderCreateService {
     private final DeliverymanRepository deliverymanRepository;
     private final DeliveryRouteRepository deliveryRouteRepository;
 
+    private final CompanyClient companyClient;
+    private final HubClient hubClient;
+    private final SlackClient slackClient;
+    private final UserClient userClient;
+
     @Transactional
     public OrderAllRes createDeliveryAndOrder(OrderAndDeliveryCreateReq requestDto) {
         // 수령, 생산 업체가 소속된 허브ID 받아옴
-        StartEndHubIdModel startEndHubIdModel = tempFeignClientGetHubIdOfCompanies(requestDto.receiveCompanyId(), requestDto.produceCompanyId());
+        GetStartEndHubIdOfCompanyResWrapper getStartEndHubIdOfCompanyDto = companyClient.getStartEndHubIdOfCompany(GetStartEndHubIdOfCompanyReq.toDto(requestDto.produceCompanyId(), requestDto.receiveCompanyId()));
         // TODO : -> 조회 실패할 경우 예외응답
 
 
         // 주문, 배송 생성
-        Delivery delivery = requestDto.deliveryInfo().toEntity(startEndHubIdModel);
+        Delivery delivery = requestDto.deliveryInfo().toEntity(getStartEndHubIdOfCompanyDto);
         Delivery deliverySaved = deliveryRepository.save(delivery);
 
         Order order = requestDto.toEntity(deliverySaved);
@@ -59,7 +64,8 @@ public class OrderCreateService {
 
         // 배송 경로 생성
         // 허브 경로 받아옴
-        List<HubRouteModel> hubRouteModels = tempFeignClientGetRoutes(startEndHubIdModel);
+//        List<HubRouteModel> hubRouteModels = tempFeignClientGetRoutes(getStartEndHubIdOfCompanyDto);
+        List<HubRouteModel> hubRouteModels = tempFeignClientGetRoutes(getStartEndHubIdOfCompanyDto);
         log.info("OrderService createDeliveryAndOrder : hubRouteModels[0] : {}", hubRouteModels.get(0));
 
         // 경로별 담당자 배정 및 배송 경로 생성
@@ -115,7 +121,7 @@ public class OrderCreateService {
      * 테스트용 더미 메서드
      * @return
      */
-    private List<HubRouteModel> tempFeignClientGetRoutes(StartEndHubIdModel hubIdModel) {
+    private List<HubRouteModel> tempFeignClientGetRoutes(GetStartEndHubIdOfCompanyResWrapper hubIdModel) {
         log.info("OrderService tempFeignClientGetRoutes");
 
         UUID dummyUuid1 = UUID.fromString("1e6a1a38-5ede-4873-9471-1f4bb3e1d062");

@@ -2,8 +2,11 @@ package com.rush.logistic.client.order_delivery.domain.order.controller.client.d
 
 import lombok.Builder;
 
-@Builder
-public record GetStartEndHubIdOfCompanyRes(
+import java.util.UUID;
 
+public record GetStartEndHubIdOfCompanyRes(
+        UUID departureHubId,
+        UUID arrivalHubId
 ) {
 }
+
