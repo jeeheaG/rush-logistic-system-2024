@@ -68,8 +68,8 @@ public class OrderCreateService {
         // 허브 경로 받아옴
 //        List<HubRouteModel> hubRouteModels = tempFeignClientGetRoutes(getStartEndHubIdOfCompanyDto);
 //        log.info("OrderService createDeliveryAndOrder : hubRouteModels[0] : {}", hubRouteModels.get(0));
-        HubResWrapper<HubRouteInfoRes> hubRouteInfoResWrap = hubClient.getHubRoute(HubRouteInfoReq.toDto(
-                getStartEndHubIdOfCompanyDto.result().departureHubId(), getStartEndHubIdOfCompanyDto.result().arrivalHubId()));
+        HubResWrapper<HubRouteInfoRes> hubRouteInfoResWrap = hubClient.getHubRoute(
+                getStartEndHubIdOfCompanyDto.result().departureHubId(), getStartEndHubIdOfCompanyDto.result().arrivalHubId());
         log.info("OrderCreateService createDeliveryAndOrder : hubRouteInfoResWrap : {}", hubRouteInfoResWrap);
         List<HubRouteInfoRes> hubRouteInfos = List.of(hubRouteInfoResWrap.data()); // TODO : 목록으로 바뀌면 변경하기
         List<HubRouteModel> hubRouteModels = HubRouteModel.fromDtos(hubRouteInfos);
@@ -124,7 +124,7 @@ public class OrderCreateService {
         }
 
         // 배송 경로 생성
-        DeliveryRoute deliveryRoute = hubToCompanyRoute.toDeliveryRouteEntity(sequence, endHubId, hubToCompanyRoute, delivery, deliveryman);
+        DeliveryRoute deliveryRoute = hubToCompanyRoute.toDeliveryRouteEntity(sequence, endHubId, delivery, deliveryman);
         deliveryRoutes.add(deliveryRoute);
         log.info("OrderCreateService assignCompanyDeliveryman : deliveryRoute : {}", deliveryRoute);
 
@@ -179,8 +179,9 @@ public class OrderCreateService {
         log.info("OrderCreateService alertExpectedTimeSlackMessage start");
 
         String message = GeminiUtil.getExpectedStartDateMessage().message();
-        UserSlackResWrapper<GetUserInfoRes> getUserInfoRes = userClient.getUserInfo(userId);
-        UserSlackResWrapper<SendSlackMessageRes> SendSlackMessageRes = slackClient.sendSlackMessage(SendSlackMessageReq.toDto(message, getUserInfoRes.data().email()));
+//        UserSlackResWrapper<GetUserInfoRes> getUserInfoRes = userClient.getUserInfo(userId);
+//        UserSlackResWrapper<SendSlackMessageRes> SendSlackMessageRes = slackClient.sendSlackMessage(SendSlackMessageReq.toDto(message, getUserInfoRes.data().email()));
+//        UserSlackResWrapper<SendSlackMessageRes> SendSlackMessageRes = slackClient.sendSlackMessage(SendSlackMessageReq.toDto(message, "dummySlackIdEmail"));
     }
 
 //    /**

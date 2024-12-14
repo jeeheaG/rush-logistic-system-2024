@@ -37,7 +37,7 @@ public record HubRouteModel(
 
     public static HubRouteModel fromDto(HubRouteInfoRes dto) {
         return HubRouteModel.builder()
-                .sequence(0)
+                .sequence(-2)
                 .startHubId(dto.startHubId())
                 .endHubId(dto.endHubId())
                 .expectedTime(dto.timeTaken())

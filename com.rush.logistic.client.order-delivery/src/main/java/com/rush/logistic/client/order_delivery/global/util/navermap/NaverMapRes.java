@@ -17,12 +17,14 @@ public record NaverMapRes(
 ) {
     public static NaverMapRes toDto() {
         return NaverMapRes.builder()
-
+                .distance(-1)
+                .time("dummyTime")
                 .build();
     }
 
-    public DeliveryRoute toDeliveryRouteEntity(Integer sequence, UUID startHubId, NaverMapRes hubToCompanyRoute, Delivery delivery, Deliveryman deliveryman) {
+    public DeliveryRoute toDeliveryRouteEntity(Integer sequence, UUID startHubId, Delivery delivery, Deliveryman deliveryman) {
         return DeliveryRoute.builder()
+                .sequence(sequence)
                 .delivery(delivery)
                 .deliveryman(deliveryman)
                 .type(DeliveryTypeEnum.COMPANY)
