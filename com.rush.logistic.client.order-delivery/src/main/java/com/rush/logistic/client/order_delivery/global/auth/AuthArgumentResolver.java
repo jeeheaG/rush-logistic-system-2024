@@ -30,7 +30,7 @@ public class AuthArgumentResolver implements HandlerMethodArgumentResolver {
         String username = request.getHeader(HEADER_USER_NAME);
         String role = request.getHeader(HEADER_ROLE);
 
-        log.info("AuthArgumentResolver resolveArgument : userId={}, username={}, role={}", userIdStr, username, role);
+        log.info("AuthArgumentResolver resolveArgument : userIdStr={}, username={}, role={}", userIdStr, username, role);
 
         return new UserInfo(
                 parseUserId(userIdStr),
