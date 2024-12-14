@@ -52,8 +52,31 @@ public class HubService {
 
     @Transactional
     public BaseResponseDto<HubIdResponseDto> createHub(HubInfoRequestDto requestDto) {
+        HubIdResponseDto responseDto = null;
         // TODO: MASTER USER 확인 로직 추가
         try {
+            // 이미 추가된 허브인지 확인
+            if (hubRepository.existsByHubName(requestDto.getName())) {
+                // TODO: Redis에 있는지 먼저 확인
+
+                Hub existHub = hubRepository.findByName(requestDto.getName());
+                responseDto = HubIdResponseDto.from(existHub.getHubId());
+
+                // 중복된 허브명
+                return BaseResponseDto
+                        .<HubIdResponseDto>from(HttpStatus.OK.value(), HttpStatus.OK, HubMessage.HUB_NAME_DUPLICATED.getMessage(), responseDto);
+            }
+            if (hubRepository.existsByAddress(requestDto.getAddress())) {
+                // TODO: Redis에 있는지 먼저 확인
+
+                Hub existHub = hubRepository.findByAddress(requestDto.getName());
+                responseDto = HubIdResponseDto.from(existHub.getHubId());
+
+                // 중복된 주소
+                return BaseResponseDto
+                        .<HubIdResponseDto>from(HttpStatus.OK.value(), HttpStatus.OK, HubMessage.HUB_ADDRESS_DUPLICATED.getMessage(), responseDto);
+            }
+
             // 네이버 API : 주소 -> 좌표 추출
             String addressToCoordinatesResponse = getCoordinates(requestDto.getAddress());
             LatLonDto latLonDto = extractCoordinates(addressToCoordinatesResponse);
@@ -63,7 +86,7 @@ public class HubService {
 
 
             // 허브 생성 반환
-            HubIdResponseDto responseDto = HubIdResponseDto.from(hub.getHubId());
+            responseDto = HubIdResponseDto.from(hub.getHubId());
 
             return BaseResponseDto
                     .<HubIdResponseDto>from(HttpStatus.CREATED.value(), HttpStatus.CREATED, HubMessage.HUB_CREATED_SUCCESS.getMessage(), responseDto);
