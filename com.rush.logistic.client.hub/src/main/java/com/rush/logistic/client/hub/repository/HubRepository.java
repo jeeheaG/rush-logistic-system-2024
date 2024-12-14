@@ -11,4 +11,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface HubRepository extends JpaRepository<Hub, UUID> {
     Optional<Page<Hub>> findPagedByIsDeleteFalse(Pageable pageable);
     Optional<List<Hub>> findAllAsListByIsDeleteFalse();
+
+    boolean existsByAddress(String address);
+
+    boolean existsByHubName(String name);
+
+    Hub findByName(String name);
+
+    Hub findByAddress(String name);
 }
