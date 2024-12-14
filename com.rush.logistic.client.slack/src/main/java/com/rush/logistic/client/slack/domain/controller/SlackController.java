@@ -1,6 +1,7 @@
 package com.rush.logistic.client.slack.domain.controller;
 
 
+import com.rush.logistic.client.slack.domain.dto.SlackInfoResponseDto;
 import com.rush.logistic.client.slack.domain.dto.SlackRequestDto;
 import com.rush.logistic.client.slack.domain.dto.SlackUpdateRequestDto;
 import com.rush.logistic.client.slack.domain.entity.SlackEntity;
@@ -37,7 +38,11 @@ public class SlackController {
                                                       direction = Sort.Direction.DESC) Pageable pageable,
                                               @RequestParam Integer size){
 
-        Page<SlackEntity> slacks = slackService.getAllSlacks(role, authenticatedUserId, pageable, size);
+        Page<SlackInfoResponseDto> slacks = slackService.getAllSlacks(role, authenticatedUserId, pageable, size);
+
+        if (slacks.isEmpty()) {
+            return ApiResponse.noContent();
+        }
 
         return ApiResponse.ok(slacks);
     }

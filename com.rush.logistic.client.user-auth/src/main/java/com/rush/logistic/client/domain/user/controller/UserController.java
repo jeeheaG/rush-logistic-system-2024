@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -27,6 +28,10 @@ public class UserController {
                                       @RequestParam Integer size){
 
         Page<UserInfoResponseDto> users = userService.getAllUsers(role, pageable, size);
+
+        if (users.isEmpty()) {
+            return ApiResponse.noContent();
+        }
 
         return ApiResponse.ok(users);
     }

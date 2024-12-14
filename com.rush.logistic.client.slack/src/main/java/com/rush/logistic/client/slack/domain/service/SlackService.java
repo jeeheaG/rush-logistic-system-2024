@@ -116,14 +116,14 @@ public class SlackService {
         }
     }
 
-    public Page<SlackEntity> getAllSlacks(String role, String authenticatedUserId, Pageable pageable, Integer size) {
+    public Page<SlackInfoResponseDto> getAllSlacks(String role, String authenticatedUserId, Pageable pageable, Integer size) {
 
         ApiResponse<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
 
         return slackRepositoryImpl.findAll(pageable,size);
     }
 
-    public SlackEntity getSlack(String role, String authenticatedUserId, String slackId) {
+    public SlackInfoResponseDto getSlack(String role, String authenticatedUserId, String slackId) {
 
         ApiResponse<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
 
@@ -156,7 +156,7 @@ public class SlackService {
         return SlackInfoResponseDto.from(slackentity);
     }
 
-    public List<SlackEntity> getSlackByMessage(String role, String authenticatedUserId, String message) {
+    public List<SlackInfoResponseDto> getSlackByMessage(String role, String authenticatedUserId, String message) {
 
         ApiResponse<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
 
