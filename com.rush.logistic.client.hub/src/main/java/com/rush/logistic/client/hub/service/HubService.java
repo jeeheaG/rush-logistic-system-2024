@@ -53,20 +53,24 @@ public class HubService {
     @Transactional
     public BaseResponseDto<HubIdResponseDto> createHub(HubInfoRequestDto requestDto) {
         // TODO: MASTER USER 확인 로직 추가
+        try {
+            // 네이버 API : 주소 -> 좌표 추출
+            String addressToCoordinatesResponse = getCoordinates(requestDto.getAddress());
+            LatLonDto latLonDto = extractCoordinates(addressToCoordinatesResponse);
 
-        // 네이버 API : 주소 -> 좌표 추출
-        String addressToCoordinatesResponse = getCoordinates(requestDto.getAddress());
-        LatLonDto latLonDto = extractCoordinates(addressToCoordinatesResponse);
+            // 허브 저장
+            Hub hub = hubRepository.save(Hub.from(requestDto, latLonDto));
 
-        // 허브 저장
-        Hub hub = hubRepository.save(Hub.from(requestDto, latLonDto));
-        // TODO: 저장 실패시 예외 처리 추가
 
-        // 허브 생성 반환
-        HubIdResponseDto responseDto = HubIdResponseDto.from(hub.getHubId());
+            // 허브 생성 반환
+            HubIdResponseDto responseDto = HubIdResponseDto.from(hub.getHubId());
 
-        return BaseResponseDto
-                .<HubIdResponseDto>from(HttpStatus.CREATED.value(), HttpStatus.CREATED, HubMessage.HUB_CREATED_SUCCESS.getMessage(), responseDto);
+            return BaseResponseDto
+                    .<HubIdResponseDto>from(HttpStatus.CREATED.value(), HttpStatus.CREATED, HubMessage.HUB_CREATED_SUCCESS.getMessage(), responseDto);
+        } catch (Exception e) {
+            return BaseResponseDto
+                    .<HubIdResponseDto>from(HttpStatus.INTERNAL_SERVER_ERROR.value(), HttpStatus.INTERNAL_SERVER_ERROR, HubMessage.HUB_SAVE_FAILED.getMessage(), null);
+        }
     }
 
     public BaseResponseDto<HubInfoResponseDto> getHubDetails(UUID hubId) {
