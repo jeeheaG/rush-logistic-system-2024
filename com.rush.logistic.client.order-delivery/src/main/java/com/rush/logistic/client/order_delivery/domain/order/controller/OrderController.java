@@ -7,6 +7,8 @@ import com.rush.logistic.client.order_delivery.domain.order.controller.dto.respo
 import com.rush.logistic.client.order_delivery.domain.order.controller.dto.response.OrderUpdateRes;
 import com.rush.logistic.client.order_delivery.domain.order.service.OrderCreateService;
 import com.rush.logistic.client.order_delivery.domain.order.service.OrderService;
+import com.rush.logistic.client.order_delivery.global.auth.UserInfo;
+import com.rush.logistic.client.order_delivery.global.auth.UserInfoHeader;
 import com.rush.logistic.client.order_delivery.global.response.BaseResponse;
 import com.rush.logistic.client.order_delivery.domain.order.exception.OrderCode;
 import lombok.RequiredArgsConstructor;
@@ -34,8 +36,12 @@ public class OrderController {
     }
 
     @GetMapping("/{orderId}")
-    public ResponseEntity<Object> getOrderById(@PathVariable UUID orderId) {
+    public ResponseEntity<Object> getOrderById(@UserInfoHeader UserInfo userInfo, @PathVariable UUID orderId) {
         log.info("OrderController getOrderById");
+
+        log.info("getOrderById userInfo getUserId : {}", userInfo.getUserId());
+        log.info("getOrderById userInfo getUsername : {}", userInfo.getUsername());
+        log.info("getOrderById userInfo getRole : {}", userInfo.getRole());
 
         OrderAllRes responseDto = orderService.getOrderDetail(orderId);
         return ResponseEntity.ok().body(BaseResponse.toResponse(OrderCode.GET_ORDER_OK, responseDto));
