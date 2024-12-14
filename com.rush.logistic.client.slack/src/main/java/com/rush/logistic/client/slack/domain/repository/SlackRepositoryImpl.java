@@ -3,7 +3,7 @@ package com.rush.logistic.client.slack.domain.repository;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.rush.logistic.client.slack.domain.entity.QSlackEntity;
+import com.rush.logistic.client.slack.domain.dto.SlackInfoResponseDto;
 import com.rush.logistic.client.slack.domain.entity.SlackEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -25,14 +25,14 @@ public class SlackRepositoryImpl extends QuerydslRepositorySupport implements Sl
     }
 
     @Override
-    public Page<SlackEntity> findAll(Pageable pageable, int size){
+    public Page<SlackInfoResponseDto> findAll(Pageable pageable, int size){
 
         pageable = PageRequest.of(pageable.getPageNumber(), size, pageable.getSort());
 
-        JPAQuery<SlackEntity> query = queryFactory
+        JPAQuery<SlackInfoResponseDto> query = queryFactory
                 .select(
                         Projections.fields(
-                                SlackEntity.class,
+                                SlackInfoResponseDto.class,
                                 slackEntity.slackId,
                                 slackEntity.message,
                                 slackEntity.sendUserId,
@@ -46,7 +46,7 @@ public class SlackRepositoryImpl extends QuerydslRepositorySupport implements Sl
                 .from(slackEntity)
                 .where(slackEntity.deletedAt.isNull());
 
-        List<SlackEntity> slacks = getQuerydsl().applyPagination(pageable,query).fetch();
+        List<SlackInfoResponseDto> slacks = getQuerydsl().applyPagination(pageable,query).fetch();
 
         long totalCount = slacks.size();
 
@@ -63,24 +63,11 @@ public class SlackRepositoryImpl extends QuerydslRepositorySupport implements Sl
 //    }
 
     @Override
-    public List<SlackEntity> findByMessage(String message) {
-
+    public List<SlackInfoResponseDto> findByMessage(String message) {
         return queryFactory
-                .selectFrom(QSlackEntity.slackEntity)
-                .where(
-                        QSlackEntity.slackEntity.deletedAt.isNull()
-                                .and(QSlackEntity.slackEntity.message.eq(message))
-                )
-                .fetch();
-    }
-
-    @Override
-    public SlackEntity findBySlackId(Long slackId) {
-
-        JPAQuery<SlackEntity> query = queryFactory
                 .select(
                         Projections.fields(
-                                SlackEntity.class,
+                                SlackInfoResponseDto.class,
                                 slackEntity.slackId,
                                 slackEntity.message,
                                 slackEntity.sendUserId,
@@ -92,10 +79,35 @@ public class SlackRepositoryImpl extends QuerydslRepositorySupport implements Sl
                         )
                 )
                 .from(slackEntity)
-                .where(slackEntity.deletedAt.isNull()
-                        .and(slackEntity.slackId.eq(slackId)));
+                .where(
+                        slackEntity.deletedAt.isNull()
+                                .and(slackEntity.message.eq(message))
+                )
+                .fetch();
+    }
 
-        return query.fetchOne();
+    @Override
+    public SlackInfoResponseDto findBySlackId(Long slackId) {
+        return queryFactory
+                .select(
+                        Projections.fields(
+                                SlackInfoResponseDto.class,
+                                slackEntity.slackId,
+                                slackEntity.message,
+                                slackEntity.sendUserId,
+                                slackEntity.receiveUserSlackId,
+                                slackEntity.createdAt,
+                                slackEntity.createdBy,
+                                slackEntity.updatedAt,
+                                slackEntity.updatedBy
+                        )
+                )
+                .from(slackEntity)
+                .where(
+                        slackEntity.deletedAt.isNull()
+                                .and(slackEntity.slackId.eq(slackId))
+                )
+                .fetchOne();
     }
 
 }
