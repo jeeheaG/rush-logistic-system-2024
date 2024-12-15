@@ -36,8 +36,6 @@ public class User extends BaseEntity {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    //
-
     @Column(name = "hub_id", unique = true)
     private UUID hubId;
 
