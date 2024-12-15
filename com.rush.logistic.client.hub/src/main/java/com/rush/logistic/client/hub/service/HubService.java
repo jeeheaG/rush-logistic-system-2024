@@ -125,7 +125,18 @@ public class HubService {
     }
 
     public BaseResponseDto<HubInfoResponseDto> getHubDetails(UUID hubId) {
+        HubInfoResponseDto responseDto = null;
         try {
+            if(hubItemRepository.existsById(String.valueOf(hubId))) {
+                //Redis에 있는지 먼저 확인
+                HubItem existHubItem = hubItemRepository.findById(String.valueOf(hubId)).get();
+                responseDto = HubInfoResponseDto.fromRedis(existHubItem);
+
+                // 중복된 허브명
+                return BaseResponseDto
+                        .<HubInfoResponseDto>from(HttpStatus.OK.value(), HttpStatus.OK, HubMessage.HUB_FOUND_SUCCESS.getMessage(), responseDto);
+            }
+
             // 허브 조회
             Hub hub = hubRepository.findById(hubId)
                     .orElseThrow(() ->
@@ -139,7 +150,10 @@ public class HubService {
             }
 
             // 허브 정보 반환
-            HubInfoResponseDto responseDto = HubInfoResponseDto.from(hub);
+            responseDto = HubInfoResponseDto.from(hub);
+
+            // Redis에 저장
+            HubItem hubItem = hubItemRepository.save(HubItem.to(hub));
 
             return BaseResponseDto
                     .<HubInfoResponseDto>from(HttpStatus.OK.value(), HttpStatus.OK, HubMessage.HUB_FOUND_SUCCESS.getMessage(), responseDto);

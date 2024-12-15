@@ -1,6 +1,7 @@
 package com.rush.logistic.client.hub.dto;
 
 import com.rush.logistic.client.hub.model.Hub;
+import com.rush.logistic.client.hub.model.HubItem;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,6 +23,15 @@ public class HubInfoResponseDto {
                 .address(hub.getAddress())
                 .latitude(hub.getLatitude())
                 .longitude(hub.getLongitude())
+                .build();
+    }
+
+    public static HubInfoResponseDto fromRedis(HubItem hubItem) {
+        return HubInfoResponseDto.builder()
+                .name(hubItem.getName())
+                .address(hubItem.getAddress())
+                .latitude(hubItem.getLatitude())
+                .longitude(hubItem.getLongitude())
                 .build();
     }
 }

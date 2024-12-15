@@ -34,13 +34,13 @@ public class HubItem implements Serializable {
             .build();
     }
 
-    public static HubItem to(Hub existHub) {
+    public static HubItem to(Hub hub) {
         return HubItem.builder()
-            .hubId(String.valueOf(existHub.getHubId()))
-            .name(existHub.getName())
-            .address(existHub.getAddress())
-            .latitude(existHub.getLatitude())
-            .longitude(existHub.getLongitude())
+            .hubId(String.valueOf(hub.getHubId()))
+            .name(hub.getName())
+            .address(hub.getAddress())
+            .latitude(hub.getLatitude())
+            .longitude(hub.getLongitude())
             .build();
     }
 }
