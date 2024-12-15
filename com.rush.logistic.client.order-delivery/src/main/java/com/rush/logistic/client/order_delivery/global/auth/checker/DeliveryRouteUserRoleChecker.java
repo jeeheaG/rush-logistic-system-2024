@@ -33,7 +33,7 @@ public class DeliveryRouteUserRoleChecker extends UserRoleChecker<DeliveryRoute>
 
         switch (role) {
             case HUB -> checkHubInCharge(deliveryRoute, getUserInfoRes.hubId());
-            case COMPANY -> checkCompanyInCharge(deliveryRoute, getUserInfoRes.companyId());
+//            case COMPANY -> checkCompanyInCharge(deliveryRoute, getUserInfoRes.companyId()); // 업체 담당자 모두 허용인듯?
             case DELIVERY -> checkDeliveryInCharge(deliveryRoute, getUserInfoRes.userId());
         }
     }
