@@ -1,10 +1,10 @@
 spring:
   application:
-    name: company-service
+    name: company-product-service
   datasource:
     url: jdbc:postgresql://localhost:5432/company
-    username: kangheeseung
-    password: 1129
+    username: postgres
+    password: 1111
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
