@@ -24,7 +24,6 @@ import java.util.UUID;
 public class UserRoleChecker {
     private final UserClient userClient;
     private final DeliveryRouteRepository deliveryRouteRepository;
-    private final DeliveryRepository deliveryRepository;
 
     /**
      * 권한의 현재 유효성 확인, 허용 권한에 포함되어 있는지 확인

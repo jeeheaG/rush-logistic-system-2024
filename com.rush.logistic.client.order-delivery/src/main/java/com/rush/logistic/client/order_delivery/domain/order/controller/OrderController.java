@@ -33,11 +33,12 @@ public class OrderController {
     private final UserRoleChecker userRoleChecker;
 
     @PostMapping
-    public ResponseEntity<Object> createOrder(@RequestBody OrderAndDeliveryCreateReq requestDto) {
+    public ResponseEntity<Object> createOrder(@UserInfoHeader UserInfo userInfo, @RequestBody OrderAndDeliveryCreateReq requestDto) {
         log.info("OrderController createOrder");
-        Long tempUserId = 0L; // TODO : 사용자 정보 header 에서 받기
 
-        OrderAllRes responseDto = orderCreateService.createDeliveryAndOrder(tempUserId, requestDto);
+        GetUserInfoRes getUserInfoRes = userRoleChecker.getUserAndCheckRole(getAllRoles(), userInfo);
+
+        OrderAllRes responseDto = orderCreateService.createDeliveryAndOrder(userInfo.getUserId(), requestDto);
         return ResponseEntity.ok().body(BaseResponse.toResponse(OrderCode.CREATE_ORDER_OK, responseDto));
     }
 
@@ -45,32 +46,29 @@ public class OrderController {
     public ResponseEntity<Object> getOrderById(@UserInfoHeader UserInfo userInfo, @PathVariable UUID orderId) {
         log.info("OrderController getOrderById");
 
-        log.info("getOrderById userInfo getUserId : {}", userInfo.getUserId());
-        log.info("getOrderById userInfo getUsername : {}", userInfo.getUsername());
-        log.info("getOrderById userInfo getRole : {}", userInfo.getRole());
-
-        List<UserRole> allowedRoles = getAllRoles();
-        GetUserInfoRes getUserInfoRes = userRoleChecker.getUserAndCheckRole(allowedRoles, userInfo);
+        GetUserInfoRes getUserInfoRes = userRoleChecker.getUserAndCheckRole(getAllRoles(), userInfo);
 
         OrderAllRes responseDto = orderService.getOrderDetail(orderId, getUserInfoRes);
         return ResponseEntity.ok().body(BaseResponse.toResponse(OrderCode.GET_ORDER_OK, responseDto));
     }
 
     @PatchMapping("/{orderId}")
-    public ResponseEntity<Object> updateOrder(@PathVariable UUID orderId, @RequestBody OrderAllReq requestDto) {
+    public ResponseEntity<Object> updateOrder(@UserInfoHeader UserInfo userInfo, @PathVariable UUID orderId, @RequestBody OrderAllReq requestDto) {
         log.info("OrderController updateOrder");
 
-        OrderUpdateRes responseDto = orderService.updateOrder(orderId, requestDto);
+        GetUserInfoRes getUserInfoRes = userRoleChecker.getUserAndCheckRole(Arrays.asList(UserRole.MASTER, UserRole.HUB), userInfo);
+
+        OrderUpdateRes responseDto = orderService.updateOrder(orderId, requestDto, getUserInfoRes);
         return ResponseEntity.ok().body(BaseResponse.toResponse(OrderCode.UPDATE_ORDER_OK, responseDto));
     }
 
     @DeleteMapping("/{orderId}")
-    public ResponseEntity<Object> deleteOrder(@PathVariable UUID orderId) {
+    public ResponseEntity<Object> deleteOrder(@UserInfoHeader UserInfo userInfo, @PathVariable UUID orderId) {
         log.info("OrderController deleteOrder");
 
-        Long userId = 10L; // TODO : 사용자 정보 header 에서 받기
+        GetUserInfoRes getUserInfoRes = userRoleChecker.getUserAndCheckRole(Arrays.asList(UserRole.MASTER, UserRole.HUB), userInfo);
 
-        UUID deletedId = orderService.deleteOrder(orderId, userId);
+        UUID deletedId = orderService.deleteOrder(orderId, userInfo.getUserId(), getUserInfoRes);
         return ResponseEntity.ok().body(BaseResponse.toResponse(OrderCode.DELETE_ORDER_OK, OrderIdRes.toDto(deletedId)));
     }
 

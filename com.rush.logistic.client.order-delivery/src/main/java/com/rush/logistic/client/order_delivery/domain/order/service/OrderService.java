@@ -44,11 +44,13 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderUpdateRes updateOrder(UUID orderId, OrderAllReq requestDto) {
+    public OrderUpdateRes updateOrder(UUID orderId, OrderAllReq requestDto, GetUserInfoRes getUserInfoRes) {
         Delivery delivery = deliveryRepository.findById(requestDto.deliveryId())
                 .orElseThrow(() -> new DeliveryException(DeliveryCode.DELIVERY_NOT_EXIST));
 
         Order order = getOrderEntityById(orderId);
+        userRoleChecker.checkInCharge(order, getUserInfoRes);
+
         order.updateAll(requestDto, delivery);
         entityManager.flush();
 
@@ -57,8 +59,10 @@ public class OrderService {
     }
 
     @Transactional
-    public UUID deleteOrder(UUID orderId, Long userId) {
+    public UUID deleteOrder(UUID orderId, Long userId, GetUserInfoRes getUserInfoRes) {
         Order order = getOrderEntityById(orderId);
+        userRoleChecker.checkInCharge(order, getUserInfoRes);
+
         order.softDelete(userId.toString());
         return order.getId();
     }
