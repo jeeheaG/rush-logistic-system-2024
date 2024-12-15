@@ -180,6 +180,16 @@ public class HubService {
                         .<HubInfoResponseDto>from(HttpStatus.GONE.value(), HttpStatus.GONE, HubMessage.HUB_ALREADY_DELETED.getMessage(), null);
             }
 
+            // 자기 자신을 제외한 이미 있는 hub이름, 주소 중복확인
+            if(hubRepository.existsByName(requestDto.getName()) && !hub.getName().equals(requestDto.getName())) {
+                return BaseResponseDto
+                        .<HubInfoResponseDto>from(HttpStatus.OK.value(), HttpStatus.OK, HubMessage.HUB_NAME_DUPLICATED.getMessage(), HubInfoResponseDto.from(hub));
+            }
+            if(hubRepository.existsByAddress(requestDto.getAddress()) && !hub.getAddress().equals(requestDto.getAddress())) {
+                return BaseResponseDto
+                        .<HubInfoResponseDto>from(HttpStatus.OK.value(), HttpStatus.OK, HubMessage.HUB_ADDRESS_DUPLICATED.getMessage(), HubInfoResponseDto.from(hub));
+            }
+
             String originAddress = hub.getAddress();
             String updateAddress = requestDto.getAddress();
 
@@ -199,6 +209,17 @@ public class HubService {
 
             // 업데이트 저장
             hubRepository.save(hub);
+
+            // redis에 있다면 업데이트 내용 반영
+            if(hubItemRepository.existsById(String.valueOf(hubId))) {
+                HubItem hubItem = hubItemRepository.findById(String.valueOf(hubId)).get();
+                hubItem.updateRedis(hub);
+                hubItemRepository.save(hubItem);
+            } else {
+                // redis에 없다면 새로 추가
+                HubItem hubItem = hubItemRepository.save(HubItem.to(hub));
+                hubItemRepository.save(hubItem);
+            }
 
             return BaseResponseDto
                     .<HubInfoResponseDto>from(HttpStatus.OK.value(), HttpStatus.OK, HubMessage.HUB_UPDATED_SUCCESS.getMessage(), HubInfoResponseDto.from(hub));

@@ -43,4 +43,11 @@ public class HubItem implements Serializable {
             .longitude(hub.getLongitude())
             .build();
     }
+
+    public void updateRedis(Hub hub) {
+        this.name = hub.getName();
+        this.address = hub.getAddress();
+        this.latitude = hub.getLatitude();
+        this.longitude = hub.getLongitude();
+    }
 }
