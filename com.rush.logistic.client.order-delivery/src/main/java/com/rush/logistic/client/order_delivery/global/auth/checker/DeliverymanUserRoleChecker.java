@@ -51,7 +51,7 @@ public class DeliverymanUserRoleChecker extends UserRoleChecker<Deliveryman> {
      */
     private void checkDeliveryInCharge(Deliveryman deliveryman, Long userId) {
         if (!deliveryman.getUserId().equals(userId)) {
-            throw new BaseException(BasicCode.USER_NOT_ALLOWED_DELIVERY_ROUTE);
+            throw new BaseException(BasicCode.USER_NOT_ALLOWED_DELIVERYMAN);
         }
     }
 
