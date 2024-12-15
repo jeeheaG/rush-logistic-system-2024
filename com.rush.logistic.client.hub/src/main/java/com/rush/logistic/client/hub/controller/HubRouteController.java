@@ -36,7 +36,9 @@ public class HubRouteController {
     }
 
     @GetMapping
-    public ResponseEntity<BaseResponseDto<HubRouteInfoResponseDto>> getHubRouteInfo(@RequestBody HubPointRequestDto requestDto) {
+//    public ResponseEntity<BaseResponseDto<HubRouteInfoResponseDto>> getHubRouteInfo(@RequestBody HubPointRequestDto requestDto) {
+    public ResponseEntity<BaseResponseDto<HubRouteInfoResponseDto>> getHubRouteInfo(@RequestParam UUID startHubId, @RequestParam UUID endHubId) {
+        HubPointRequestDto requestDto = new HubPointRequestDto(startHubId, endHubId);
         BaseResponseDto<HubRouteInfoResponseDto> responseDto = hubRouteService.getHubRouteInfo(requestDto);
 
         return ResponseEntity.ok(responseDto);

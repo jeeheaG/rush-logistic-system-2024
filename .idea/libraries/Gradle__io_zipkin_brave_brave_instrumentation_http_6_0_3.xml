@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="Gradle: io.zipkin.brave:brave-instrumentation-http:6.0.3" type="java-imported" external-system-id="GRADLE">
+    <properties groupId="io.zipkin.brave" artifactId="brave-instrumentation-http" version="6.0.3" />
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/io.zipkin.brave/brave-instrumentation-http/6.0.3/bc58655bd14d2f8e8975c5951fecab202e1a1e5/brave-instrumentation-http-6.0.3.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

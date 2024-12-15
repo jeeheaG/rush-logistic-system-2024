@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="Gradle: io.zipkin.contrib.brave-propagation-w3c:brave-propagation-tracecontext:0.2.0" type="java-imported" external-system-id="GRADLE">
+    <properties groupId="io.zipkin.contrib.brave-propagation-w3c" artifactId="brave-propagation-tracecontext" version="0.2.0" />
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/io.zipkin.contrib.brave-propagation-w3c/brave-propagation-tracecontext/0.2.0/bdc26787eb3bf99e7172b53df4e170e9a067b44/brave-propagation-tracecontext-0.2.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
