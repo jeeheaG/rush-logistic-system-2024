@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Getter
 @Builder
@@ -14,7 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class SlackInfoResponseDto {
 
-    private Long slackId;
+    private UUID Id;
     private String message;
     private String sendUserId;
     private String receiveUserId;
@@ -25,7 +26,7 @@ public class SlackInfoResponseDto {
 
     public static SlackInfoResponseDto from(SlackEntity slack) {
         return SlackInfoResponseDto.builder()
-                .slackId(slack.getSlackId())
+                .Id(slack.getId())
                 .message(slack.getMessage())
                 .sendUserId(slack.getSendUserId())
                 .receiveUserId(slack.getReceiveUserSlackId())

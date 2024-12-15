@@ -44,9 +44,6 @@ public class User extends BaseEntity {
     @Column(name = "company_id", unique = true)
     private UUID companyId;
 
-    @Column(name = "delivery_id", unique = true)
-    private UUID deliveryId;
-
     public void updateUser(UserUpdateRequestDto requestDto){
 
         Optional.ofNullable(requestDto.getUsername()).ifPresent(username -> this.username = username);
@@ -54,6 +51,5 @@ public class User extends BaseEntity {
         Optional.ofNullable(requestDto.getEmail()).ifPresent(email -> this.email = email);
         Optional.ofNullable(requestDto.getHubId()).ifPresent(huhId -> this.hubId = huhId);
         Optional.ofNullable(requestDto.getCompanyId()).ifPresent(companyId -> this.companyId = companyId);
-        Optional.ofNullable(requestDto.getDeliveryId()).ifPresent(deliveryId -> this.deliveryId = deliveryId);
     }
 }
