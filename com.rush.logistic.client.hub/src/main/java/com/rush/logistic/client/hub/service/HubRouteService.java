@@ -66,6 +66,7 @@ public class HubRouteService {
     private final String DIRECTION15_URL = "https://naveropenapi.apigw.ntruss.com/map-direction-15/v1/driving";
 
     private final HubRepository hubRepository;
+    private final HubItemRepository hubItemRepository;
     private final HubRouteRepository hubRouteRepository;
 
     @Transactional
@@ -140,27 +141,15 @@ public class HubRouteService {
         }
     }
 
-    public BaseResponseDto<HubRouteInfoResponseDto> getHubRouteInfo(UUID startHubId, UUID endHubId) {
+    public BaseResponseDto<HubRouteListResponseDto<HubRouteInfoResponseDto>> getHubRouteInfo(UUID startHubId, UUID endHubId) {
         try {
-            HubRoute hubRoute = hubRouteRepository.findByStartHubIdAndEndHubId(startHubId,
-                            endHubId)
-                    .orElseThrow(() ->
-                            new IllegalArgumentException(HubRouteMessage.HUB_ROUTE_NOT_FOUND.getMessage())
-                    );
+            HubRouteListResponseDto<HubRouteInfoResponseDto> responseDto = getHubToHubPath(HubPointRequestDto.from(startHubId, endHubId));
 
-            // soft delete된 허브 경로 입니다.
-            if (hubRoute.isDelete()){
+            if (responseDto.getHubRouteList().isEmpty()) {
                 return BaseResponseDto
-                        .from(HttpStatus.GONE.value(), HttpStatus.GONE, HubRouteMessage.HUB_ROUTE_ALREADY_DELETED.getMessage(), null);
+                        .from(HttpStatus.NOT_FOUND.value(), HttpStatus.NOT_FOUND,
+                                HubRouteMessage.HUB_ROUTE_NOT_CONNECTED.getMessage(), null);
             }
-
-            String startHubName = hubRepository.findById(startHubId).get().getName();
-            String startHubAddress = hubRepository.findById(startHubId).get().getAddress();
-            String endHubName = hubRepository.findById(endHubId).get().getName();
-            String endHubAddress = hubRepository.findById(endHubId).get().getAddress();
-
-            HubRouteInfoResponseDto responseDto = HubRouteInfoResponseDto.from(
-                    hubRoute, startHubName, startHubAddress, endHubName, endHubAddress);
 
             return BaseResponseDto
                     .from(HttpStatus.OK.value(), HttpStatus.OK, HubRouteMessage.HUB_ROUTE_FOUND.getMessage(),
@@ -681,11 +670,6 @@ public class HubRouteService {
     }
 
     public HubRouteListResponseDto<HubRouteInfoResponseDto> getHubToHubPath(HubPointRequestDto requestDto) {
-        Optional<HubRoute> hubRoute = hubRouteRepository.findByStartHubIdAndEndHubIdAndIsDeleteFalse(requestDto.getStartHubId(), requestDto.getEndHubId());
-
-        List<HubRouteInfoResponseDto> hubRouteInfoList = new ArrayList<>();
-
-        // Hub간 경로가 없음. -> 경유지가 필요함
         HubRouteListResponseDto<HubRouteInfoResponseDto> responseDto = dijkstra(requestDto.getStartHubId(), requestDto.getEndHubId());
 
         return responseDto;
@@ -778,6 +762,12 @@ public class HubRouteService {
         int totalDistance = 0;
         Long totalMilliseconds = 0L;
         String totalTimeTaken;
+
+        if(startHubIdx == -1){
+            totalTimeTaken = formatDuration(Duration.ofMillis(totalMilliseconds));
+            HubRouteListResponseDto<HubRouteInfoResponseDto> nothingResponseDto = HubRouteListResponseDto.from(hubRouteInfoResponseDtoList, totalDistance, totalMilliseconds, totalTimeTaken);
+            return nothingResponseDto;
+        }
 
         while(true) {
             if(startHubIdx == -1){
