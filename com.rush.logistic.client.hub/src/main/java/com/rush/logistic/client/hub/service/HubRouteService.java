@@ -116,10 +116,10 @@ public class HubRouteService {
         }
     }
 
-    public BaseResponseDto<HubRouteInfoResponseDto> getHubRouteInfo(HubPointRequestDto requestDto) {
+    public BaseResponseDto<HubRouteInfoResponseDto> getHubRouteInfo(UUID startHubId, UUID endHubId) {
         try {
-            HubRoute hubRoute = hubRouteRepository.findByStartHubIdAndEndHubId(requestDto.getStartHubId(),
-                            requestDto.getEndHubId())
+            HubRoute hubRoute = hubRouteRepository.findByStartHubIdAndEndHubId(startHubId,
+                            endHubId)
                     .orElseThrow(() ->
                             new IllegalArgumentException(HubRouteMessage.HUB_ROUTE_NOT_FOUND.getMessage())
                     );
@@ -130,10 +130,10 @@ public class HubRouteService {
                         .from(HttpStatus.GONE.value(), HttpStatus.GONE, HubRouteMessage.HUB_ROUTE_ALREADY_DELETED.getMessage(), null);
             }
 
-            String startHubName = hubRepository.findById(requestDto.getStartHubId()).get().getName();
-            String startHubAddress = hubRepository.findById(requestDto.getStartHubId()).get().getAddress();
-            String endHubName = hubRepository.findById(requestDto.getEndHubId()).get().getName();
-            String endHubAddress = hubRepository.findById(requestDto.getEndHubId()).get().getAddress();
+            String startHubName = hubRepository.findById(startHubId).get().getName();
+            String startHubAddress = hubRepository.findById(startHubId).get().getAddress();
+            String endHubName = hubRepository.findById(endHubId).get().getName();
+            String endHubAddress = hubRepository.findById(endHubId).get().getAddress();
 
             HubRouteInfoResponseDto responseDto = HubRouteInfoResponseDto.from(
                     hubRoute, startHubName, startHubAddress, endHubName, endHubAddress);
