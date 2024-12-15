@@ -2,7 +2,6 @@ package com.rush.logistic.client.order_delivery.global.auth.checker;
 
 import com.rush.logistic.client.order_delivery.domain.order.controller.client.UserClient;
 import com.rush.logistic.client.order_delivery.domain.order.controller.client.dto.response.GetUserInfoRes;
-import com.rush.logistic.client.order_delivery.domain.order.domain.Order;
 import com.rush.logistic.client.order_delivery.global.auth.UserInfo;
 import com.rush.logistic.client.order_delivery.global.auth.UserRole;
 import com.rush.logistic.client.order_delivery.global.exception.BaseException;

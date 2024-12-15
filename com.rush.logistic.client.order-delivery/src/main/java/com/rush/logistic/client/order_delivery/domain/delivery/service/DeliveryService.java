@@ -6,7 +6,8 @@ import com.rush.logistic.client.order_delivery.domain.delivery.domain.Delivery;
 import com.rush.logistic.client.order_delivery.domain.delivery.exception.DeliveryCode;
 import com.rush.logistic.client.order_delivery.domain.delivery.exception.DeliveryException;
 import com.rush.logistic.client.order_delivery.domain.delivery.repository.DeliveryRepository;
-import jakarta.persistence.EntityManager;
+import com.rush.logistic.client.order_delivery.domain.order.controller.client.dto.response.GetUserInfoRes;
+import com.rush.logistic.client.order_delivery.global.auth.checker.DeliveryUserRoleChecker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +19,7 @@ import java.util.UUID;
 @Service
 public class DeliveryService {
     private final DeliveryRepository deliveryRepository;
-    private final EntityManager entityManager;
+    private final DeliveryUserRoleChecker deliveryUserRoleChecker;
 
 //    /**
 //     * OrderService 쪽에서 호출됨
@@ -31,24 +32,30 @@ public class DeliveryService {
 //        return deliveryRepository.save(delivery);
 //    }
 
-    public DeliveryAllRes getDeliveryDetail(UUID deliveryId) {
+    public DeliveryAllRes getDeliveryDetail(UUID deliveryId, GetUserInfoRes getUserInfoRes) {
         Delivery delivery = getDeliveryEntityById(deliveryId);
+        deliveryUserRoleChecker.checkInCharge(delivery, getUserInfoRes);
+
         return DeliveryAllRes.fromEntity(delivery);
     }
 
     @Transactional
-    public DeliveryAllRes updateDelivery(UUID deliveryId, DeliveryAllReq requestDto) {
+    public DeliveryAllRes updateDelivery(UUID deliveryId, DeliveryAllReq requestDto, GetUserInfoRes getUserInfoRes) {
         Delivery delivery = getDeliveryEntityById(deliveryId);
+        deliveryUserRoleChecker.checkInCharge(delivery, getUserInfoRes);
+
         delivery.updateAll(requestDto);
-        entityManager.flush();
+        deliveryRepository.saveAndFlush(delivery);
 
         Delivery savedDelivery = getDeliveryEntityById(deliveryId);
         return DeliveryAllRes.fromEntity(savedDelivery);
     }
 
     @Transactional
-    public UUID deleteDelivery(UUID deliveryId, UUID userId) {
+    public UUID deleteDelivery(UUID deliveryId, Long userId, GetUserInfoRes getUserInfoRes) {
         Delivery delivery = getDeliveryEntityById(deliveryId);
+        deliveryUserRoleChecker.checkInCharge(delivery, getUserInfoRes);
+
         delivery.softDelete(userId.toString());
         return delivery.getId();
     }
