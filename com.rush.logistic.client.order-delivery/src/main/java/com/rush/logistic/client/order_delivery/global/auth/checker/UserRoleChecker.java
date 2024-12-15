@@ -16,6 +16,7 @@ import com.rush.logistic.client.order_delivery.global.response.BasicCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,6 +25,10 @@ import java.util.UUID;
 public class UserRoleChecker {
     private final UserClient userClient;
     private final DeliveryRouteRepository deliveryRouteRepository;
+
+    public GetUserInfoRes getUserAndCheckAllRole(UserInfo userInfo) {
+        return this.getUserAndCheckRole(getAllRoles(), userInfo);
+    }
 
     /**
      * 권한의 현재 유효성 확인, 허용 권한에 포함되어 있는지 확인
@@ -109,6 +114,10 @@ public class UserRoleChecker {
         if (!newRole.equals(checkRole)) {
             throw new BaseException(BasicCode.TOKEN_USER_ROLE_NOT_VALID);
         }
+    }
+
+    private List<UserRole> getAllRoles() {
+        return Arrays.asList(UserRole.MASTER, UserRole.HUB, UserRole.COMPANY, UserRole.DELIVERY);
     }
 
 }

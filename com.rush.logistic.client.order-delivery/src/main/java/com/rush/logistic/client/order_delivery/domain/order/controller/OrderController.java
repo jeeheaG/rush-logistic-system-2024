@@ -35,8 +35,7 @@ public class OrderController {
     @PostMapping
     public ResponseEntity<Object> createOrder(@UserInfoHeader UserInfo userInfo, @RequestBody OrderAndDeliveryCreateReq requestDto) {
         log.info("OrderController createOrder");
-
-        GetUserInfoRes getUserInfoRes = userRoleChecker.getUserAndCheckRole(getAllRoles(), userInfo);
+        GetUserInfoRes getUserInfoRes = userRoleChecker.getUserAndCheckAllRole(userInfo);
 
         OrderAllRes responseDto = orderCreateService.createDeliveryAndOrder(userInfo.getUserId(), requestDto);
         return ResponseEntity.ok().body(BaseResponse.toResponse(OrderCode.CREATE_ORDER_OK, responseDto));
@@ -45,8 +44,7 @@ public class OrderController {
     @GetMapping("/{orderId}")
     public ResponseEntity<Object> getOrderById(@UserInfoHeader UserInfo userInfo, @PathVariable UUID orderId) {
         log.info("OrderController getOrderById");
-
-        GetUserInfoRes getUserInfoRes = userRoleChecker.getUserAndCheckRole(getAllRoles(), userInfo);
+        GetUserInfoRes getUserInfoRes = userRoleChecker.getUserAndCheckAllRole(userInfo);
 
         OrderAllRes responseDto = orderService.getOrderDetail(orderId, getUserInfoRes);
         return ResponseEntity.ok().body(BaseResponse.toResponse(OrderCode.GET_ORDER_OK, responseDto));
@@ -55,7 +53,6 @@ public class OrderController {
     @PatchMapping("/{orderId}")
     public ResponseEntity<Object> updateOrder(@UserInfoHeader UserInfo userInfo, @PathVariable UUID orderId, @RequestBody OrderAllReq requestDto) {
         log.info("OrderController updateOrder");
-
         GetUserInfoRes getUserInfoRes = userRoleChecker.getUserAndCheckRole(Arrays.asList(UserRole.MASTER, UserRole.HUB), userInfo);
 
         OrderUpdateRes responseDto = orderService.updateOrder(orderId, requestDto, getUserInfoRes);
@@ -65,14 +62,10 @@ public class OrderController {
     @DeleteMapping("/{orderId}")
     public ResponseEntity<Object> deleteOrder(@UserInfoHeader UserInfo userInfo, @PathVariable UUID orderId) {
         log.info("OrderController deleteOrder");
-
         GetUserInfoRes getUserInfoRes = userRoleChecker.getUserAndCheckRole(Arrays.asList(UserRole.MASTER, UserRole.HUB), userInfo);
 
         UUID deletedId = orderService.deleteOrder(orderId, userInfo.getUserId(), getUserInfoRes);
         return ResponseEntity.ok().body(BaseResponse.toResponse(OrderCode.DELETE_ORDER_OK, OrderIdRes.toDto(deletedId)));
     }
 
-    private static List<UserRole> getAllRoles() {
-        return Arrays.asList(UserRole.MASTER, UserRole.HUB, UserRole.COMPANY, UserRole.DELIVERY);
-    }
 }
