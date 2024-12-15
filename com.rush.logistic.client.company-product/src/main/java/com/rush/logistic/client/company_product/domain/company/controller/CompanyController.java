@@ -54,7 +54,7 @@ public class CompanyController {
                                                       @RequestHeader(value = "USER_ID", required = true) String authenticatedUserId
     ) {
         Page<CompanyDto> companies = companyService.getAllCompany(name, hubId, companyType, pageable, sortType, role, authenticatedUserId);
-
+        System.out.println(role);
         return Response.success(companies, "업체 조회에 성공하였습니다.");
     }
 
