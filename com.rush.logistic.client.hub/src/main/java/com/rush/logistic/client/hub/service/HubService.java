@@ -10,6 +10,8 @@ import com.rush.logistic.client.hub.dto.HubListResponseDto;
 import com.rush.logistic.client.hub.dto.LatLonDto;
 import com.rush.logistic.client.hub.message.HubMessage;
 import com.rush.logistic.client.hub.model.Hub;
+import com.rush.logistic.client.hub.model.HubItem;
+import com.rush.logistic.client.hub.repository.HubItemRepository;
 import com.rush.logistic.client.hub.repository.HubRepository;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -49,28 +51,90 @@ public class HubService {
     private final String DIRECTION15_URL = "https://naveropenapi.apigw.ntruss.com/map-direction-15/v1/driving";
 
     private final HubRepository hubRepository;
+    private final HubItemRepository hubItemRepository;
 
     @Transactional
     public BaseResponseDto<HubIdResponseDto> createHub(HubInfoRequestDto requestDto) {
+        HubIdResponseDto responseDto = null;
         // TODO: MASTER USER 확인 로직 추가
+        try {
+            // 이미 추가된 허브인지 확인
+            if(hubItemRepository.existsByName(requestDto.getName())) {
+                //Redis에 있는지 먼저 확인
+                HubItem existHubItem = hubItemRepository.findByName(requestDto.getName());
+                responseDto = HubIdResponseDto.from(UUID.fromString(existHubItem.getHubId()));
 
-        // 네이버 API : 주소 -> 좌표 추출
-        String addressToCoordinatesResponse = getCoordinates(requestDto.getAddress());
-        LatLonDto latLonDto = extractCoordinates(addressToCoordinatesResponse);
+                // 중복된 허브명
+                return BaseResponseDto
+                        .<HubIdResponseDto>from(HttpStatus.OK.value(), HttpStatus.OK, HubMessage.HUB_NAME_DUPLICATED.getMessage(), responseDto);
+            }
+            else if (hubRepository.existsByNameAndIsDeleteFalse(requestDto.getName())) {
+                Hub existHub = hubRepository.findByName(requestDto.getName());
+                responseDto = HubIdResponseDto.from(existHub.getHubId());
 
-        // 허브 저장
-        Hub hub = hubRepository.save(Hub.from(requestDto, latLonDto));
-        // TODO: 저장 실패시 예외 처리 추가
+                // DB에 있는데 Redis에 캐싱 안되어있으면 redis에 추가
+                HubItem registHubItem = hubItemRepository.save(HubItem.to(existHub));
 
-        // 허브 생성 반환
-        HubIdResponseDto responseDto = HubIdResponseDto.from(hub.getHubId());
+                // 중복된 허브명
+                return BaseResponseDto
+                        .<HubIdResponseDto>from(HttpStatus.OK.value(), HttpStatus.OK, HubMessage.HUB_NAME_DUPLICATED.getMessage(), responseDto);
+            }
 
-        return BaseResponseDto
-                .<HubIdResponseDto>from(HttpStatus.CREATED.value(), HttpStatus.CREATED, HubMessage.HUB_CREATED_SUCCESS.getMessage(), responseDto);
+            if(hubItemRepository.existsByAddress(requestDto.getAddress())) {
+                //Redis에 있는지 먼저 확인
+                HubItem existHubItem = hubItemRepository.findByAddress(requestDto.getAddress());
+                responseDto = HubIdResponseDto.from(UUID.fromString(existHubItem.getHubId()));
+
+                // 중복된 허브명
+                return BaseResponseDto
+                        .<HubIdResponseDto>from(HttpStatus.OK.value(), HttpStatus.OK, HubMessage.HUB_ADDRESS_DUPLICATED.getMessage(), responseDto);
+            }
+            else if (hubRepository.existsByAddressAndIsDeleteFalse(requestDto.getAddress())) {
+
+                Hub existHub = hubRepository.findByAddress(requestDto.getName());
+                responseDto = HubIdResponseDto.from(existHub.getHubId());
+
+                // DB에 있는데 Redis에 캐싱 안되어있으면 redis에 추가
+                HubItem registHubItem = hubItemRepository.save(HubItem.to(existHub));
+
+                // 중복된 주소
+                return BaseResponseDto
+                        .<HubIdResponseDto>from(HttpStatus.OK.value(), HttpStatus.OK, HubMessage.HUB_ADDRESS_DUPLICATED.getMessage(), responseDto);
+            }
+
+            // 신규 HUB 생성 로직
+            // 네이버 API : 주소 -> 좌표 추출
+            String addressToCoordinatesResponse = getCoordinates(requestDto.getAddress());
+            LatLonDto latLonDto = extractCoordinates(addressToCoordinatesResponse);
+
+            // 허브 저장
+            Hub hub = hubRepository.save(Hub.from(requestDto, latLonDto));
+            hubItemRepository.save(HubItem.from(hub.getHubId(), requestDto, latLonDto));
+
+            // 허브 생성 반환
+            responseDto = HubIdResponseDto.from(hub.getHubId());
+
+            return BaseResponseDto
+                    .<HubIdResponseDto>from(HttpStatus.CREATED.value(), HttpStatus.CREATED, HubMessage.HUB_CREATED_SUCCESS.getMessage(), responseDto);
+        } catch (Exception e) {
+            return BaseResponseDto
+                    .<HubIdResponseDto>from(HttpStatus.INTERNAL_SERVER_ERROR.value(), HttpStatus.INTERNAL_SERVER_ERROR, HubMessage.HUB_SAVE_FAILED.getMessage(), null);
+        }
     }
 
     public BaseResponseDto<HubInfoResponseDto> getHubDetails(UUID hubId) {
+        HubInfoResponseDto responseDto = null;
         try {
+            if(hubItemRepository.existsById(String.valueOf(hubId))) {
+                //Redis에 있는지 먼저 확인
+                HubItem existHubItem = hubItemRepository.findById(String.valueOf(hubId)).get();
+                responseDto = HubInfoResponseDto.fromRedis(existHubItem);
+
+                // 중복된 허브명
+                return BaseResponseDto
+                        .<HubInfoResponseDto>from(HttpStatus.OK.value(), HttpStatus.OK, HubMessage.HUB_FOUND_SUCCESS.getMessage(), responseDto);
+            }
+
             // 허브 조회
             Hub hub = hubRepository.findById(hubId)
                     .orElseThrow(() ->
@@ -84,7 +148,10 @@ public class HubService {
             }
 
             // 허브 정보 반환
-            HubInfoResponseDto responseDto = HubInfoResponseDto.from(hub);
+            responseDto = HubInfoResponseDto.from(hub);
+
+            // Redis에 저장
+            HubItem hubItem = hubItemRepository.save(HubItem.to(hub));
 
             return BaseResponseDto
                     .<HubInfoResponseDto>from(HttpStatus.OK.value(), HttpStatus.OK, HubMessage.HUB_FOUND_SUCCESS.getMessage(), responseDto);
@@ -111,6 +178,16 @@ public class HubService {
                         .<HubInfoResponseDto>from(HttpStatus.GONE.value(), HttpStatus.GONE, HubMessage.HUB_ALREADY_DELETED.getMessage(), null);
             }
 
+            // 자기 자신을 제외한 이미 있는 hub이름, 주소 중복확인
+            if(hubRepository.existsByNameAndIsDeleteFalse(requestDto.getName()) && !hub.getName().equals(requestDto.getName())) {
+                return BaseResponseDto
+                        .<HubInfoResponseDto>from(HttpStatus.OK.value(), HttpStatus.OK, HubMessage.HUB_NAME_DUPLICATED.getMessage(), HubInfoResponseDto.from(hub));
+            }
+            if(hubRepository.existsByAddressAndIsDeleteFalse(requestDto.getAddress()) && !hub.getAddress().equals(requestDto.getAddress())) {
+                return BaseResponseDto
+                        .<HubInfoResponseDto>from(HttpStatus.OK.value(), HttpStatus.OK, HubMessage.HUB_ADDRESS_DUPLICATED.getMessage(), HubInfoResponseDto.from(hub));
+            }
+
             String originAddress = hub.getAddress();
             String updateAddress = requestDto.getAddress();
 
@@ -130,6 +207,16 @@ public class HubService {
 
             // 업데이트 저장
             hubRepository.save(hub);
+
+            // redis에 있다면 업데이트 내용 반영
+            if(hubItemRepository.existsById(String.valueOf(hubId))) {
+                HubItem hubItem = hubItemRepository.findById(String.valueOf(hubId)).get();
+                hubItem.updateRedis(hub);
+                hubItemRepository.save(hubItem);
+            } else {
+                // redis에 없다면 새로 추가
+                hubItemRepository.save(HubItem.to(hub));
+            }
 
             return BaseResponseDto
                     .<HubInfoResponseDto>from(HttpStatus.OK.value(), HttpStatus.OK, HubMessage.HUB_UPDATED_SUCCESS.getMessage(), HubInfoResponseDto.from(hub));
@@ -160,6 +247,11 @@ public class HubService {
 
             // 허브 삭제정보 저장
             hubRepository.save(hub);
+
+            // redis에 있다면 삭제
+            if(hubItemRepository.existsById(String.valueOf(hubId))) {
+                hubItemRepository.deleteById(String.valueOf(hubId));
+            }
 
             return BaseResponseDto
                     .<HubIdResponseDto>from(HttpStatus.OK.value(), HttpStatus.OK, HubMessage.HUB_DELETED_SUCCESS.getMessage(), HubIdResponseDto.from(hub.getHubId()));
