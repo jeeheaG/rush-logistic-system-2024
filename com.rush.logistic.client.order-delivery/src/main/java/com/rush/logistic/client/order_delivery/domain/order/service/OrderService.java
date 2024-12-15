@@ -29,7 +29,6 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 @Service
 public class OrderService {
-    private final EntityManager entityManager; // TODO : .saveAndFlush() 로 대체?
     private final OrderRepository orderRepository;
     private final DeliveryRepository deliveryRepository;
     private final DeliveryRouteRepository deliveryRouteRepository;
@@ -52,7 +51,7 @@ public class OrderService {
         userRoleChecker.checkInCharge(order, getUserInfoRes);
 
         order.updateAll(requestDto, delivery);
-        entityManager.flush();
+        orderRepository.saveAndFlush(order);
 
         Order orderSaved = getOrderEntityById(orderId);
         return OrderUpdateRes.fromEntity(orderSaved);
