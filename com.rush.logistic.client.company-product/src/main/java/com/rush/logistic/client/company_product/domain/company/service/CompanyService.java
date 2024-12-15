@@ -9,12 +9,14 @@ import com.rush.logistic.client.company_product.domain.company.dto.response.Comp
 import com.rush.logistic.client.company_product.domain.company.entity.Company;
 import com.rush.logistic.client.company_product.domain.company.repository.CompanyRepository;
 import com.rush.logistic.client.company_product.global.client.UserClient;
+import com.rush.logistic.client.company_product.global.client.UserRoleEnum;
 import com.rush.logistic.client.company_product.global.client.UserResponseDto;
 import com.rush.logistic.client.company_product.global.exception.ApplicationException;
 import com.rush.logistic.client.company_product.global.exception.ErrorCode;
 import com.rush.logistic.client.company_product.global.exception.Response;
 import com.rush.logistic.client.company_product.global.type.CompanyType;
 import jakarta.persistence.EntityManager;
+import jakarta.ws.rs.ForbiddenException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -42,7 +44,22 @@ public class CompanyService {
     @Transactional
     public CompanyDto createCompany(CompanyCreateRequest request, String role, String authenticatedUserId) {
         Response<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
-        // TODO: MASTER, HUB-MANAGER 확인 로직 추가
+        UserResponseDto userResponseDto = response.getResult();
+
+        // 관리자(MASTER) 권한 체크
+        if (UserRoleEnum.MASTER.getRole().equals(role)) {
+            // 관리자는 모든 업체 생성 가능
+        } else if (UserRoleEnum.HUB.getRole().equals(role)) {
+            // 허브 매니저 권한 체크
+            if (userResponseDto.getHubId().equals(request.hubId())) {
+            } else {
+                throw new ForbiddenException("해당 업체에 대한 관리자 권한이 없습니다.");
+            }
+        } else {
+            // 일반 사용자는 업체 생성 불가
+            throw new ForbiddenException("업체 생성 권한이 없습니다.");
+        }
+
         CompanyDto dto = CompanyCreateRequest.toDto(request);
 
         Optional<Company> company = companyRepository.findByName(dto.name());
@@ -132,7 +149,26 @@ public class CompanyService {
     public CompanyDto updateCompany(UUID id, CompanyUpdateRequest request, String role, String authenticatedUserId) {
 
         Response<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
+        UserResponseDto userResponseDto = response.getResult();
 
+        // 관리자(MASTER) 권한 체크
+        if (UserRoleEnum.MASTER.getRole().equals(role)) {
+            // 관리자는 모든 업체 생성 가능
+        } else if (UserRoleEnum.HUB.getRole().equals(role)) {
+            // 허브 매니저 권한 체크
+            if (userResponseDto.getHubId().equals(request.hubId())) {
+            } else {
+                throw new ForbiddenException("해당 업체에 대한 관리자 권한이 없습니다.");
+            }
+        } else if (UserRoleEnum.HUB.getRole().equals(role)) {
+            if (userResponseDto.getCompanyId().equals(companyRepository.findById(id))) {
+            } else {
+                throw new ForbiddenException("해당 업체에 대한 관리자 권한이 없습니다.");
+            }
+        } else {
+            // 일반 사용자는 업체 생성 불가
+            throw new ForbiddenException("업체 수정 권한이 없습니다.");
+        }
         Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.COMPANY_NOT_FOUND));
 
@@ -160,7 +196,21 @@ public class CompanyService {
     public void deleteCompany(UUID id, String role, String authenticatedUserId) {
 
         Response<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
+        UserResponseDto userResponseDto = response.getResult();
 
+        // 관리자(MASTER) 권한 체크
+        if (UserRoleEnum.MASTER.getRole().equals(role)) {
+            // 관리자는 모든 업체 생성 가능
+        } else if (UserRoleEnum.HUB.getRole().equals(role)) {
+            // 허브 매니저 권한 체크
+            if (userResponseDto.getHubId().equals(companyRepository.findById(id))) {
+            } else {
+                throw new ForbiddenException("해당 업체에 대한 관리자 권한이 없습니다.");
+            }
+        } else {
+            // 일반 사용자는 업체 생성 불가
+            throw new ForbiddenException("업체 삭제 권한이 없습니다.");
+        }
         Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.INVALID_REQUEST));
         if (company.getIsDelete()){

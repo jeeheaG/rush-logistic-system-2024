@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Getter
 @Builder
 @NoArgsConstructor
@@ -17,4 +19,7 @@ public class UserResponseDto {
     private String slackId;
     private String role;
     private String email;
+    private String hubId;
+    private String companyId;
+    private String deliveryId;
 }
