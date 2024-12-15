@@ -5,9 +5,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface SlackRepositoryCustom {
     Page<SlackInfoResponseDto> findAll(Pageable pageable, int size);
     List<SlackInfoResponseDto> findByMessage(String message);
-    SlackInfoResponseDto findBySlackId(Long slackId);
+    SlackInfoResponseDto findBySlackId(UUID slackId);
 }

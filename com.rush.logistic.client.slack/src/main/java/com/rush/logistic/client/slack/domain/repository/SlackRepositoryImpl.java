@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
 import java.util.List;
+import java.util.UUID;
 
 import static com.rush.logistic.client.slack.domain.entity.QSlackEntity.slackEntity;
 
@@ -33,7 +34,7 @@ public class SlackRepositoryImpl extends QuerydslRepositorySupport implements Sl
                 .select(
                         Projections.fields(
                                 SlackInfoResponseDto.class,
-                                slackEntity.slackId,
+                                slackEntity.id,
                                 slackEntity.message,
                                 slackEntity.sendUserId,
                                 slackEntity.receiveUserSlackId,
@@ -68,7 +69,7 @@ public class SlackRepositoryImpl extends QuerydslRepositorySupport implements Sl
                 .select(
                         Projections.fields(
                                 SlackInfoResponseDto.class,
-                                slackEntity.slackId,
+                                slackEntity.id,
                                 slackEntity.message,
                                 slackEntity.sendUserId,
                                 slackEntity.receiveUserSlackId,
@@ -87,12 +88,12 @@ public class SlackRepositoryImpl extends QuerydslRepositorySupport implements Sl
     }
 
     @Override
-    public SlackInfoResponseDto findBySlackId(Long slackId) {
+    public SlackInfoResponseDto findBySlackId(UUID slackId) {
         return queryFactory
                 .select(
                         Projections.fields(
                                 SlackInfoResponseDto.class,
-                                slackEntity.slackId,
+                                slackEntity.id,
                                 slackEntity.message,
                                 slackEntity.sendUserId,
                                 slackEntity.receiveUserSlackId,
@@ -105,7 +106,7 @@ public class SlackRepositoryImpl extends QuerydslRepositorySupport implements Sl
                 .from(slackEntity)
                 .where(
                         slackEntity.deletedAt.isNull()
-                                .and(slackEntity.slackId.eq(slackId))
+                                .and(slackEntity.id.eq(slackId))
                 )
                 .fetchOne();
     }

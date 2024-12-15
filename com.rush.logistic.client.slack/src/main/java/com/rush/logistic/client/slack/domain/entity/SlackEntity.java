@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -17,16 +18,17 @@ import java.util.Optional;
 public class SlackEntity extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long slackId;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "slack_id", updatable = false, nullable = false)
+    private UUID id;
 
     @Column(name = "message")
     private String message;
 
-    @Column(name = "sendUserId")
+    @Column(name = "send_User_Id")
     private String sendUserId;
 
-    @Column(name = "receiveUserSlackId")
+    @Column(name = "receive_User_Slack_Id")
     private String receiveUserSlackId;
 
     public void updateSlackEntity(SlackUpdateRequestDto requestDto){
