@@ -21,18 +21,18 @@ import java.util.UUID;
 public class DeliveryRouteController {
     private final DeliveryRouteService deliveryRouteService;
 
-    /**
-     * 임시 api - 아마 api없이 배달 쪽에서 내부호출 될 예정
-     * @param requestDto
-     * @return
-     */
-    @PostMapping
-    public ResponseEntity<Object> createDeliveryRoute(@RequestBody DeliveryRouteCreateReq requestDto) {
-        log.info("DeliveryRouteController createDeliveryRoute");
-
-        DeliveryRouteAllRes responseDto = deliveryRouteService.createDeliveryRoute(requestDto);
-        return ResponseEntity.ok().body(BaseResponse.toResponse(DeliveryRouteCode.CREATE_DELIVERY_ROUTE_OK, responseDto));
-    }
+//    /**
+//     * 임시 api - api없이 주문or배달 쪽에서 내부호출 될 예정
+//     * @param requestDto
+//     * @return
+//     */
+//    @PostMapping
+//    public ResponseEntity<Object> createDeliveryRoute(@RequestBody DeliveryRouteCreateReq requestDto) {
+//        log.info("DeliveryRouteController createDeliveryRoute");
+//
+//        DeliveryRouteAllRes responseDto = deliveryRouteService.createDeliveryRoute(requestDto);
+//        return ResponseEntity.ok().body(BaseResponse.toResponse(DeliveryRouteCode.CREATE_DELIVERY_ROUTE_OK, responseDto));
+//    }
 
     @GetMapping("/{deliveryRouteId}")
     public ResponseEntity<Object> getDeliveryRouteById(@PathVariable UUID deliveryRouteId) {

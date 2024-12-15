@@ -1,9 +1,10 @@
 package com.rush.logistic.client.order_delivery.domain.order.controller;
 
 import com.rush.logistic.client.order_delivery.domain.order.controller.dto.request.OrderAllReq;
-import com.rush.logistic.client.order_delivery.domain.order.controller.dto.request.OrderAndDeliveryAllReq;
+import com.rush.logistic.client.order_delivery.domain.order.controller.dto.request.OrderAndDeliveryCreateReq;
 import com.rush.logistic.client.order_delivery.domain.order.controller.dto.response.OrderAllRes;
 import com.rush.logistic.client.order_delivery.domain.order.controller.dto.response.OrderIdRes;
+import com.rush.logistic.client.order_delivery.domain.order.controller.dto.response.OrderUpdateRes;
 import com.rush.logistic.client.order_delivery.domain.order.service.OrderService;
 import com.rush.logistic.client.order_delivery.global.response.BaseResponse;
 import com.rush.logistic.client.order_delivery.domain.order.exception.OrderCode;
@@ -22,7 +23,7 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping
-    public ResponseEntity<Object> createOrder(@RequestBody OrderAndDeliveryAllReq requestDto) {
+    public ResponseEntity<Object> createOrder(@RequestBody OrderAndDeliveryCreateReq requestDto) {
         log.info("OrderController createOrder");
 
         OrderAllRes responseDto = orderService.createDeliveryAndOrder(requestDto);
@@ -41,7 +42,7 @@ public class OrderController {
     public ResponseEntity<Object> updateOrder(@PathVariable UUID orderId, @RequestBody OrderAllReq requestDto) {
         log.info("OrderController updateOrder");
 
-        OrderAllRes responseDto = orderService.updateOrder(orderId, requestDto);
+        OrderUpdateRes responseDto = orderService.updateOrder(orderId, requestDto);
         return ResponseEntity.ok().body(BaseResponse.toResponse(OrderCode.UPDATE_ORDER_OK, responseDto));
     }
 

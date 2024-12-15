@@ -5,13 +5,13 @@ import com.rush.logistic.client.slack.domain.client.UserResponseDto;
 import com.rush.logistic.client.slack.domain.dto.SlackInfoResponseDto;
 import com.rush.logistic.client.slack.domain.dto.SlackRequestDto;
 import com.rush.logistic.client.slack.domain.dto.SlackUpdateRequestDto;
-import com.rush.logistic.client.slack.domain.dto.SlackUpdateResponseDto;
 import com.rush.logistic.client.slack.domain.entity.SlackEntity;
 import com.rush.logistic.client.slack.domain.global.ApiResponse;
 import com.rush.logistic.client.slack.domain.global.exception.slack.NotFoundSlackException;
 import com.rush.logistic.client.slack.domain.global.exception.slack.NotFoundSlackIdException;
 import com.rush.logistic.client.slack.domain.global.exception.slack.SlackSendErrorException;
 import com.rush.logistic.client.slack.domain.repository.SlackRepository;
+import com.rush.logistic.client.slack.domain.repository.SlackRepositoryImpl;
 import com.slack.api.Slack;
 import com.slack.api.methods.MethodsClient;
 import com.slack.api.methods.SlackApiException;
@@ -31,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.util.List;
 
 
 @Service
@@ -41,6 +42,7 @@ public class SlackService {
 
     private final SlackRepository slackRepository;
     private final UserClient userClient;
+    private final SlackRepositoryImpl slackRepositoryImpl;
 
     @Value(value = "${slack.token}")
     String slackToken;
@@ -118,16 +120,14 @@ public class SlackService {
 
         ApiResponse<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
 
-        return slackRepository.findAll(pageable).map(SlackInfoResponseDto::from);
+        return slackRepositoryImpl.findAll(pageable,size);
     }
 
     public SlackInfoResponseDto getSlack(String role, String authenticatedUserId, String slackId) {
 
         ApiResponse<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
 
-        SlackEntity slackentity = slackRepository.findById(Long.valueOf(slackId)).orElseThrow(NotFoundSlackException::new);
-
-        return SlackInfoResponseDto.from(slackentity);
+        return slackRepositoryImpl.findBySlackId(Long.valueOf(slackId));
     }
 
     @Transactional(readOnly = false)
@@ -155,4 +155,23 @@ public class SlackService {
 
         return SlackInfoResponseDto.from(slackentity);
     }
+
+    public List<SlackInfoResponseDto> getSlackByMessage(String role, String authenticatedUserId, String message) {
+
+        ApiResponse<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
+
+        return slackRepositoryImpl.findByMessage(message);
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+

@@ -13,6 +13,7 @@ public class ApiResponse<T> {
     private boolean success;
     private HttpStatus httpStatus;
     private List<String> errorMessages;
+    private String errorMessage;
     private T data;
 
     public static <T> ApiResponse<?> ok(T data) {
@@ -40,6 +41,16 @@ public class ApiResponse<T> {
                 .success(false)
                 .httpStatus(status)
                 .errorMessages(errorMessages)
+                .data(null)
+                .build();
+    }
+
+    public static ApiResponse<?> noContent() {
+
+        return ApiResponse.builder()
+                .success(false)
+                .httpStatus(HttpStatus.NO_CONTENT)
+                .errorMessage("NO CONTENT")
                 .data(null)
                 .build();
     }

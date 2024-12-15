@@ -6,8 +6,8 @@ import com.rush.logistic.client.domain.user.enums.UserRoleEnum;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 
 @Entity
@@ -36,10 +36,24 @@ public class User extends BaseEntity {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
+    //
+
+    @Column(name = "hub_id", unique = true)
+    private UUID hubId;
+
+    @Column(name = "company_id", unique = true)
+    private UUID companyId;
+
+    @Column(name = "delivery_id", unique = true)
+    private UUID deliveryId;
+
     public void updateUser(UserUpdateRequestDto requestDto){
 
         Optional.ofNullable(requestDto.getUsername()).ifPresent(username -> this.username = username);
         Optional.ofNullable(requestDto.getRole()).ifPresent(role -> this.role = role);
         Optional.ofNullable(requestDto.getEmail()).ifPresent(email -> this.email = email);
+        Optional.ofNullable(requestDto.getHubId()).ifPresent(huhId -> this.hubId = huhId);
+        Optional.ofNullable(requestDto.getCompanyId()).ifPresent(companyId -> this.companyId = companyId);
+        Optional.ofNullable(requestDto.getDeliveryId()).ifPresent(deliveryId -> this.deliveryId = deliveryId);
     }
 }
