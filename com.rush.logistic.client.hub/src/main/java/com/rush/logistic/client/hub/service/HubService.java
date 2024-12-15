@@ -61,17 +61,16 @@ public class HubService {
         // TODO: MASTER USER 확인 로직 추가
         try {
             // 이미 추가된 허브인지 확인
-            if (hubRepository.existsByName(requestDto.getName())) {
-                if(hubItemRepository.existsByName(requestDto.getName())) {
-                    //Redis에 있는지 먼저 확인
-                    HubItem existHubItem = hubItemRepository.findByName(requestDto.getName());
-                    responseDto = HubIdResponseDto.from(UUID.fromString(existHubItem.getHubId()));
+            if(hubItemRepository.existsByName(requestDto.getName())) {
+                //Redis에 있는지 먼저 확인
+                HubItem existHubItem = hubItemRepository.findByName(requestDto.getName());
+                responseDto = HubIdResponseDto.from(UUID.fromString(existHubItem.getHubId()));
 
-                    // 중복된 허브명
-                    return BaseResponseDto
-                            .<HubIdResponseDto>from(HttpStatus.OK.value(), HttpStatus.OK, HubMessage.HUB_NAME_DUPLICATED.getMessage(), responseDto);
-                }
-
+                // 중복된 허브명
+                return BaseResponseDto
+                        .<HubIdResponseDto>from(HttpStatus.OK.value(), HttpStatus.OK, HubMessage.HUB_NAME_DUPLICATED.getMessage(), responseDto);
+            }
+            else if (hubRepository.existsByName(requestDto.getName())) {
                 Hub existHub = hubRepository.findByName(requestDto.getName());
                 responseDto = HubIdResponseDto.from(existHub.getHubId());
 
@@ -82,16 +81,17 @@ public class HubService {
                 return BaseResponseDto
                         .<HubIdResponseDto>from(HttpStatus.OK.value(), HttpStatus.OK, HubMessage.HUB_NAME_DUPLICATED.getMessage(), responseDto);
             }
-            if (hubRepository.existsByAddress(requestDto.getAddress())) {
-                if(hubItemRepository.existsByAddress(requestDto.getAddress())) {
-                    //Redis에 있는지 먼저 확인
-                    HubItem existHubItem = hubItemRepository.findByAddress(requestDto.getAddress());
-                    responseDto = HubIdResponseDto.from(UUID.fromString(existHubItem.getHubId()));
 
-                    // 중복된 허브명
-                    return BaseResponseDto
-                            .<HubIdResponseDto>from(HttpStatus.OK.value(), HttpStatus.OK, HubMessage.HUB_NAME_DUPLICATED.getMessage(), responseDto);
-                }
+            if(hubItemRepository.existsByAddress(requestDto.getAddress())) {
+                //Redis에 있는지 먼저 확인
+                HubItem existHubItem = hubItemRepository.findByAddress(requestDto.getAddress());
+                responseDto = HubIdResponseDto.from(UUID.fromString(existHubItem.getHubId()));
+
+                // 중복된 허브명
+                return BaseResponseDto
+                        .<HubIdResponseDto>from(HttpStatus.OK.value(), HttpStatus.OK, HubMessage.HUB_ADDRESS_DUPLICATED.getMessage(), responseDto);
+            }
+            else if (hubRepository.existsByAddress(requestDto.getAddress())) {
 
                 Hub existHub = hubRepository.findByAddress(requestDto.getName());
                 responseDto = HubIdResponseDto.from(existHub.getHubId());
