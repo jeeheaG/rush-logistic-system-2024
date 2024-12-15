@@ -12,9 +12,9 @@ public interface HubRepository extends JpaRepository<Hub, UUID> {
     Optional<Page<Hub>> findPagedByIsDeleteFalse(Pageable pageable);
     Optional<List<Hub>> findAllAsListByIsDeleteFalse();
 
-    boolean existsByAddress(String address);
+    boolean existsByAddressAndIsDeleteFalse(String address);
 
-    boolean existsByName(String name);
+    boolean existsByNameAndIsDeleteFalse(String name);
 
     Hub findByName(String name);
 

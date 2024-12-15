@@ -2,7 +2,6 @@ package com.rush.logistic.client.hub.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.netflix.discovery.converters.Auto;
 import com.rush.logistic.client.hub.dto.BaseResponseDto;
 import com.rush.logistic.client.hub.dto.HubIdResponseDto;
 import com.rush.logistic.client.hub.dto.HubInfoRequestDto;
@@ -20,7 +19,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -70,7 +68,7 @@ public class HubService {
                 return BaseResponseDto
                         .<HubIdResponseDto>from(HttpStatus.OK.value(), HttpStatus.OK, HubMessage.HUB_NAME_DUPLICATED.getMessage(), responseDto);
             }
-            else if (hubRepository.existsByName(requestDto.getName())) {
+            else if (hubRepository.existsByNameAndIsDeleteFalse(requestDto.getName())) {
                 Hub existHub = hubRepository.findByName(requestDto.getName());
                 responseDto = HubIdResponseDto.from(existHub.getHubId());
 
@@ -91,7 +89,7 @@ public class HubService {
                 return BaseResponseDto
                         .<HubIdResponseDto>from(HttpStatus.OK.value(), HttpStatus.OK, HubMessage.HUB_ADDRESS_DUPLICATED.getMessage(), responseDto);
             }
-            else if (hubRepository.existsByAddress(requestDto.getAddress())) {
+            else if (hubRepository.existsByAddressAndIsDeleteFalse(requestDto.getAddress())) {
 
                 Hub existHub = hubRepository.findByAddress(requestDto.getName());
                 responseDto = HubIdResponseDto.from(existHub.getHubId());
@@ -111,7 +109,7 @@ public class HubService {
 
             // 허브 저장
             Hub hub = hubRepository.save(Hub.from(requestDto, latLonDto));
-            HubItem hubItem = hubItemRepository.save(HubItem.from(hub.getHubId(), requestDto, latLonDto));
+            hubItemRepository.save(HubItem.from(hub.getHubId(), requestDto, latLonDto));
 
             // 허브 생성 반환
             responseDto = HubIdResponseDto.from(hub.getHubId());
@@ -181,11 +179,11 @@ public class HubService {
             }
 
             // 자기 자신을 제외한 이미 있는 hub이름, 주소 중복확인
-            if(hubRepository.existsByName(requestDto.getName()) && !hub.getName().equals(requestDto.getName())) {
+            if(hubRepository.existsByNameAndIsDeleteFalse(requestDto.getName()) && !hub.getName().equals(requestDto.getName())) {
                 return BaseResponseDto
                         .<HubInfoResponseDto>from(HttpStatus.OK.value(), HttpStatus.OK, HubMessage.HUB_NAME_DUPLICATED.getMessage(), HubInfoResponseDto.from(hub));
             }
-            if(hubRepository.existsByAddress(requestDto.getAddress()) && !hub.getAddress().equals(requestDto.getAddress())) {
+            if(hubRepository.existsByAddressAndIsDeleteFalse(requestDto.getAddress()) && !hub.getAddress().equals(requestDto.getAddress())) {
                 return BaseResponseDto
                         .<HubInfoResponseDto>from(HttpStatus.OK.value(), HttpStatus.OK, HubMessage.HUB_ADDRESS_DUPLICATED.getMessage(), HubInfoResponseDto.from(hub));
             }
@@ -217,8 +215,7 @@ public class HubService {
                 hubItemRepository.save(hubItem);
             } else {
                 // redis에 없다면 새로 추가
-                HubItem hubItem = hubItemRepository.save(HubItem.to(hub));
-                hubItemRepository.save(hubItem);
+                hubItemRepository.save(HubItem.to(hub));
             }
 
             return BaseResponseDto
@@ -250,6 +247,11 @@ public class HubService {
 
             // 허브 삭제정보 저장
             hubRepository.save(hub);
+
+            // redis에 있다면 삭제
+            if(hubItemRepository.existsById(String.valueOf(hubId))) {
+                hubItemRepository.deleteById(String.valueOf(hubId));
+            }
 
             return BaseResponseDto
                     .<HubIdResponseDto>from(HttpStatus.OK.value(), HttpStatus.OK, HubMessage.HUB_DELETED_SUCCESS.getMessage(), HubIdResponseDto.from(hub.getHubId()));

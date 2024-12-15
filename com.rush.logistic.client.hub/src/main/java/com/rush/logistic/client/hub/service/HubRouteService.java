@@ -68,26 +68,25 @@ public class HubRouteService {
 
     @Transactional
     public BaseResponseDto<HubRouteIdResponseDto> createHubRoute(HubPointRequestDto requestDto) {
-        // TODO: 미리 구해둔 허브간 경로 정보가 있는지 확인 없다면 아래 로직 수행
-        // TODO: 미리 구해둔 허브간 경로가 오래되었다면 아래 로직 수행해서 갱신
+        HubRouteIdResponseDto responseDto = null;
         // TODO: MASTER USER 확인 로직 추가
         try {
-            // TODO: 이미 생성한 경로는 다시 생성할 필요 없음
-            // TODO: 이미 생성한 경로가 soft delete되었다면 다시 생성해야함.
-            // TODO: 일정 주기로 소요시간이 업데이트 될 순 있을거 같다.
+            if(hubRouteRepository.findByStartHubIdAndEndHubIdAndIsDeleteFalse(requestDto.getStartHubId(), requestDto.getEndHubId()).isPresent()){
+                // 이미 생성한 경로는 다시 생성할 필요 없음
+                HubRoute existHubRoute = hubRouteRepository.findByStartHubIdAndEndHubIdAndIsDeleteFalse(requestDto.getStartHubId(), requestDto.getEndHubId()).get();
 
+                responseDto = HubRouteIdResponseDto.from(existHubRoute.getHubRouteId());
+                return BaseResponseDto
+                        .from(HttpStatus.OK.value(), HttpStatus.OK, HubRouteMessage.HUB_ROUTE_ALREADY_CREATED.getMessage(), responseDto);
+            }
+            // TODO: 미리 구해둔 허브간 경로가 오래되었다면 아래 로직 수행해서 갱신
+            // TODO: 일정 주기로 소요시간이 업데이트 될 순 있을거 같다.
 
             // 주소 추출
             String startAddress = extractAddress(requestDto.getStartHubId());
             String endAddress = extractAddress(requestDto.getEndHubId());
 
             // 네어지 지도 요청
-//            String startAddressToCoordinatesResponse = getCoordinates(startAddress);
-//            String endAddressToCoordinatesResponse = getCoordinates(endAddress);
-
-//            LatLonDto startLatLon = extractCoordinates(startAddressToCoordinatesResponse);
-//            LatLonDto endLatLon = extractCoordinates(endAddressToCoordinatesResponse);
-
             String startLat = String.valueOf(hubRepository.findById(requestDto.getStartHubId()).get().getLatitude());
             String startLon = String.valueOf(hubRepository.findById(requestDto.getStartHubId()).get().getLongitude());
             String endLat = String.valueOf(hubRepository.findById(requestDto.getEndHubId()).get().getLatitude());
@@ -106,7 +105,7 @@ public class HubRouteService {
             HubRoute hubRoute = hubRouteRepository.save(HubRoute.from(requestDto, timeTaken, distance, timeTakenAndDistDto.getTimeTaken()));
 
             // 허브 경로 생성 반환
-            HubRouteIdResponseDto responseDto = HubRouteIdResponseDto.from(hubRoute.getHubRouteId());
+            responseDto = HubRouteIdResponseDto.from(hubRoute.getHubRouteId());
 
             return BaseResponseDto
                     .from(HttpStatus.CREATED.value(), HttpStatus.CREATED, HubRouteMessage.HUB_ROUTE_CREATED_SUCCESS.getMessage(), responseDto);
@@ -440,7 +439,8 @@ public class HubRouteService {
                     hubRepository.findById(requestDto.getStartHubId()).get().getName(),
                     hubRepository.findById(requestDto.getStartHubId()).get().getAddress(),
                     hubRepository.findById(requestDto.getEndHubId()).get().getName(),
-                    hubRepository.findById(requestDto.getEndHubId()).get().getAddress());
+                    hubRepository.findById(requestDto.getEndHubId()).get().getAddress()
+            );
 
 
             List<HubRouteInfoResponseDto> hubRouteList = new ArrayList<>();
@@ -659,21 +659,6 @@ public class HubRouteService {
         Optional<HubRoute> hubRoute = hubRouteRepository.findByStartHubIdAndEndHubIdAndIsDeleteFalse(requestDto.getStartHubId(), requestDto.getEndHubId());
 
         List<HubRouteInfoResponseDto> hubRouteInfoList = new ArrayList<>();
-
-        if (hubRoute.isPresent()) {
-            // Hub간 직접 연결되어 있음.
-            String startHubName = hubRepository.findById(requestDto.getStartHubId()).get().getName();
-            String startHubAddress = hubRepository.findById(requestDto.getStartHubId()).get().getAddress();
-            String endHubName = hubRepository.findById(requestDto.getEndHubId()).get().getName();
-            String endHubAddress = hubRepository.findById(requestDto.getEndHubId()).get().getAddress();
-
-            HubRouteInfoResponseDto hubRouteInfoRes = HubRouteInfoResponseDto.from(
-                    hubRoute.get(), startHubName, startHubAddress, endHubName, endHubAddress);
-
-            hubRouteInfoList.add(hubRouteInfoRes);
-
-            return HubRouteListResponseDto.from(hubRouteInfoList, hubRoute.get().getDistance(), Long.parseLong(hubRoute.get().getMilliseconds()), hubRoute.get().getTimeTaken());
-        }
 
         // Hub간 경로가 없음. -> 경유지가 필요함
         HubRouteListResponseDto<HubRouteInfoResponseDto> responseDto = dijkstra(requestDto.getStartHubId(), requestDto.getEndHubId());
