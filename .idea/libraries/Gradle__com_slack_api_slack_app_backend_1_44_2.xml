@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="Gradle: com.slack.api:slack-app-backend:1.44.2" type="java-imported" external-system-id="GRADLE">
+    <properties groupId="com.slack.api" artifactId="slack-app-backend" version="1.44.2" />
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.slack.api/slack-app-backend/1.44.2/3d94b6f9edef3287ebb2b7ff429040e2c4bf7055/slack-app-backend-1.44.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

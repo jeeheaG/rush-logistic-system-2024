@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="Gradle: com.slack.api:bolt:1.44.2" type="java-imported" external-system-id="GRADLE">
+    <properties groupId="com.slack.api" artifactId="bolt" version="1.44.2" />
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.slack.api/bolt/1.44.2/ab18cbbd065dd6df425417dc01e04249597842d0/bolt-1.44.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

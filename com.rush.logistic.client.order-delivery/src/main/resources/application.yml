@@ -26,3 +26,13 @@ eureka:
     service-url:
       defaultZone: http://localhost:19090/eureka/
 
+
+# feign log
+feign:
+  client:
+    config:
+      default:
+        loggerLevel: full
+logging:
+  level:
+    com.rush.logistic : debug
