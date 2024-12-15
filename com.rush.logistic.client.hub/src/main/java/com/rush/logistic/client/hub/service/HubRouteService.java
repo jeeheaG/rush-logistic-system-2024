@@ -15,7 +15,9 @@ import com.rush.logistic.client.hub.message.HubMessage;
 import com.rush.logistic.client.hub.message.HubName;
 import com.rush.logistic.client.hub.message.HubRouteMessage;
 import com.rush.logistic.client.hub.model.Hub;
+import com.rush.logistic.client.hub.model.HubItem;
 import com.rush.logistic.client.hub.model.HubRoute;
+import com.rush.logistic.client.hub.repository.HubItemRepository;
 import com.rush.logistic.client.hub.repository.HubRepository;
 import com.rush.logistic.client.hub.repository.HubRouteRepository;
 import java.net.URI;
@@ -86,15 +88,38 @@ public class HubRouteService {
             String startAddress = extractAddress(requestDto.getStartHubId());
             String endAddress = extractAddress(requestDto.getEndHubId());
 
-            // 네어지 지도 요청
-            String startLat = String.valueOf(hubRepository.findById(requestDto.getStartHubId()).get().getLatitude());
-            String startLon = String.valueOf(hubRepository.findById(requestDto.getStartHubId()).get().getLongitude());
-            String endLat = String.valueOf(hubRepository.findById(requestDto.getEndHubId()).get().getLatitude());
-            String endLon = String.valueOf(hubRepository.findById(requestDto.getEndHubId()).get().getLongitude());
+            Hub startHub = null;
+            Hub endHub = null;
+            if(hubItemRepository.existsById(String.valueOf(requestDto.getStartHubId()))){
+                HubItem hubItem = hubItemRepository.findById(String.valueOf(requestDto.getStartHubId())).get();
+                startHub = Hub.to(hubItem);
+            }
+            else {
+                startHub = hubRepository.findById(requestDto.getStartHubId())
+                        .orElseThrow(() ->
+                                new IllegalArgumentException(HubMessage.HUB_NOT_FOUND.getMessage())
+                        );
+            }
+            if(hubItemRepository.existsById(String.valueOf(requestDto.getEndHubId()))){
+                HubItem hubItem = hubItemRepository.findById(String.valueOf(requestDto.getEndHubId())).get();
+                endHub = Hub.to(hubItem);
+            }
+            else {
+                endHub = hubRepository.findById(requestDto.getStartHubId())
+                        .orElseThrow(() ->
+                                new IllegalArgumentException(HubMessage.HUB_NOT_FOUND.getMessage())
+                        );
+            }
+
+            String startLat = String.valueOf(startHub.getLatitude());
+            String startLon = String.valueOf(startHub.getLongitude());
+            String endLat = String.valueOf(endHub.getLatitude());
+            String endLon = String.valueOf(endHub.getLongitude());
 
             LatLonDto startLatLon = new LatLonDto(startLat, startLon);
             LatLonDto endLatLon = new LatLonDto(endLat, endLon);
 
+            // 네어지 지도 요청
             // 경로 탐색 -> 소요시간, 이동거리 추출
             String directionResponse = getTimeTackenAndDistance(startLatLon, endLatLon);
             TimeTakenAndDistDto timeTakenAndDistDto = extractTimeTakenAndDistance(directionResponse);
