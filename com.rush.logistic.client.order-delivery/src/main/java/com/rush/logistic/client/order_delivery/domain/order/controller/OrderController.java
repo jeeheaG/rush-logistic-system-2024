@@ -1,5 +1,6 @@
 package com.rush.logistic.client.order_delivery.domain.order.controller;
 
+import com.rush.logistic.client.order_delivery.domain.order.controller.client.dto.response.GetUserInfoRes;
 import com.rush.logistic.client.order_delivery.domain.order.controller.dto.request.OrderAllReq;
 import com.rush.logistic.client.order_delivery.domain.order.controller.dto.request.OrderAndDeliveryCreateReq;
 import com.rush.logistic.client.order_delivery.domain.order.controller.dto.response.OrderAllRes;
@@ -9,6 +10,8 @@ import com.rush.logistic.client.order_delivery.domain.order.service.OrderCreateS
 import com.rush.logistic.client.order_delivery.domain.order.service.OrderService;
 import com.rush.logistic.client.order_delivery.global.auth.UserInfo;
 import com.rush.logistic.client.order_delivery.global.auth.UserInfoHeader;
+import com.rush.logistic.client.order_delivery.global.auth.UserRole;
+import com.rush.logistic.client.order_delivery.global.auth.checker.UserRoleChecker;
 import com.rush.logistic.client.order_delivery.global.response.BaseResponse;
 import com.rush.logistic.client.order_delivery.domain.order.exception.OrderCode;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +19,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -25,6 +30,7 @@ import java.util.UUID;
 public class OrderController {
     private final OrderCreateService orderCreateService;
     private final OrderService orderService;
+    private final UserRoleChecker userRoleChecker;
 
     @PostMapping
     public ResponseEntity<Object> createOrder(@RequestBody OrderAndDeliveryCreateReq requestDto) {
@@ -43,7 +49,10 @@ public class OrderController {
         log.info("getOrderById userInfo getUsername : {}", userInfo.getUsername());
         log.info("getOrderById userInfo getRole : {}", userInfo.getRole());
 
-        OrderAllRes responseDto = orderService.getOrderDetail(orderId);
+        List<UserRole> allowedRoles = getAllRoles();
+        GetUserInfoRes getUserInfoRes = userRoleChecker.getUserAndCheckRole(allowedRoles, userInfo);
+
+        OrderAllRes responseDto = orderService.getOrderDetail(orderId, getUserInfoRes);
         return ResponseEntity.ok().body(BaseResponse.toResponse(OrderCode.GET_ORDER_OK, responseDto));
     }
 
@@ -63,5 +72,9 @@ public class OrderController {
 
         UUID deletedId = orderService.deleteOrder(orderId, userId);
         return ResponseEntity.ok().body(BaseResponse.toResponse(OrderCode.DELETE_ORDER_OK, OrderIdRes.toDto(deletedId)));
+    }
+
+    private static List<UserRole> getAllRoles() {
+        return Arrays.asList(UserRole.MASTER, UserRole.HUB, UserRole.COMPANY, UserRole.DELIVERY);
     }
 }
