@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="Gradle: io.zipkin.reporter2:zipkin-reporter-brave:3.4.2" type="java-imported" external-system-id="GRADLE">
+    <properties groupId="io.zipkin.reporter2" artifactId="zipkin-reporter-brave" version="3.4.2" />
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/io.zipkin.reporter2/zipkin-reporter-brave/3.4.2/9d972583ad89aeb1c7ce163dfc711366728e4cec/zipkin-reporter-brave-3.4.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

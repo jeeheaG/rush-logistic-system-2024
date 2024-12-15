@@ -20,9 +20,9 @@ public record DeliveryRouteAllRes(
         UUID startHubId,
         UUID endHubId,
         Integer expectedDistance,
-        Integer expectedTime,
+        String expectedTime,
         Integer realDistance,
-        Integer realTime,
+        String realTime,
         DeliveryTypeEnum type,
 
         String createdBy,

@@ -5,6 +5,7 @@
     <file type="web" url="file://$PROJECT_DIR$/com.rush.logistic.client.company-product" />
     <file type="web" url="file://$PROJECT_DIR$/com.rush.logistic.client.hub" />
     <file type="web" url="file://$PROJECT_DIR$/com.rush.logistic.client.order-delivery" />
+    <file type="web" url="file://$PROJECT_DIR$/com.rush.logistic.client.slack" />
     <file type="web" url="file://$PROJECT_DIR$/com.rush.logistic.client.user-auth" />
     <file type="web" url="file://$PROJECT_DIR$/com.rush.logistic.gateway" />
     <file type="web" url="file://$PROJECT_DIR$/com.rush.logistic.server" />

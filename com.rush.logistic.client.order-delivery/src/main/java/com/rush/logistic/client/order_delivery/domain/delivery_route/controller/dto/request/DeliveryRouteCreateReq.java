@@ -18,12 +18,19 @@ public record DeliveryRouteCreateReq(
         UUID startHubId,
         UUID endHubId,
         Integer expectedDistance,
-        Integer expectedTime,
+        String expectedTime,
         DeliveryTypeEnum type
 ) {
     public static DeliveryRouteCreateReq toDto(Deliveryman deliveryman, Delivery delivery, HubRouteModel hubRouteModel) {
         return DeliveryRouteCreateReq.builder()
-
+                .deliveryman(deliveryman)
+                .sequence(hubRouteModel.sequence())
+                .delivery(delivery)
+                .startHubId(hubRouteModel.startHubId())
+                .endHubId(hubRouteModel.endHubId())
+                .expectedDistance(hubRouteModel.expectedDistance())
+                .expectedTime(hubRouteModel.expectedTime())
+                .type(DeliveryTypeEnum.HUB)
                 .build();
     }
 
