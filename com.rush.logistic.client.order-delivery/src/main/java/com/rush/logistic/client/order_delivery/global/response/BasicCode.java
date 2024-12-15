@@ -21,6 +21,7 @@ public enum BasicCode implements StatusCode{
     USER_NOT_ALLOWED_HUB(HttpStatus.FORBIDDEN, "해당 허브에 접근 권한 없음"),
     USER_NOT_ALLOWED_COMPANY(HttpStatus.FORBIDDEN, "해당 업체에 접근 권한 없음"),
     USER_NOT_ALLOWED_DELIVERY(HttpStatus.FORBIDDEN, "해당 배달에 접근 권한 없음"),
+    USER_NOT_ALLOWED_DELIVERY_ROUTE(HttpStatus.FORBIDDEN, "해당 배달 경로에 접근 권한 없음"),
     ;
 
     private final HttpStatus httpStatus;
