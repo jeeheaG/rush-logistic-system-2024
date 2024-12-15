@@ -7,6 +7,7 @@ import com.rush.logistic.client.domain.user.dto.UserUpdateRequestDto;
 import com.rush.logistic.client.domain.user.entity.User;
 import com.rush.logistic.client.domain.user.enums.UserRoleEnum;
 import com.rush.logistic.client.domain.user.repository.UserRepository;
+import com.rush.logistic.client.domain.user.repository.UserRepositoryImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +22,7 @@ import java.util.Objects;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final UserRepositoryImpl userRepositoryImpl;
 
     public User findById(Long userId) {
 
@@ -38,7 +40,7 @@ public class UserService {
             throw new NoAuthorizationException();
         }
 
-        return userRepository.findAll(pageable).map(UserInfoResponseDto::from);
+        return userRepositoryImpl.findAll(pageable,size);
     }
 
     public UserInfoResponseDto getUserById(String role, String userId, String authenticatedUserId) {

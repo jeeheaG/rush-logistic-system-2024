@@ -77,4 +77,9 @@ public class HubRoute extends BaseEntity {
         this.setDelete(true);
         this.setDeletedAt(now);
     }
+
+    public void restore() {
+        this.setDelete(false);
+        this.setDeletedAt(null);
+    }
 }

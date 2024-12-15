@@ -1,4 +1,4 @@
-package com.rush.logistic.client.slack.domain.config;
+package com.rush.logistic.client.domain.global;
 
 import com.querydsl.jpa.JPQLTemplates;
 import com.querydsl.jpa.impl.JPAQueryFactory;
