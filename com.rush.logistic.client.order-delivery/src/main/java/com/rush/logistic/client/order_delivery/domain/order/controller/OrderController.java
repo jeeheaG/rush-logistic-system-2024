@@ -36,7 +36,7 @@ public class OrderController {
         log.info("OrderController createOrder");
         GetUserInfoRes getUserInfoRes = orderUserRoleChecker.getUserAndCheckAllRole(userInfo);
 
-        OrderAllRes responseDto = orderCreateService.createDeliveryAndOrder(userInfo.getUserId(), requestDto);
+        OrderAllRes responseDto = orderCreateService.createDeliveryAndOrder(requestDto, getUserInfoRes.email());
         return ResponseEntity.ok().body(BaseResponse.toResponse(OrderCode.CREATE_ORDER_OK, responseDto));
     }
 
