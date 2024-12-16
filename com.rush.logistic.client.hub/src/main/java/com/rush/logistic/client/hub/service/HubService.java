@@ -124,7 +124,6 @@ public class HubService {
             return BaseResponseDto
                     .<HubIdResponseDto>from(HttpStatus.CREATED.value(), HttpStatus.CREATED, HubMessage.HUB_CREATED_SUCCESS.getMessage(), responseDto);
         } catch (Exception e) {
-            System.out.println("error: " + e.getMessage());
             return BaseResponseDto
                     .<HubIdResponseDto>from(HttpStatus.INTERNAL_SERVER_ERROR.value(), HttpStatus.INTERNAL_SERVER_ERROR, HubMessage.HUB_SAVE_FAILED.getMessage(), null);
         }
