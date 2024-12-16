@@ -14,6 +14,7 @@ import com.rush.logistic.client.order_delivery.domain.order.controller.client.Co
 import com.rush.logistic.client.order_delivery.domain.order.controller.client.HubClient;
 import com.rush.logistic.client.order_delivery.domain.order.controller.client.SlackClient;
 import com.rush.logistic.client.order_delivery.domain.order.controller.client.dto.request.GetStartEndHubIdOfCompanyReq;
+import com.rush.logistic.client.order_delivery.domain.order.controller.client.dto.request.HubRouteInfoReq;
 import com.rush.logistic.client.order_delivery.domain.order.controller.client.dto.request.SendSlackMessageReq;
 import com.rush.logistic.client.order_delivery.domain.order.controller.client.dto.response.*;
 import com.rush.logistic.client.order_delivery.domain.order.controller.dto.request.OrderAndDeliveryCreateReq;
@@ -21,7 +22,8 @@ import com.rush.logistic.client.order_delivery.domain.order.controller.dto.respo
 import com.rush.logistic.client.order_delivery.domain.order.domain.Order;
 import com.rush.logistic.client.order_delivery.domain.order.repository.OrderRepository;
 import com.rush.logistic.client.order_delivery.domain.order.service.model.HubRouteModel;
-import com.rush.logistic.client.order_delivery.global.util.gemini.GeminiUtil;
+import com.rush.logistic.client.order_delivery.global.util.gemini.GeminiClient;
+import com.rush.logistic.client.order_delivery.global.util.gemini.GeminiReq;
 import com.rush.logistic.client.order_delivery.global.util.navermap.NaverMapRes;
 import com.rush.logistic.client.order_delivery.global.util.navermap.NaverMapUtil;
 import lombok.RequiredArgsConstructor;
@@ -49,7 +51,8 @@ public class OrderCreateService {
     private final SlackClient slackClient;
 
     private final NaverMapUtil naverMapUtil;
-    private final GeminiUtil geminiUtil;
+//    private final GeminiUtil geminiUtil;
+    private final GeminiClient geminiClient;
 
     @Transactional
     public OrderAllRes createDeliveryAndOrder(OrderAndDeliveryCreateReq requestDto, String userEmail) {
@@ -68,14 +71,16 @@ public class OrderCreateService {
         // 허브 경로 받아옴
 //        List<HubRouteModel> hubRouteModels = tempFeignClientGetRoutes(getStartEndHubIdOfCompanyDto);
 //        log.info("OrderService createDeliveryAndOrder : hubRouteModels[0] : {}", hubRouteModels.get(0));
-        HubResWrapper<HubRouteInfoRes> hubRouteInfoResWrap = hubClient.getHubRoute(
-                getStartEndHubIdOfCompanyDto.result().departureHubId(), getStartEndHubIdOfCompanyDto.result().arrivalHubId());
+        HubRouteInfoReq hubRouteInfoReq = HubRouteInfoReq.toDto(getStartEndHubIdOfCompanyDto.result().departureHubId(), getStartEndHubIdOfCompanyDto.result().arrivalHubId());
+        HubResWrapper<HubResSubWrapper<HubRouteInfoRes>> hubRouteInfoResWrap = hubClient.getHubRoute(hubRouteInfoReq);
         log.info("OrderCreateService createDeliveryAndOrder : hubRouteInfoResWrap : {}", hubRouteInfoResWrap);
-        List<HubRouteInfoRes> hubRouteInfos = List.of(hubRouteInfoResWrap.data()); // TODO : 목록으로 바뀌면 변경하기
+        List<HubRouteInfoRes> hubRouteInfos = hubRouteInfoResWrap.data().hubRouteList();
         List<HubRouteModel> hubRouteModels = HubRouteModel.fromDtos(hubRouteInfos);
 
         // 마지막 허브-업체 간 경로 받아옴
-        NaverMapRes naverMapRes = naverMapUtil.getDistanceAndTimeByAddress(hubRouteInfoResWrap.data().endHubAddress(), requestDto.deliveryInfo().address());
+        int hubRouteSize = hubRouteInfos.size();
+        NaverMapRes naverMapRes = naverMapUtil.getDistanceAndTimeByAddress(hubRouteInfoResWrap.data().hubRouteList().get(hubRouteSize-1).endHubAddress(), requestDto.deliveryInfo().address());
+        log.info("createDeliveryAndOrder naverMapRes : {}", naverMapRes);
 
         // 경로별 담당자 배정, 배송 경로 생성
         List<Deliveryman> assignedDeliverymans = new ArrayList<>();
@@ -91,7 +96,7 @@ public class OrderCreateService {
         log.info("OrderCreateService createDeliveryAndOrder : savedDeliveryRoutes[0] : {}", savedDeliveryRoutes.get(0));
 
         // 슬랙 알림
-        alertExpectedTimeSlackMessage(userEmail, requestDto, hubRouteInfoResWrap.data(), orderSaved.getId());
+        alertExpectedTimeSlackMessage(userEmail, requestDto, hubRouteInfoResWrap.data().hubRouteList().get(0), orderSaved.getId(), naverMapRes);
 
         return OrderAllRes.fromEntity(orderSaved, savedDeliveryRoutes);
     }
@@ -176,16 +181,24 @@ public class OrderCreateService {
      * @param requestDto
      * @param hubRouteInfoRes
      * @param orderId
+     * @param naverMapRes
      */
-    private void alertExpectedTimeSlackMessage(String email, OrderAndDeliveryCreateReq requestDto, HubRouteInfoRes hubRouteInfoRes, UUID orderId) {
+    private void alertExpectedTimeSlackMessage(String email, OrderAndDeliveryCreateReq requestDto, HubRouteInfoRes hubRouteInfoRes, UUID orderId, NaverMapRes naverMapRes) {
         log.info("OrderCreateService alertExpectedTimeSlackMessage start");
 
-        String message = geminiUtil.getExpectedStartDateMessage().message();
+        GeminiReq geminiReq = GeminiReq.toDto(requestDto, hubRouteInfoRes, naverMapRes);
+        log.info("alertExpectedTimeSlackMessage geminiReq : {}", geminiReq);
+        String message = geminiClient.getExpectedStartTime(geminiReq);
         String tempMessage = """
                 허브가 발송할 주문이 추가되었습니다.
                 주문 ID = 
                 """ + orderId;
-        UserSlackResWrapper<SendSlackMessageRes> SendSlackMessageRes = slackClient.sendSlackMessage(SendSlackMessageReq.toDto(tempMessage, email));
+
+        UserSlackResWrapper<SendSlackMessageRes> tempSendSlackMessageRes = slackClient.sendSlackMessage(SendSlackMessageReq.toDto(tempMessage, email));
+        log.info("alertExpectedTimeSlackMessage tempSendSlackMessageRes : {}", tempSendSlackMessageRes);
+
+        UserSlackResWrapper<SendSlackMessageRes> sendSlackMessageRes = slackClient.sendSlackMessage(SendSlackMessageReq.toDto(message, email));
+        log.info("alertExpectedTimeSlackMessage sendSlackMessageRes : {}", sendSlackMessageRes);
     }
 
 //    /**

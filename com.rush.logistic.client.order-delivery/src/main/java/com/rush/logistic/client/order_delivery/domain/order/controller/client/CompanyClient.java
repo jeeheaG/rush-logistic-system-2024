@@ -8,7 +8,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(value = "company-service", configuration = FeignConfig.class)
+@FeignClient(value = "company-product-service", configuration = FeignConfig.class)
 public interface CompanyClient {
     @PostMapping("/api/companies/mapping")
     CompanyResWrapper<GetStartEndHubIdOfCompanyRes> getStartEndHubIdOfCompany(@RequestBody GetStartEndHubIdOfCompanyReq requestDto);
