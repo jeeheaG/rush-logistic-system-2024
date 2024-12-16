@@ -49,6 +49,16 @@ public class Hub extends BaseEntity{
         return hub;
     }
 
+    public static Hub to(HubItem hubItem) {
+        return Hub.builder()
+            .hubId(UUID.fromString(hubItem.getHubId()))
+            .name(hubItem.getName())
+            .address(hubItem.getAddress())
+            .latitude(hubItem.getLatitude())
+            .longitude(hubItem.getLongitude())
+            .build();
+    }
+
     public void update(HubInfoRequestDto requestDto, LatLonDto latLonDto) {
         this.name = requestDto.getName();
         this.address = requestDto.getAddress();
