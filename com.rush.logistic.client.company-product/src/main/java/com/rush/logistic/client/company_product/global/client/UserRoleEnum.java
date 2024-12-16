@@ -6,10 +6,10 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum UserRoleEnum {
-    MASTER("ROLE_MASTER"),
-    HUB("ROLE_HUB"),
-    DELIVERY("ROLE_DELIVERY"),
-    COMPANY("ROLE_COMPANY");
+    MASTER("MASTER"),
+    HUB("HUB"),
+    DELIVERY("DELIVERY"),
+    COMPANY("COMPANY");
 
     private final String role;
 }
