@@ -102,8 +102,6 @@ public class ProductService {
             Pageable pageable,
             String sortType
     ) {
-        ApiResponse<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
-
         // 페이지 사이즈 제한
         int[] allowedPageSizes = {10, 30, 50};
         int pageSize = pageable.getPageSize();
@@ -150,7 +148,6 @@ public class ProductService {
 
     //상품 단건 조회
     public ProductSearchResponse getProduct(UUID id) {
-        ApiResponse<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
 
