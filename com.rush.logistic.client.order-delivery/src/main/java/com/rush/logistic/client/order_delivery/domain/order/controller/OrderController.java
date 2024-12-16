@@ -1,21 +1,28 @@
 package com.rush.logistic.client.order_delivery.domain.order.controller;
 
+import com.querydsl.core.types.Predicate;
 import com.rush.logistic.client.order_delivery.domain.order.controller.client.dto.response.GetUserInfoRes;
 import com.rush.logistic.client.order_delivery.domain.order.controller.dto.request.OrderAllReq;
 import com.rush.logistic.client.order_delivery.domain.order.controller.dto.request.OrderAndDeliveryCreateReq;
 import com.rush.logistic.client.order_delivery.domain.order.controller.dto.response.OrderAllRes;
 import com.rush.logistic.client.order_delivery.domain.order.controller.dto.response.OrderIdRes;
 import com.rush.logistic.client.order_delivery.domain.order.controller.dto.response.OrderUpdateRes;
+import com.rush.logistic.client.order_delivery.domain.order.domain.Order;
 import com.rush.logistic.client.order_delivery.domain.order.service.OrderCreateService;
 import com.rush.logistic.client.order_delivery.domain.order.service.OrderService;
 import com.rush.logistic.client.order_delivery.global.auth.UserInfo;
 import com.rush.logistic.client.order_delivery.global.auth.UserInfoHeader;
 import com.rush.logistic.client.order_delivery.global.auth.UserRole;
 import com.rush.logistic.client.order_delivery.global.auth.checker.OrderUserRoleChecker;
+import com.rush.logistic.client.order_delivery.global.common.SearchUtil;
 import com.rush.logistic.client.order_delivery.global.response.BaseResponse;
 import com.rush.logistic.client.order_delivery.domain.order.exception.OrderCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.*;
+import org.springframework.data.querydsl.binding.QuerydslPredicate;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,6 +54,18 @@ public class OrderController {
 
         OrderAllRes responseDto = orderService.getOrderDetail(orderId, getUserInfoRes);
         return ResponseEntity.ok().body(BaseResponse.toResponse(OrderCode.GET_ORDER_OK, responseDto));
+    }
+
+    @GetMapping
+    public ResponseEntity<Object> searchOrder(@UserInfoHeader UserInfo userInfo,
+                                              @QuerydslPredicate(root = Order.class) Predicate predicate,
+                                              @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        log.info("OrderController searchOrder");
+        GetUserInfoRes getUserInfoRes = orderUserRoleChecker.getUserAndCheckAllRole(userInfo);
+        Pageable pageRequest = SearchUtil.checkAndGetPageRequest(pageable);
+
+        PagedModel<OrderAllRes> responseDtos = orderService.getOrderSearch(getUserInfoRes, predicate, pageRequest);
+        return ResponseEntity.ok().body(BaseResponse.toResponse(OrderCode.SEARCH_ORDER_OK, responseDtos));
     }
 
     @PatchMapping("/{orderId}")

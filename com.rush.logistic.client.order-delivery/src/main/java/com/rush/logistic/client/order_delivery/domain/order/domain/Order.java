@@ -40,9 +40,6 @@ public class Order extends BaseAudit {
     @Column(nullable = false)
     private UUID produceCompanyId;
 
-//    // TODO : temp
-//    private UUID deliveryId;
-
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "delivery_id", nullable = false)
     private Delivery delivery;
@@ -57,7 +54,6 @@ public class Order extends BaseAudit {
         if (requestDto.quantity()!=null) { this.quantity = requestDto.quantity(); }
         if (requestDto.receiveCompanyId()!=null) { this.receiveCompanyId = requestDto.receiveCompanyId(); }
         if (requestDto.produceCompanyId()!=null) { this.produceCompanyId = requestDto.produceCompanyId(); }
-//        if (requestDto.deliveryId()!=null) { this.deliveryId = requestDto.deliveryId(); }
         if (delivery!=null) { this.delivery = delivery; }
         if (requestDto.requestDeadLine()!=null) { this.requestDeadLine = requestDto.requestDeadLine(); }
         if (requestDto.requestNote()!=null) { this.requestNote = requestDto.requestNote(); }
