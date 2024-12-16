@@ -18,9 +18,8 @@
 
 ## 문서 자료
 [📘 테이블 명세서](https://docs.google.com/spreadsheets/d/1xiXvHmo2wijXeWZmYdi3OQq0XHNwmVog8oWbCUE3zuE/edit?gid=2112576932#gid=2112576932)<br>
-[📙 API 명세서](https://functional-iron-b15.notion.site/API-15e5724d1eee80d9a313ccb8c9f88bfe?pvs=4)
 
-<br>
+[📙 API 명세서](https://functional-iron-b15.notion.site/API-15e5724d1eee80d9a313ccb8c9f88bfe?pvs=4)
 
 ## ERD
 <img src = "https://github.com/user-attachments/assets/e5c1f783-08f5-4a98-84f2-2e1a900caa7d" width="700" height="500"/>
