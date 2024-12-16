@@ -76,7 +76,7 @@ public class HubRouteService {
     @Transactional
     public BaseResponseDto<HubRouteIdResponseDto> createHubRoute(Long userId, String role, HubPointRequestDto requestDto) {
         HubRouteIdResponseDto responseDto = null;
-        if (!checkForbidden(userId, role)) {
+        if (!checkForbidden(userId, role, requestDto.getStartHubId(), requestDto.getEndHubId())) {
             return BaseResponseDto
                     .<HubRouteIdResponseDto>from(HttpStatus.FORBIDDEN.value(), HttpStatus.FORBIDDEN, HubRouteMessage.HUB_ROUTE_CREATE_FORBIDDEN.getMessage(), null);
         }
@@ -205,11 +205,6 @@ public class HubRouteService {
 
     @Transactional
     public BaseResponseDto<HubRouteInfoResponseDto> updateHubRouteById(Long userId, String role, UUID hubRouteId) {
-        if (!checkForbidden(userId, role)) {
-            return BaseResponseDto
-                    .<HubRouteInfoResponseDto>from(HttpStatus.FORBIDDEN.value(), HttpStatus.FORBIDDEN, HubRouteMessage.HUB_ROUTE_UPDATED_FORBIDDEN.getMessage(), null);
-        }
-        String username = getUserNameByJwt(userId, role);
         try {
             HubRoute hubRoute = hubRouteRepository.findById(hubRouteId)
                     .orElseThrow(() ->
@@ -221,6 +216,11 @@ public class HubRouteService {
                 return BaseResponseDto
                         .from(HttpStatus.GONE.value(), HttpStatus.GONE, HubRouteMessage.HUB_ROUTE_ALREADY_DELETED.getMessage(), null);
             }
+            if (!checkForbidden(userId, role, hubRoute.getStartHubId(), hubRoute.getEndHubId())) {
+                return BaseResponseDto
+                        .<HubRouteInfoResponseDto>from(HttpStatus.FORBIDDEN.value(), HttpStatus.FORBIDDEN, HubRouteMessage.HUB_ROUTE_UPDATED_FORBIDDEN.getMessage(), null);
+            }
+            String username = getUserNameByJwt(userId, role);
 
             String startHubName = hubRepository.findById(hubRoute.getStartHubId()).get().getName();
             String endHubName = hubRepository.findById(hubRoute.getEndHubId()).get().getName();
@@ -257,11 +257,6 @@ public class HubRouteService {
 
     @Transactional
     public BaseResponseDto<HubRouteIdResponseDto> deleteHubRoute(Long userId, String role, UUID hubRouteId) {
-        if (!checkForbidden(userId, role)) {
-            return BaseResponseDto
-                    .<HubRouteIdResponseDto>from(HttpStatus.FORBIDDEN.value(), HttpStatus.FORBIDDEN, HubRouteMessage.HUB_ROUTE_DELETED_FORBIDDEN.getMessage(), null);
-        }
-        String username = getUserNameByJwt(userId, role);
         try {
             // 허브 조회
             HubRoute hubRoute = hubRouteRepository.findById(hubRouteId)
@@ -274,6 +269,12 @@ public class HubRouteService {
                 return BaseResponseDto
                         .from(HttpStatus.GONE.value(), HttpStatus.GONE, HubRouteMessage.HUB_ROUTE_ALREADY_DELETED.getMessage(), null);
             }
+
+            if (!checkForbidden(userId, role, hubRoute.getStartHubId(), hubRoute.getEndHubId())) {
+                return BaseResponseDto
+                        .<HubRouteIdResponseDto>from(HttpStatus.FORBIDDEN.value(), HttpStatus.FORBIDDEN, HubRouteMessage.HUB_ROUTE_DELETED_FORBIDDEN.getMessage(), null);
+            }
+            String username = getUserNameByJwt(userId, role);
 
             // 허브 경로 삭제정보 업데이트
             hubRoute.delete(username);
@@ -490,7 +491,7 @@ public class HubRouteService {
 
     @Transactional
     public BaseResponseDto<HubRouteListResponseDto<HubRouteInfoResponseDto>> createHubToHubRelay(Long userId, String role, HubPointRequestDto requestDto) {
-        if(!checkForbidden(userId, role)){
+        if(!checkForbidden(userId, "MASTER", requestDto.getStartHubId(), requestDto.getEndHubId())){
             return BaseResponseDto
                     .<HubRouteListResponseDto<HubRouteInfoResponseDto>>from(HttpStatus.FORBIDDEN.value(), HttpStatus.FORBIDDEN,
                             HubRouteMessage.HUB_ROUTE_CREATE_FORBIDDEN.getMessage(), null);
@@ -512,7 +513,7 @@ public class HubRouteService {
                         if(!connectedHubRoute.isPresent()){
                             // 아직 생성되지 않았다면 신규 경로 생성
                             HubPointRequestDto hubPointReq = new HubPointRequestDto(startHub.getHubId(), endHub.getHubId());
-                            createHubRoute(userId, role, hubPointReq);
+                            createHubRoute(userId, "MASTER", hubPointReq);
                         } else {
                             if(connectedHubRoute.get().isDelete()){
                                 // 생성했었지만 soft delete되어 있으면 다시 생성
@@ -835,14 +836,16 @@ public class HubRouteService {
         return String.format("%dD %dH %dM", days, hours, minutes);
     }
 
-    private boolean checkForbidden(Long userId, String role) {
+    private boolean checkForbidden(Long userId, String role, UUID startHubId, UUID endHubId) {
         BaseResponseDto<UserDto> userDto = userClient.getUserById(userId, role, userId);
 
         if(userDto.getData().getRole().equals("MASTER")) {
             return true;
         }
         if (userDto.getData().getRole().equals("HUB")) {
-            return true;
+            if(userDto.getData().getHubId().equals(startHubId) || userDto.getData().getHubId().equals(endHubId)){
+                return true;
+            }
         }
 
         return false;
