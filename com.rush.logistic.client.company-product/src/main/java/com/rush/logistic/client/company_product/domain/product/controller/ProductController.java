@@ -25,8 +25,11 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping
-    public Response<?> createProduct(@RequestBody ProductCreateRequest request){
-        ProductDto result = productService.createProduct(request);
+    public Response<?> createProduct(@RequestBody ProductCreateRequest request,
+                                     @RequestHeader(value = "role", required = true) String role,
+                                     @RequestHeader(value = "USER_ID", required = true) String authenticatedUserId
+    ){
+        ProductDto result = productService.createProduct(request,role,authenticatedUserId);
         return Response.success(result, "상품 생성에 성공하였습니다.");
     }
 
@@ -35,25 +38,37 @@ public class ProductController {
                                                      UUID companyId,
                                                      UUID hubId,
                                                      Pageable pageable,
-                                                     String sortType
+                                                     String sortType,
+                                                     @RequestHeader(value = "role", required = true) String role,
+                                                     @RequestHeader(value = "USER_ID", required = true) String authenticatedUserId
+
     ){
-        Page<ProductDto> products = productService.getAllProduct(name,companyId,hubId,pageable,sortType);
+        Page<ProductDto> products = productService.getAllProduct(name,companyId,hubId,pageable,sortType,role,authenticatedUserId);
         return Response.success(products, "상품 조회에 성공하였습니다");
     }
 
     @GetMapping("/{id}")
-    public Response<ProductSearchResponse> getProduct(@PathVariable UUID id){
-        return Response.success(productService.getProduct(id), "상품 단건 조회에 성공하였습니다.");
+    public Response<ProductSearchResponse> getProduct(@PathVariable UUID id,
+                                                      @RequestHeader(value = "role", required = true) String role,
+                                                      @RequestHeader(value = "USER_ID", required = true) String authenticatedUserId
+    ){
+        return Response.success(productService.getProduct(id,role,authenticatedUserId), "상품 단건 조회에 성공하였습니다.");
     }
 
     @PutMapping("/{id}")
-    public Response<?> updateProduct(@PathVariable UUID id, @RequestBody ProductUpdateRequest request){
-        return Response.success(productService.updateProduct(id,request), "상품 수정에 성공하였습니다.");
+    public Response<?> updateProduct(@PathVariable UUID id, @RequestBody ProductUpdateRequest request,
+                                     @RequestHeader(value = "role", required = true) String role,
+                                     @RequestHeader(value = "USER_ID", required = true) String authenticatedUserId
+    ){
+        return Response.success(productService.updateProduct(id,request,role,authenticatedUserId), "상품 수정에 성공하였습니다.");
     }
 
     @DeleteMapping("/{id}")
-    public Response<?> deleteProduct(@PathVariable UUID id){
-        productService.deleteProduct(id);
+    public Response<?> deleteProduct(@PathVariable UUID id,
+                                     @RequestHeader(value = "role", required = true) String role,
+                                     @RequestHeader(value = "USER_ID", required = true) String authenticatedUserId
+    ){
+        productService.deleteProduct(id,role,authenticatedUserId);
         return Response.success(null, "상품 삭제에 성공하였습니다.");
     }
 
