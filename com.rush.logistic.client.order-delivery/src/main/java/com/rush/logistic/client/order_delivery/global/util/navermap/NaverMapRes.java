@@ -10,7 +10,7 @@ import lombok.Builder;
 import java.util.UUID;
 
 @Builder
-public record NaverMapRes(
+public record NaverMapRes( // TODO : 변경해주셔도 됩니다!!
         Integer distance,
         String time
 

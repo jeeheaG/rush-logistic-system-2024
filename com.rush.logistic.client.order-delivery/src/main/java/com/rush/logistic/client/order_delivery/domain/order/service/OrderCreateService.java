@@ -13,7 +13,6 @@ import com.rush.logistic.client.order_delivery.domain.deliveryman.repository.Del
 import com.rush.logistic.client.order_delivery.domain.order.controller.client.CompanyClient;
 import com.rush.logistic.client.order_delivery.domain.order.controller.client.HubClient;
 import com.rush.logistic.client.order_delivery.domain.order.controller.client.SlackClient;
-import com.rush.logistic.client.order_delivery.domain.order.controller.client.UserClient;
 import com.rush.logistic.client.order_delivery.domain.order.controller.client.dto.request.GetStartEndHubIdOfCompanyReq;
 import com.rush.logistic.client.order_delivery.domain.order.controller.client.dto.request.SendSlackMessageReq;
 import com.rush.logistic.client.order_delivery.domain.order.controller.client.dto.response.*;
@@ -49,6 +48,9 @@ public class OrderCreateService {
     private final HubClient hubClient;
     private final SlackClient slackClient;
 
+    private final NaverMapUtil naverMapUtil;
+    private final GeminiUtil geminiUtil;
+
     @Transactional
     public OrderAllRes createDeliveryAndOrder(OrderAndDeliveryCreateReq requestDto, String userEmail) {
         // 수령, 생산 업체가 소속된 허브ID 받아옴
@@ -73,7 +75,7 @@ public class OrderCreateService {
         List<HubRouteModel> hubRouteModels = HubRouteModel.fromDtos(hubRouteInfos);
 
         // 마지막 허브-업체 간 경로 받아옴
-        NaverMapRes naverMapRes = NaverMapUtil.getDistanceAndTimeByAddress(hubRouteInfoResWrap.data().endHubAddress(), requestDto.deliveryInfo().address());
+        NaverMapRes naverMapRes = naverMapUtil.getDistanceAndTimeByAddress(hubRouteInfoResWrap.data().endHubAddress(), requestDto.deliveryInfo().address());
 
         // 경로별 담당자 배정, 배송 경로 생성
         List<Deliveryman> assignedDeliverymans = new ArrayList<>();
@@ -178,7 +180,7 @@ public class OrderCreateService {
     private void alertExpectedTimeSlackMessage(String email, OrderAndDeliveryCreateReq requestDto, HubRouteInfoRes hubRouteInfoRes, UUID orderId) {
         log.info("OrderCreateService alertExpectedTimeSlackMessage start");
 
-        String message = GeminiUtil.getExpectedStartDateMessage().message();
+        String message = geminiUtil.getExpectedStartDateMessage().message();
         String tempMessage = """
                 허브가 발송할 주문이 추가되었습니다.
                 주문 ID = 
