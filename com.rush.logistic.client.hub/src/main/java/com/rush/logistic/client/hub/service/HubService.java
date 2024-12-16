@@ -59,7 +59,8 @@ public class HubService {
     @Transactional
     public BaseResponseDto<HubIdResponseDto> createHub(Long userId, String role, HubInfoRequestDto requestDto) {
         HubIdResponseDto responseDto = null;
-        if (!checkForbidden(userId, role)) {
+        boolean isNeedHubId = false;
+        if (!checkForbidden(userId, role, isNeedHubId, null)) {
             return BaseResponseDto
                     .<HubIdResponseDto>from(HttpStatus.FORBIDDEN.value(), HttpStatus.FORBIDDEN, HubMessage.HUB_CREATE_FORBIDDEN.getMessage(), null);
         }
@@ -76,7 +77,7 @@ public class HubService {
                         .<HubIdResponseDto>from(HttpStatus.OK.value(), HttpStatus.OK, HubMessage.HUB_NAME_DUPLICATED.getMessage(), responseDto);
             }
             else if (hubRepository.existsByNameAndIsDeleteFalse(requestDto.getName())) {
-                Hub existHub = hubRepository.findByName(requestDto.getName());
+                Hub existHub = hubRepository.findByNameAndIsDeleteFalse(requestDto.getName());
                 responseDto = HubIdResponseDto.from(existHub.getHubId());
 
                 // DB에 있는데 Redis에 캐싱 안되어있으면 redis에 추가
@@ -97,7 +98,7 @@ public class HubService {
             }
             else if (hubRepository.existsByAddressAndIsDeleteFalse(requestDto.getAddress())) {
 
-                Hub existHub = hubRepository.findByAddress(requestDto.getName());
+                Hub existHub = hubRepository.findByAddressAndIsDeleteFalse(requestDto.getName());
                 responseDto = HubIdResponseDto.from(existHub.getHubId());
 
                 // DB에 있는데 Redis에 캐싱 안되어있으면 redis에 추가
@@ -133,13 +134,18 @@ public class HubService {
         return userDto.getData().getUsername();
     }
 
-    private boolean checkForbidden(Long userId, String role) {
+    private boolean checkForbidden(Long userId, String role, boolean isNeedHubId, UUID hubId) {
         BaseResponseDto<UserDto> userDto = userClient.getUserById(userId, role, userId);
         if(userDto.getData().getRole().equals("MASTER")) {
             return true;
         }
         if (userDto.getData().getRole().equals("HUB")) {
-            return true;
+            if(isNeedHubId && userDto.getData().getHubId().equals(hubId)) {
+                return true;
+            }
+            else if (!isNeedHubId) {
+                return true;
+            }
         }
 
         return false;
@@ -187,7 +193,8 @@ public class HubService {
 
     @Transactional
     public BaseResponseDto<HubInfoResponseDto> updateHubDetails(Long userId, String role, UUID hubId, HubInfoRequestDto requestDto) {
-        if (!checkForbidden(userId, role)) {
+        boolean isNeedHubId = true;
+        if (!checkForbidden(userId, role, isNeedHubId, hubId)) {
             return BaseResponseDto
                     .<HubInfoResponseDto>from(HttpStatus.FORBIDDEN.value(), HttpStatus.FORBIDDEN, HubMessage.HUB_UPDATED_FORBIDDEN.getMessage(), null);
         }
@@ -255,7 +262,8 @@ public class HubService {
   
     @Transactional
     public BaseResponseDto<HubIdResponseDto> deleteHub(Long userId, String role, UUID hubId) {
-        if (!checkForbidden(userId, role)) {
+        boolean isNeedHubId = true;
+        if (!checkForbidden(userId, role, isNeedHubId, hubId)) {
             return BaseResponseDto
                     .<HubIdResponseDto>from(HttpStatus.FORBIDDEN.value(), HttpStatus.FORBIDDEN, HubMessage.HUB_DELETED_FORBIDDEN.getMessage(), null);
         }
