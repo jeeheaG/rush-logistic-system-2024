@@ -13,9 +13,7 @@ import com.rush.logistic.client.order_delivery.domain.deliveryman.repository.Del
 import com.rush.logistic.client.order_delivery.domain.order.controller.client.CompanyClient;
 import com.rush.logistic.client.order_delivery.domain.order.controller.client.HubClient;
 import com.rush.logistic.client.order_delivery.domain.order.controller.client.SlackClient;
-import com.rush.logistic.client.order_delivery.domain.order.controller.client.UserClient;
 import com.rush.logistic.client.order_delivery.domain.order.controller.client.dto.request.GetStartEndHubIdOfCompanyReq;
-import com.rush.logistic.client.order_delivery.domain.order.controller.client.dto.request.HubRouteInfoReq;
 import com.rush.logistic.client.order_delivery.domain.order.controller.client.dto.request.SendSlackMessageReq;
 import com.rush.logistic.client.order_delivery.domain.order.controller.client.dto.response.*;
 import com.rush.logistic.client.order_delivery.domain.order.controller.dto.request.OrderAndDeliveryCreateReq;
@@ -49,10 +47,12 @@ public class OrderCreateService {
     private final CompanyClient companyClient;
     private final HubClient hubClient;
     private final SlackClient slackClient;
-    private final UserClient userClient;
+
+    private final NaverMapUtil naverMapUtil;
+    private final GeminiUtil geminiUtil;
 
     @Transactional
-    public OrderAllRes createDeliveryAndOrder(Long tempUserId, OrderAndDeliveryCreateReq requestDto) {
+    public OrderAllRes createDeliveryAndOrder(OrderAndDeliveryCreateReq requestDto, String userEmail) {
         // 수령, 생산 업체가 소속된 허브ID 받아옴
         CompanyResWrapper<GetStartEndHubIdOfCompanyRes> getStartEndHubIdOfCompanyDto = companyClient.getStartEndHubIdOfCompany(GetStartEndHubIdOfCompanyReq.toDto(requestDto.produceCompanyId(), requestDto.receiveCompanyId()));
         // TODO : -> 조회 실패할 경우 예외응답
@@ -75,7 +75,7 @@ public class OrderCreateService {
         List<HubRouteModel> hubRouteModels = HubRouteModel.fromDtos(hubRouteInfos);
 
         // 마지막 허브-업체 간 경로 받아옴
-        NaverMapRes naverMapRes = NaverMapUtil.getDistanceAndTimeByAddress(hubRouteInfoResWrap.data().endHubAddress(), requestDto.deliveryInfo().address());
+        NaverMapRes naverMapRes = naverMapUtil.getDistanceAndTimeByAddress(hubRouteInfoResWrap.data().endHubAddress(), requestDto.deliveryInfo().address());
 
         // 경로별 담당자 배정, 배송 경로 생성
         List<Deliveryman> assignedDeliverymans = new ArrayList<>();
@@ -91,7 +91,7 @@ public class OrderCreateService {
         log.info("OrderCreateService createDeliveryAndOrder : savedDeliveryRoutes[0] : {}", savedDeliveryRoutes.get(0));
 
         // 슬랙 알림
-        alertExpectedTimeSlackMessage(tempUserId, requestDto, hubRouteInfoResWrap.data());
+        alertExpectedTimeSlackMessage(userEmail, requestDto, hubRouteInfoResWrap.data(), orderSaved.getId());
 
         return OrderAllRes.fromEntity(orderSaved, savedDeliveryRoutes);
     }
@@ -171,17 +171,21 @@ public class OrderCreateService {
 
     /**
      * 슬랙 알림 발송 메서드
-     * @param userId
+     *
+     * @param email
      * @param requestDto
      * @param hubRouteInfoRes
+     * @param orderId
      */
-    private void alertExpectedTimeSlackMessage(Long userId, OrderAndDeliveryCreateReq requestDto, HubRouteInfoRes hubRouteInfoRes) {
+    private void alertExpectedTimeSlackMessage(String email, OrderAndDeliveryCreateReq requestDto, HubRouteInfoRes hubRouteInfoRes, UUID orderId) {
         log.info("OrderCreateService alertExpectedTimeSlackMessage start");
 
-        String message = GeminiUtil.getExpectedStartDateMessage().message();
-//        UserSlackResWrapper<GetUserInfoRes> getUserInfoRes = userClient.getUserInfo(userId);
-//        UserSlackResWrapper<SendSlackMessageRes> SendSlackMessageRes = slackClient.sendSlackMessage(SendSlackMessageReq.toDto(message, getUserInfoRes.data().email()));
-//        UserSlackResWrapper<SendSlackMessageRes> SendSlackMessageRes = slackClient.sendSlackMessage(SendSlackMessageReq.toDto(message, "dummySlackIdEmail"));
+        String message = geminiUtil.getExpectedStartDateMessage().message();
+        String tempMessage = """
+                허브가 발송할 주문이 추가되었습니다.
+                주문 ID = 
+                """ + orderId;
+        UserSlackResWrapper<SendSlackMessageRes> SendSlackMessageRes = slackClient.sendSlackMessage(SendSlackMessageReq.toDto(tempMessage, email));
     }
 
 //    /**
