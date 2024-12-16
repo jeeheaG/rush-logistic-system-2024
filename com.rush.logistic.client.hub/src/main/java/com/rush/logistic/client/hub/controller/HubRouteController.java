@@ -1,15 +1,21 @@
 package com.rush.logistic.client.hub.controller;
 
+import com.querydsl.core.types.Predicate;
 import com.rush.logistic.client.hub.dto.BaseResponseDto;
 import com.rush.logistic.client.hub.dto.HubListResponseDto;
 import com.rush.logistic.client.hub.dto.HubPointRequestDto;
 import com.rush.logistic.client.hub.dto.HubRouteIdResponseDto;
 import com.rush.logistic.client.hub.dto.HubRouteInfoResponseDto;
 import com.rush.logistic.client.hub.dto.HubRouteListResponseDto;
+import com.rush.logistic.client.hub.model.HubRoute;
 import com.rush.logistic.client.hub.service.HubRouteService;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.querydsl.binding.QuerydslPredicate;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -77,14 +83,12 @@ public class HubRouteController {
 
     @GetMapping("/list")
     public ResponseEntity<BaseResponseDto<HubListResponseDto<HubRouteInfoResponseDto>>> getHubRouteInfoList(
-            @RequestParam(value = "page", defaultValue = "1") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size,
-            @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
-            @RequestParam(value = "isAsc", defaultValue = "true") boolean isAsc,
-            Sort sort
+            @RequestParam(required = false) List<UUID> idList,
+            @QuerydslPredicate(root = HubRoute.class) Predicate predicate,
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         BaseResponseDto<HubListResponseDto<HubRouteInfoResponseDto>> responseDto = hubRouteService.getHubRouteInfoList(
-                page - 1, size, sortBy, isAsc
+                idList, predicate, pageable
         );
 
         return ResponseEntity.ok(responseDto);
