@@ -54,6 +54,7 @@ public class CompanyService {
         Response<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
         UserResponseDto userResponseDto = response.getResult();
 
+        System.out.println(role);
         if (UserRoleEnum.MASTER.getRole().equals(role)) {
             // 관리자는 모든 업체 생성 가능
             return;
@@ -178,18 +179,18 @@ public class CompanyService {
         if (UserRoleEnum.HUB.getRole().equals(role)) {
             // 허브 매니저 권한 체크
             if (!userResponseDto.getHubId().equals(request.hubId())) {
-                throw new ForbiddenException("해당 업체에 대한 관리자 권한이 없습니다.");
+                throw new RuntimeException("해당 업체에 대한 관리자 권한이 없습니다.");
             }
         } else if (UserRoleEnum.COMPANY.getRole().equals(role)) {
             // 회사 관리자 권한 체크 (중복된 조건을 수정)
             Company company = companyRepository.findById(id)
                     .orElseThrow(() -> new ApplicationException(ErrorCode.COMPANY_NOT_FOUND));
             if (!userResponseDto.getCompanyId().equals(company.getId())) {
-                throw new ForbiddenException("해당 업체에 대한 관리자 권한이 없습니다.");
+                throw new RuntimeException("해당 업체에 대한 관리자 권한이 없습니다.");
             }
         } else {
             // 일반 사용자는 업체 수정 불가
-            throw new ForbiddenException("업체 수정 권한이 없습니다.");
+            throw new RuntimeException("업체 수정 권한이 없습니다.");
         }
     }
 
@@ -243,11 +244,11 @@ public class CompanyService {
             Company company = companyRepository.findById(id)
                     .orElseThrow(() -> new ApplicationException(ErrorCode.INVALID_REQUEST));
             if (!userResponseDto.getHubId().equals(company.getHubId())) {
-                throw new ForbiddenException("해당 업체에 대한 관리자 권한이 없습니다.");
+                throw new RuntimeException("해당 업체에 대한 관리자 권한이 없습니다.");
             }
         } else {
             // 일반 사용자는 업체 삭제 불가
-            throw new ForbiddenException("업체 삭제 권한이 없습니다.");
+            throw new RuntimeException("업체 삭제 권한이 없습니다.");
         }
     }
 

@@ -16,7 +16,7 @@ public interface HubRepository extends JpaRepository<Hub, UUID> {
 
     boolean existsByNameAndIsDeleteFalse(String name);
 
-    Hub findByName(String name);
+    Hub findByNameAndIsDeleteFalse(String name);
 
-    Hub findByAddress(String name);
+    Hub findByAddressAndIsDeleteFalse(String name);
 }

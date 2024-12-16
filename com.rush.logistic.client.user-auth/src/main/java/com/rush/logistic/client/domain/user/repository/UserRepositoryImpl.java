@@ -40,7 +40,6 @@ public class UserRepositoryImpl extends QuerydslRepositorySupport implements Use
                                 user.email,
                                 user.hubId,
                                 user.companyId,
-                                user.deliveryId,
                                 user.createdAt,
                                 user.createdBy,
                                 user.updatedAt,

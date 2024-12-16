@@ -8,11 +8,13 @@ import com.rush.logistic.client.hub.dto.HubInfoRequestDto;
 import com.rush.logistic.client.hub.dto.HubInfoResponseDto;
 import com.rush.logistic.client.hub.dto.HubListResponseDto;
 import com.rush.logistic.client.hub.dto.LatLonDto;
+import com.rush.logistic.client.hub.dto.UserDto;
 import com.rush.logistic.client.hub.message.HubMessage;
 import com.rush.logistic.client.hub.model.Hub;
 import com.rush.logistic.client.hub.model.HubItem;
 import com.rush.logistic.client.hub.repository.HubItemRepository;
 import com.rush.logistic.client.hub.repository.HubRepository;
+import com.rush.logistic.client.hub.repository.UserClient;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -52,11 +54,17 @@ public class HubService {
 
     private final HubRepository hubRepository;
     private final HubItemRepository hubItemRepository;
+    private final UserClient userClient;
 
     @Transactional
-    public BaseResponseDto<HubIdResponseDto> createHub(HubInfoRequestDto requestDto) {
+    public BaseResponseDto<HubIdResponseDto> createHub(Long userId, String role, HubInfoRequestDto requestDto) {
         HubIdResponseDto responseDto = null;
-        // TODO: MASTER USER 확인 로직 추가
+        boolean isNeedHubId = false;
+        if (!checkForbidden(userId, role, isNeedHubId, null)) {
+            return BaseResponseDto
+                    .<HubIdResponseDto>from(HttpStatus.FORBIDDEN.value(), HttpStatus.FORBIDDEN, HubMessage.HUB_CREATE_FORBIDDEN.getMessage(), null);
+        }
+        String username = getUserNameByJwt(userId, role);
         try {
             // 이미 추가된 허브인지 확인
             if(hubItemRepository.existsByName(requestDto.getName())) {
@@ -69,7 +77,7 @@ public class HubService {
                         .<HubIdResponseDto>from(HttpStatus.OK.value(), HttpStatus.OK, HubMessage.HUB_NAME_DUPLICATED.getMessage(), responseDto);
             }
             else if (hubRepository.existsByNameAndIsDeleteFalse(requestDto.getName())) {
-                Hub existHub = hubRepository.findByName(requestDto.getName());
+                Hub existHub = hubRepository.findByNameAndIsDeleteFalse(requestDto.getName());
                 responseDto = HubIdResponseDto.from(existHub.getHubId());
 
                 // DB에 있는데 Redis에 캐싱 안되어있으면 redis에 추가
@@ -79,7 +87,6 @@ public class HubService {
                 return BaseResponseDto
                         .<HubIdResponseDto>from(HttpStatus.OK.value(), HttpStatus.OK, HubMessage.HUB_NAME_DUPLICATED.getMessage(), responseDto);
             }
-
             if(hubItemRepository.existsByAddress(requestDto.getAddress())) {
                 //Redis에 있는지 먼저 확인
                 HubItem existHubItem = hubItemRepository.findByAddress(requestDto.getAddress());
@@ -91,7 +98,7 @@ public class HubService {
             }
             else if (hubRepository.existsByAddressAndIsDeleteFalse(requestDto.getAddress())) {
 
-                Hub existHub = hubRepository.findByAddress(requestDto.getName());
+                Hub existHub = hubRepository.findByAddressAndIsDeleteFalse(requestDto.getName());
                 responseDto = HubIdResponseDto.from(existHub.getHubId());
 
                 // DB에 있는데 Redis에 캐싱 안되어있으면 redis에 추가
@@ -108,7 +115,7 @@ public class HubService {
             LatLonDto latLonDto = extractCoordinates(addressToCoordinatesResponse);
 
             // 허브 저장
-            Hub hub = hubRepository.save(Hub.from(requestDto, latLonDto));
+            Hub hub = hubRepository.save(Hub.from(requestDto, latLonDto, username));
             hubItemRepository.save(HubItem.from(hub.getHubId(), requestDto, latLonDto));
 
             // 허브 생성 반환
@@ -120,6 +127,28 @@ public class HubService {
             return BaseResponseDto
                     .<HubIdResponseDto>from(HttpStatus.INTERNAL_SERVER_ERROR.value(), HttpStatus.INTERNAL_SERVER_ERROR, HubMessage.HUB_SAVE_FAILED.getMessage(), null);
         }
+    }
+
+    private String getUserNameByJwt(Long userId, String role) {
+        BaseResponseDto<UserDto> userDto = userClient.getUserById(userId, role, userId);
+        return userDto.getData().getUsername();
+    }
+
+    private boolean checkForbidden(Long userId, String role, boolean isNeedHubId, UUID hubId) {
+        BaseResponseDto<UserDto> userDto = userClient.getUserById(userId, role, userId);
+        if(userDto.getData().getRole().equals("MASTER")) {
+            return true;
+        }
+        if (userDto.getData().getRole().equals("HUB")) {
+            if(isNeedHubId && userDto.getData().getHubId().equals(hubId)) {
+                return true;
+            }
+            else if (!isNeedHubId) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public BaseResponseDto<HubInfoResponseDto> getHubDetails(UUID hubId) {
@@ -163,8 +192,13 @@ public class HubService {
     }
 
     @Transactional
-    public BaseResponseDto<HubInfoResponseDto> updateHubDetails(UUID hubId, HubInfoRequestDto requestDto) {
-        // TODO: MASTER USER 확인 로직 추가
+    public BaseResponseDto<HubInfoResponseDto> updateHubDetails(Long userId, String role, UUID hubId, HubInfoRequestDto requestDto) {
+        boolean isNeedHubId = true;
+        if (!checkForbidden(userId, role, isNeedHubId, hubId)) {
+            return BaseResponseDto
+                    .<HubInfoResponseDto>from(HttpStatus.FORBIDDEN.value(), HttpStatus.FORBIDDEN, HubMessage.HUB_UPDATED_FORBIDDEN.getMessage(), null);
+        }
+        String username = getUserNameByJwt(userId, role);
         try {
             // 허브 조회
             Hub hub = hubRepository.findById(hubId)
@@ -197,12 +231,12 @@ public class HubService {
                 LatLonDto latLonDto = extractCoordinates(addressToCoordinatesResponse);
 
                 // 허브 정보 업데이트
-                hub.update(requestDto, latLonDto);
+                hub.update(requestDto, latLonDto, username);
             }
             else {
                 LatLonDto latLonDto = new LatLonDto(String.valueOf(hub.getLatitude()), String.valueOf(hub.getLongitude()));
                 // 허브 정보 업데이트
-                hub.update(requestDto, latLonDto);
+                hub.update(requestDto, latLonDto, username);
             }
 
             // 업데이트 저장
@@ -227,8 +261,13 @@ public class HubService {
     }
   
     @Transactional
-    public BaseResponseDto<HubIdResponseDto> deleteHub(UUID hubId) {
-        // TODO: MASTER USER 확인 로직 추가
+    public BaseResponseDto<HubIdResponseDto> deleteHub(Long userId, String role, UUID hubId) {
+        boolean isNeedHubId = true;
+        if (!checkForbidden(userId, role, isNeedHubId, hubId)) {
+            return BaseResponseDto
+                    .<HubIdResponseDto>from(HttpStatus.FORBIDDEN.value(), HttpStatus.FORBIDDEN, HubMessage.HUB_DELETED_FORBIDDEN.getMessage(), null);
+        }
+        String username = getUserNameByJwt(userId, role);
         try {
             // 허브 조회
             Hub hub = hubRepository.findById(hubId)
@@ -243,7 +282,7 @@ public class HubService {
             }
 
             // 허브 삭제정보 업데이트
-            hub.delete();
+            hub.delete(username);
 
             // 허브 삭제정보 저장
             hubRepository.save(hub);
