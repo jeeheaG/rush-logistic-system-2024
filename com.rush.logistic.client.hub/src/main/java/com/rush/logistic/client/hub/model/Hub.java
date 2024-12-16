@@ -36,7 +36,7 @@ public class Hub extends BaseEntity{
     @Column(name = "longitude", nullable = false)
     private double longitude;
 
-    public static Hub from(HubInfoRequestDto requestDto, LatLonDto latLonDto) {
+    public static Hub from(HubInfoRequestDto requestDto, LatLonDto latLonDto, String username) {
         Hub hub = Hub.builder()
             .name(requestDto.getName())
             .address(requestDto.getAddress())
@@ -45,6 +45,8 @@ public class Hub extends BaseEntity{
             .build();
 
         hub.setDelete(false);
+        hub.setCreatedBy(username);
+        hub.setUpdatedBy(username);
 
         return hub;
     }
@@ -59,16 +61,19 @@ public class Hub extends BaseEntity{
             .build();
     }
 
-    public void update(HubInfoRequestDto requestDto, LatLonDto latLonDto) {
+    public void update(HubInfoRequestDto requestDto, LatLonDto latLonDto, String username) {
         this.name = requestDto.getName();
         this.address = requestDto.getAddress();
         this.latitude = Double.parseDouble(latLonDto.getLatitude());
         this.longitude = Double.parseDouble(latLonDto.getLongitude());
+
+        this.setUpdatedBy(username);
     }
 
-    public void delete() {
+    public void delete(String username) {
         LocalDateTime now = LocalDateTime.now();
         this.setDelete(true);
         this.setDeletedAt(now);
+        this.setDeletedBy(username);
     }
 }
