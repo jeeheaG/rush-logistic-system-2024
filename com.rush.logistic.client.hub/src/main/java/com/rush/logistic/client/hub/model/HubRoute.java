@@ -48,7 +48,7 @@ public class HubRoute extends BaseEntity {
         return String.format("%dD %dH %dM", days, hours, minutes);
     }
 
-    public static HubRoute from(HubPointRequestDto requestDto, Duration timeTaken, int distance, String milliseconds) {
+    public static HubRoute from(HubPointRequestDto requestDto, Duration timeTaken, int distance, String milliseconds, String username) {
         String timeTakenString = formatDuration(timeTaken);
 
         HubRoute hubRoute = HubRoute.builder()
@@ -60,22 +60,27 @@ public class HubRoute extends BaseEntity {
                 .build();
 
         hubRoute.setDelete(false);
+        hubRoute.setCreatedBy(username);
+        hubRoute.setUpdatedBy(username);
 
         return hubRoute;
     }
 
-    public void update(TimeTakenAndDistDto timeTakenAndDistDto, Duration timeTaken) {
+    public void update(TimeTakenAndDistDto timeTakenAndDistDto, Duration timeTaken, String username) {
         String timeTakenString = formatDuration(timeTaken);
 
         this.timeTaken = timeTakenString;
         this.distance = Integer.parseInt(timeTakenAndDistDto.getDistance());
         this.milliseconds = timeTakenAndDistDto.getTimeTaken();
+
+        this.setUpdatedBy(username);
     }
 
-    public void delete() {
+    public void delete(String username) {
         LocalDateTime now = LocalDateTime.now();
         this.setDelete(true);
         this.setDeletedAt(now);
+        this.setDeletedBy(username);
     }
 
     public void restore() {

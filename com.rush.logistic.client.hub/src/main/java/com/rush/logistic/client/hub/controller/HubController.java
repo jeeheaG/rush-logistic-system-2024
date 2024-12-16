@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,8 +34,11 @@ public class HubController {
     private final HubService hubService;
 
     @PostMapping
-    public ResponseEntity<BaseResponseDto<HubIdResponseDto>> createHub(@RequestBody HubInfoRequestDto requestDto) {
-        BaseResponseDto<HubIdResponseDto> responseDto = hubService.createHub(requestDto);
+    public ResponseEntity<BaseResponseDto<HubIdResponseDto>> createHub(
+            @RequestHeader(value = "USER_ID", required = true) Long userId,
+            @RequestHeader(value = "role", required = true) String role,
+            @RequestBody HubInfoRequestDto requestDto) {
+        BaseResponseDto<HubIdResponseDto> responseDto = hubService.createHub(userId, role, requestDto);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
@@ -47,16 +51,22 @@ public class HubController {
     }
 
     @PutMapping("/{hubId}")
-    public ResponseEntity<BaseResponseDto<HubInfoResponseDto>> updateHubDetails(@PathVariable("hubId") UUID hubId,
-                                                                                @RequestBody HubInfoRequestDto requestDto) {
-        BaseResponseDto<HubInfoResponseDto> responseDto = hubService.updateHubDetails(hubId, requestDto);
+    public ResponseEntity<BaseResponseDto<HubInfoResponseDto>> updateHubDetails(
+            @RequestHeader(value = "USER_ID", required = true) Long userId,
+            @RequestHeader(value = "role", required = true) String role,
+            @PathVariable("hubId") UUID hubId,
+            @RequestBody HubInfoRequestDto requestDto) {
+        BaseResponseDto<HubInfoResponseDto> responseDto = hubService.updateHubDetails(userId, role, hubId, requestDto);
 
         return ResponseEntity.ok(responseDto);
     }
 
     @DeleteMapping("/{hubId}")
-    public ResponseEntity<BaseResponseDto<HubIdResponseDto>> deleteHub(@PathVariable("hubId") UUID hubId) {
-        BaseResponseDto<HubIdResponseDto> responseDto = hubService.deleteHub(hubId);
+    public ResponseEntity<BaseResponseDto<HubIdResponseDto>> deleteHub(
+            @RequestHeader(value = "USER_ID", required = true) Long userId,
+            @RequestHeader(value = "role", required = true) String role,
+            @PathVariable("hubId") UUID hubId) {
+        BaseResponseDto<HubIdResponseDto> responseDto = hubService.deleteHub(userId, role, hubId);
 
         return ResponseEntity.ok(responseDto);
     }

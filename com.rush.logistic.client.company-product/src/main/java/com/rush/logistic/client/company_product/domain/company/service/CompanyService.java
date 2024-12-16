@@ -8,10 +8,15 @@ import com.rush.logistic.client.company_product.domain.company.dto.response.Comp
 import com.rush.logistic.client.company_product.domain.company.dto.response.CompanySearchResponse;
 import com.rush.logistic.client.company_product.domain.company.entity.Company;
 import com.rush.logistic.client.company_product.domain.company.repository.CompanyRepository;
+import com.rush.logistic.client.company_product.global.client.UserClient;
+import com.rush.logistic.client.company_product.global.client.UserRoleEnum;
+import com.rush.logistic.client.company_product.global.client.UserResponseDto;
 import com.rush.logistic.client.company_product.global.exception.ApplicationException;
 import com.rush.logistic.client.company_product.global.exception.ErrorCode;
+import com.rush.logistic.client.company_product.global.exception.Response;
 import com.rush.logistic.client.company_product.global.type.CompanyType;
 import jakarta.persistence.EntityManager;
+import jakarta.ws.rs.ForbiddenException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,26 +36,56 @@ import java.util.UUID;
 public class CompanyService {
 
     private final CompanyRepository companyRepository;
-
+    private final UserClient userClient;
 
     private final EntityManager entityManager;
 
     //업체 추가
     @Transactional
-    public CompanyDto createCompany(CompanyCreateRequest request) {
-        // TODO: MASTER, HUB-MANAGER 확인 로직 추가
-        CompanyDto dto = CompanyCreateRequest.toDto(request);
+    public CompanyDto createCompany(CompanyCreateRequest request, String role, String authenticatedUserId) {
+        // 1. 권한 검증
+        validateUserOermission(request, role, authenticatedUserId);
 
-        Optional<Company> company = companyRepository.findByName(dto.name());
+        // 2. 업체 생성
+        return createCompanyEntity(request);
+    }
 
-        if(company.isEmpty()){
-            Company companyEntity = companyRepository.save(dto.toEntity(dto));
-            System.out.println("Saved Company ID: " + companyEntity.getId());
-            return CompanyDto.from(companyEntity);
-        }else{
-            throw new ApplicationException(ErrorCode.DUPLICATED_COMPANYNAME);
+    private void validateUserOermission(CompanyCreateRequest request, String role, String authenticatedUserId){
+        Response<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
+        UserResponseDto userResponseDto = response.getResult();
+
+        System.out.println(role);
+        if (UserRoleEnum.MASTER.getRole().equals(role)) {
+            // 관리자는 모든 업체 생성 가능
+            return;
+        }
+        if (UserRoleEnum.HUB.getRole().equals(role)) {
+            // 허브 매니저 권한 체크
+            if (!userResponseDto.getHubId().equals(request.hubId())) {
+                throw new RuntimeException("해당 업체에 대한 관리자 권한이 없습니다.");
+            }
+        } else {
+            // 일반 사용자는 업체 생성 불가
+            throw new RuntimeException("업체 생성 권한이 없습니다.");
         }
     }
+
+    // 업체 생성
+    private CompanyDto createCompanyEntity(CompanyCreateRequest request) {
+        CompanyDto dto = CompanyCreateRequest.toDto(request);
+
+        // 중복 검사
+        Optional<Company> existingCompany = companyRepository.findByName(dto.name());
+        if (existingCompany.isPresent()) {
+            throw new ApplicationException(ErrorCode.DUPLICATED_COMPANYNAME);
+        }
+
+        Company companyEntity = companyRepository.save(dto.toEntity(dto));
+        System.out.println("Saved Company ID: " + companyEntity.getId());
+        return CompanyDto.from(companyEntity);
+    }
+
+
 
     //업체 전체 조회
     @Transactional
@@ -59,8 +94,12 @@ public class CompanyService {
             UUID hubId,
             CompanyType companyType,
             Pageable pageable,
-            String sortType
+            String sortType,
+            String role,
+            String authenticatedUserId
     ) {
+        Response<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
+
         // 페이지 사이즈 제한
         int[] allowedPageSizes = {10, 30, 50};
         int pageSize = pageable.getPageSize();
@@ -107,7 +146,8 @@ public class CompanyService {
 
     //업체 단건 조회
     @Transactional
-    public CompanySearchResponse getCompany(UUID id) {
+    public CompanySearchResponse getCompany(UUID id, String role, String authenticatedUserId) {
+        Response<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
         Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.COMPANY_NOT_FOUND));
 
@@ -118,9 +158,44 @@ public class CompanyService {
             return CompanySearchResponse.from(company);
     }
 
-    //업체 수정
     @Transactional
-    public CompanyDto updateCompany(UUID id, CompanyUpdateRequest request) {
+    public CompanyDto updateCompany(UUID id, CompanyUpdateRequest request, String role, String authenticatedUserId) {
+        // 1. 권한 검증
+        validateUserPermissionForUpdate(id, request, role, authenticatedUserId);
+
+        // 2. 업체 수정
+        return updateCompanyEntity(id, request);
+    }
+    // 권한 검증
+    private void validateUserPermissionForUpdate(UUID id, CompanyUpdateRequest request, String role, String authenticatedUserId) {
+        Response<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
+        UserResponseDto userResponseDto = response.getResult();
+
+        if (UserRoleEnum.MASTER.getRole().equals(role)) {
+            // 관리자는 모든 업체 수정 가능
+            return;
+        }
+
+        if (UserRoleEnum.HUB.getRole().equals(role)) {
+            // 허브 매니저 권한 체크
+            if (!userResponseDto.getHubId().equals(request.hubId())) {
+                throw new RuntimeException("해당 업체에 대한 관리자 권한이 없습니다.");
+            }
+        } else if (UserRoleEnum.COMPANY.getRole().equals(role)) {
+            // 회사 관리자 권한 체크 (중복된 조건을 수정)
+            Company company = companyRepository.findById(id)
+                    .orElseThrow(() -> new ApplicationException(ErrorCode.COMPANY_NOT_FOUND));
+            if (!userResponseDto.getCompanyId().equals(company.getId())) {
+                throw new RuntimeException("해당 업체에 대한 관리자 권한이 없습니다.");
+            }
+        } else {
+            // 일반 사용자는 업체 수정 불가
+            throw new RuntimeException("업체 수정 권한이 없습니다.");
+        }
+    }
+
+    // 업체 수정
+    private CompanyDto updateCompanyEntity(UUID id, CompanyUpdateRequest request) {
         Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.COMPANY_NOT_FOUND));
 
@@ -128,29 +203,64 @@ public class CompanyService {
             throw new ApplicationException(ErrorCode.COMPANY_DELETED); // 삭제된 업체에 대한 예외
         }
 
+        // 업체 정보 수정
         company.setHubId(request.hubId());
         company.setName(request.name());
         company.setAddress(request.address());
         company.setType(request.type());
 
+        // DB 업데이트
         entityManager.flush();
-
         entityManager.clear();
 
-        Company companyForReturn = companyRepository.findById(id)
+        // 수정된 업체 반환
+        Company updatedCompany = companyRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.COMPANY_NOT_FOUND));
 
-        return CompanyDto.from(companyForReturn);
+        return CompanyDto.from(updatedCompany);
     }
 
-    //업체 삭제
     @Transactional
-    public void deleteCompany(UUID id) {
+    public void deleteCompany(UUID id, String role, String authenticatedUserId) {
+        // 1. 권한 검증
+        validateUserPermissionForDelete(id, role, authenticatedUserId);
+
+        // 2. 업체 삭제
+        deleteCompanyEntity(id);
+    }
+
+    // 권한 검증
+    private void validateUserPermissionForDelete(UUID id, String role, String authenticatedUserId) {
+        Response<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
+        UserResponseDto userResponseDto = response.getResult();
+
+        if (UserRoleEnum.MASTER.getRole().equals(role)) {
+            // 관리자는 모든 업체 삭제 가능
+            return;
+        }
+
+        if (UserRoleEnum.HUB.getRole().equals(role)) {
+            // 허브 매니저 권한 체크
+            Company company = companyRepository.findById(id)
+                    .orElseThrow(() -> new ApplicationException(ErrorCode.INVALID_REQUEST));
+            if (!userResponseDto.getHubId().equals(company.getHubId())) {
+                throw new RuntimeException("해당 업체에 대한 관리자 권한이 없습니다.");
+            }
+        } else {
+            // 일반 사용자는 업체 삭제 불가
+            throw new RuntimeException("업체 삭제 권한이 없습니다.");
+        }
+    }
+
+    // 업체 삭제
+    private void deleteCompanyEntity(UUID id) {
         Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.INVALID_REQUEST));
-        if (company.getIsDelete()){
-            throw new ApplicationException(ErrorCode.COMPANY_DELETED);
+
+        if (company.getIsDelete()) {
+            throw new ApplicationException(ErrorCode.COMPANY_DELETED); // 이미 삭제된 업체
         }
+
         company.setIsDelete(true);
         company.setDeletedAt(LocalDateTime.now());
     }
