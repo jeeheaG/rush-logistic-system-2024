@@ -15,7 +15,9 @@ public enum ErrorCode {
 
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 상품을 찾지 못하였습니다."),
     DUPLICATED_PRODUCTNAME(HttpStatus.CONFLICT, "상품 이름이 중복됩니다."),
-    PRODUCT_DELETED(HttpStatus.GONE, "해당 상품은 삭제되었습니다.");
+    PRODUCT_DELETED(HttpStatus.GONE, "해당 상품은 삭제되었습니다."),
+
+    INVALID_ROLE(HttpStatus.FORBIDDEN, "해당 업무의 권한이 없습니다.");
 
     private HttpStatus status;
     private String message;

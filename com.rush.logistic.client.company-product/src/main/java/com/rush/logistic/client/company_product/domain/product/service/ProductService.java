@@ -9,6 +9,7 @@ import com.rush.logistic.client.company_product.domain.product.dto.request.Produ
 import com.rush.logistic.client.company_product.domain.product.dto.response.ProductSearchResponse;
 import com.rush.logistic.client.company_product.domain.product.entity.Product;
 import com.rush.logistic.client.company_product.domain.product.repository.ProductRepository;
+import com.rush.logistic.client.company_product.global.client.ApiResponse;
 import com.rush.logistic.client.company_product.global.client.UserClient;
 import com.rush.logistic.client.company_product.global.client.UserResponseDto;
 import com.rush.logistic.client.company_product.global.client.UserRoleEnum;
@@ -52,8 +53,8 @@ public class ProductService {
 
     // 권한 검증
     private void validateUserPermissionForCreate(ProductCreateRequest request, String role, String authenticatedUserId) {
-        Response<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
-        UserResponseDto userResponseDto = response.getResult();
+        ApiResponse<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
+        UserResponseDto userData = response.getData();
 
         if (UserRoleEnum.MASTER.getRole().equals(role)) {
             // 마스터 관리자: 모든 상품을 추가할 수 있음
@@ -62,28 +63,22 @@ public class ProductService {
 
         if (UserRoleEnum.HUB.getRole().equals(role)) {
             // 허브 관리자: 담당 허브에 대한 리소스만 생성 가능
-            if (!userResponseDto.getHubId().equals(request.hubId())) {
-                throw new RuntimeException("해당 허브에 대한 관리 권한이 없습니다.");
+            UUID hubId = UUID.fromString(userData.getHubId());
+            if (!hubId.equals(request.hubId())) {
+                throw new ApplicationException(ErrorCode.INVALID_ROLE);
             }
-            return;
         }
-
-        if (UserRoleEnum.COMPANY.getRole().equals(role)) {
+        else if (UserRoleEnum.COMPANY.getRole().equals(role)) {
             // 업체 담당자: 본인 업체에 대한 리소스만 생성 가능
-            if (!userResponseDto.getCompanyId().equals(request.companyId())) {
-                throw new RuntimeException("해당 업체에 대한 관리 권한이 없습니다.");
+            UUID companyId = UUID.fromString(userData.getCompanyId());
+            if (!companyId.equals(request.companyId())) {
+                throw new ApplicationException(ErrorCode.INVALID_ROLE);
             }
-            return;
+        }else {
+            throw new ApplicationException(ErrorCode.INVALID_ROLE);
         }
-
-        if (UserRoleEnum.DELIVERY.getRole().equals(role)) {
-            // 배송 담당자: 생성 권한 없음
-            throw new RuntimeException("배송 담당자는 상품을 추가할 수 없습니다.");
-        }
-
-        // 다른 권한은 상품 추가 불가
-        throw new ForbiddenException("상품 추가 권한이 없습니다.");
     }
+
 
     // 상품 생성
     private ProductDto createProductEntity(ProductCreateRequest request) {
@@ -112,7 +107,7 @@ public class ProductService {
             String role,
             String authenticatedUserId
     ) {
-        Response<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
+        ApiResponse<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
 
         // 페이지 사이즈 제한
         int[] allowedPageSizes = {10, 30, 50};
@@ -160,7 +155,7 @@ public class ProductService {
 
     //상품 단건 조회
     public ProductSearchResponse getProduct(UUID id, String role, String authenticatedUserId) {
-        Response<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
+        ApiResponse<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
 
@@ -183,8 +178,8 @@ public class ProductService {
     }
 
     private void validateUserPermissionForUpdate(UUID id, ProductUpdateRequest request, String role, String authenticatedUserId) {
-        Response<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
-        UserResponseDto userResponseDto = response.getResult();
+        ApiResponse<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
+        UserResponseDto userData = response.getData();
 
         if (UserRoleEnum.MASTER.getRole().equals(role)) {
             // 관리자는 모든 업체 수정 가능
@@ -193,19 +188,21 @@ public class ProductService {
 
         if (UserRoleEnum.HUB.getRole().equals(role)) {
             // 허브 매니저 권한 체크
-            if (!userResponseDto.getHubId().equals(request.hubId())) {
-                throw new ForbiddenException("해당 업체에 대한 관리자 권한이 없습니다.");
+            UUID hubId = UUID.fromString(userData.getHubId());
+            if (!hubId.equals(request.hubId())) {
+                throw new ApplicationException(ErrorCode.INVALID_ROLE);
             }
         } else if (UserRoleEnum.COMPANY.getRole().equals(role)) {
             // 회사 관리자 권한 체크 (중복된 조건을 수정)
-            Company company = companyRepository.findById(id)
-                    .orElseThrow(() -> new ApplicationException(ErrorCode.COMPANY_NOT_FOUND));
-            if (!userResponseDto.getCompanyId().equals(company.getId())) {
-                throw new ForbiddenException("해당 업체에 대한 관리자 권한이 없습니다.");
+            UUID companyId = UUID.fromString(userData.getCompanyId());
+            Product product = productRepository.findById(id)
+                    .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
+            if (!companyId.equals(product.getCompanyId())) {
+                throw new ApplicationException(ErrorCode.INVALID_ROLE);
             }
         } else {
             // 일반 사용자는 업체 수정 불가
-            throw new ForbiddenException("업체 수정 권한이 없습니다.");
+            throw new ApplicationException(ErrorCode.INVALID_ROLE);
         }
     }
 
@@ -245,8 +242,8 @@ public class ProductService {
     }
 
     private void validateUserPermissionForDelete(UUID id, String role, String authenticatedUserId) {
-        Response<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
-        UserResponseDto userResponseDto = response.getResult();
+        ApiResponse<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
+        UserResponseDto userData = response.getData();
 
         if (UserRoleEnum.MASTER.getRole().equals(role)) {
             // 관리자는 모든 업체 삭제 가능
@@ -256,12 +253,13 @@ public class ProductService {
             // 허브 매니저 권한 체크
             Company company = companyRepository.findById(id)
                     .orElseThrow(() -> new ApplicationException(ErrorCode.INVALID_REQUEST));
-            if (!userResponseDto.getHubId().equals(company.getHubId())) {
-                throw new RuntimeException("해당 업체에 대한 관리자 권한이 없습니다.");
+            UUID hubId = UUID.fromString(userData.getHubId());
+            if (!hubId.equals(company.getHubId())) {
+                throw new ApplicationException(ErrorCode.INVALID_ROLE);
             }
         } else {
             // 일반 사용자는 업체 삭제 불가
-            throw new RuntimeException("업체 삭제 권한이 없습니다.");
+            throw new ApplicationException(ErrorCode.INVALID_ROLE);
         }
     }
 

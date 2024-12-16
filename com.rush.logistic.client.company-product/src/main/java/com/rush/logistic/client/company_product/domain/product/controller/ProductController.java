@@ -18,7 +18,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @RequestMapping("api/products")
 public class ProductController {
-    
+
     @Value("{server.port}")
     private String port;
 
