@@ -4,7 +4,6 @@ package com.rush.logistic.client.slack.domain.controller;
 import com.rush.logistic.client.slack.domain.dto.SlackInfoResponseDto;
 import com.rush.logistic.client.slack.domain.dto.SlackRequestDto;
 import com.rush.logistic.client.slack.domain.dto.SlackUpdateRequestDto;
-import com.rush.logistic.client.slack.domain.entity.SlackEntity;
 import com.rush.logistic.client.slack.domain.global.ApiResponse;
 import com.rush.logistic.client.slack.domain.service.SlackService;
 import lombok.RequiredArgsConstructor;

@@ -22,7 +22,6 @@ public class AuthConfig {
                         .requestMatchers("/api/auth/signIn").permitAll()
                         .requestMatchers("/api/auth/signUp").permitAll()
                         .requestMatchers("/api/users/**").permitAll()
-                        .requestMatchers("/api/slacks/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
