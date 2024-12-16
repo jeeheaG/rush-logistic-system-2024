@@ -38,21 +38,16 @@ public class ProductController {
                                                      UUID companyId,
                                                      UUID hubId,
                                                      Pageable pageable,
-                                                     String sortType,
-                                                     @RequestHeader(value = "role", required = true) String role,
-                                                     @RequestHeader(value = "USER_ID", required = true) String authenticatedUserId
+                                                     String sortType
 
     ){
-        Page<ProductDto> products = productService.getAllProduct(name,companyId,hubId,pageable,sortType,role,authenticatedUserId);
+        Page<ProductDto> products = productService.getAllProduct(name,companyId,hubId,pageable,sortType);
         return Response.success(products, "상품 조회에 성공하였습니다");
     }
 
     @GetMapping("/{id}")
-    public Response<ProductSearchResponse> getProduct(@PathVariable UUID id,
-                                                      @RequestHeader(value = "role", required = true) String role,
-                                                      @RequestHeader(value = "USER_ID", required = true) String authenticatedUserId
-    ){
-        return Response.success(productService.getProduct(id,role,authenticatedUserId), "상품 단건 조회에 성공하였습니다.");
+    public Response<ProductSearchResponse> getProduct(@PathVariable UUID id){
+        return Response.success(productService.getProduct(id), "상품 단건 조회에 성공하였습니다.");
     }
 
     @PutMapping("/{id}")

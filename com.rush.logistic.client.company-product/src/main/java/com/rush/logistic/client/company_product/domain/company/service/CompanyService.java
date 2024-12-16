@@ -14,11 +14,10 @@ import com.rush.logistic.client.company_product.global.client.UserRoleEnum;
 import com.rush.logistic.client.company_product.global.client.UserResponseDto;
 import com.rush.logistic.client.company_product.global.exception.ApplicationException;
 import com.rush.logistic.client.company_product.global.exception.ErrorCode;
-import com.rush.logistic.client.company_product.global.exception.Response;
 import com.rush.logistic.client.company_product.global.type.CompanyType;
 import jakarta.persistence.EntityManager;
-import jakarta.ws.rs.ForbiddenException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +31,7 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CompanyService {
@@ -55,11 +55,12 @@ public class CompanyService {
         ApiResponse<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
         UserResponseDto userData = response.getData();
 
-        if (UserRoleEnum.MASTER.getRole().equals(role)) {
+        if (UserRoleEnum.MASTER.name().equals(role)) {
             // 관리자는 모든 업체 생성 가능
+            log.info(UserRoleEnum.MASTER.name());
             return;
         }
-        if (UserRoleEnum.HUB.getRole().equals(role)) {
+        if (UserRoleEnum.HUB.name().equals(role)) {
             // 허브 매니저 권한 체크
             System.out.println(role);
             System.out.println(response.getData().getHubId().toString());
@@ -97,12 +98,8 @@ public class CompanyService {
             UUID hubId,
             CompanyType companyType,
             Pageable pageable,
-            String sortType,
-            String role,
-            String authenticatedUserId
+            String sortType
     ) {
-        ApiResponse<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
-
         // 페이지 사이즈 제한
         int[] allowedPageSizes = {10, 30, 50};
         int pageSize = pageable.getPageSize();
@@ -149,8 +146,7 @@ public class CompanyService {
 
     //업체 단건 조회
     @Transactional
-    public CompanySearchResponse getCompany(UUID id, String role, String authenticatedUserId) {
-        ApiResponse<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
+    public CompanySearchResponse getCompany(UUID id) {
         Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.COMPANY_NOT_FOUND));
 
@@ -176,18 +172,18 @@ public class CompanyService {
         ApiResponse<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
         UserResponseDto userData = response.getData();
 
-        if (UserRoleEnum.MASTER.getRole().equals(role)) {
+        if (UserRoleEnum.MASTER.name().equals(role)) {
             // 관리자는 모든 업체 수정 가능
             return;
         }
 
-        if (UserRoleEnum.HUB.getRole().equals(role)) {
+        if (UserRoleEnum.HUB.name().equals(role)) {
             // 허브 매니저 권한 체크
             UUID hubId = UUID.fromString(userData.getHubId());
             if (!hubId.equals(request.hubId())) {
                 throw new RuntimeException("해당 업체에 대한 관리자 권한이 없습니다.");
             }
-        } else if (UserRoleEnum.COMPANY.getRole().equals(role)) {
+        } else if (UserRoleEnum.COMPANY.name().equals(role)) {
             // 회사 관리자 권한 체크 (중복된 조건을 수정)
             Company company = companyRepository.findById(id)
                     .orElseThrow(() -> new ApplicationException(ErrorCode.COMPANY_NOT_FOUND));
@@ -241,12 +237,12 @@ public class CompanyService {
         ApiResponse<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
         UserResponseDto userData = response.getData();
 
-        if (UserRoleEnum.MASTER.getRole().equals(role)) {
+        if (UserRoleEnum.MASTER.name().equals(role)) {
             // 관리자는 모든 업체 삭제 가능
             return;
         }
 
-        if (UserRoleEnum.HUB.getRole().equals(role)) {
+        if (UserRoleEnum.HUB.name().equals(role)) {
             // 허브 매니저 권한 체크
             Company company = companyRepository.findById(id)
                     .orElseThrow(() -> new ApplicationException(ErrorCode.INVALID_REQUEST));
