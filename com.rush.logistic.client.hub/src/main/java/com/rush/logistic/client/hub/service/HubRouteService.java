@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rush.logistic.client.hub.dto.BaseResponseDto;
 import com.rush.logistic.client.hub.dto.EdgeDto;
+import com.rush.logistic.client.hub.dto.HubIdResponseDto;
 import com.rush.logistic.client.hub.dto.HubListResponseDto;
 import com.rush.logistic.client.hub.dto.HubPointRequestDto;
 import com.rush.logistic.client.hub.dto.HubRouteIdResponseDto;
@@ -11,6 +12,7 @@ import com.rush.logistic.client.hub.dto.HubRouteInfoResponseDto;
 import com.rush.logistic.client.hub.dto.HubRouteListResponseDto;
 import com.rush.logistic.client.hub.dto.LatLonDto;
 import com.rush.logistic.client.hub.dto.TimeTakenAndDistDto;
+import com.rush.logistic.client.hub.dto.UserDto;
 import com.rush.logistic.client.hub.message.HubMessage;
 import com.rush.logistic.client.hub.message.HubName;
 import com.rush.logistic.client.hub.message.HubRouteMessage;
@@ -20,6 +22,7 @@ import com.rush.logistic.client.hub.model.HubRoute;
 import com.rush.logistic.client.hub.repository.HubItemRepository;
 import com.rush.logistic.client.hub.repository.HubRepository;
 import com.rush.logistic.client.hub.repository.HubRouteRepository;
+import com.rush.logistic.client.hub.repository.UserClient;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -68,11 +71,16 @@ public class HubRouteService {
     private final HubRepository hubRepository;
     private final HubItemRepository hubItemRepository;
     private final HubRouteRepository hubRouteRepository;
+    private final UserClient userClient;
 
     @Transactional
-    public BaseResponseDto<HubRouteIdResponseDto> createHubRoute(HubPointRequestDto requestDto) {
+    public BaseResponseDto<HubRouteIdResponseDto> createHubRoute(Long userId, String role, HubPointRequestDto requestDto) {
         HubRouteIdResponseDto responseDto = null;
-        // TODO: MASTER USER 확인 로직 추가
+        if (!checkForbidden(userId, role)) {
+            return BaseResponseDto
+                    .<HubRouteIdResponseDto>from(HttpStatus.FORBIDDEN.value(), HttpStatus.FORBIDDEN, HubRouteMessage.HUB_ROUTE_CREATE_FORBIDDEN.getMessage(), null);
+        }
+        String username = getUserNameByJwt(userId, role);
         try {
             if(hubRouteRepository.findByStartHubIdAndEndHubIdAndIsDeleteFalse(requestDto.getStartHubId(), requestDto.getEndHubId()).isPresent()){
                 // 이미 생성한 경로는 다시 생성할 필요 없음
@@ -128,7 +136,7 @@ public class HubRouteService {
             // 허브 경로 저장
             Duration timeTaken = stringToDuration(timeTakenAndDistDto.getTimeTaken());
             int distance = Integer.parseInt(timeTakenAndDistDto.getDistance()); // 400Km
-            HubRoute hubRoute = hubRouteRepository.save(HubRoute.from(requestDto, timeTaken, distance, timeTakenAndDistDto.getTimeTaken()));
+            HubRoute hubRoute = hubRouteRepository.save(HubRoute.from(requestDto, timeTaken, distance, timeTakenAndDistDto.getTimeTaken(), username));
 
             // 허브 경로 생성 반환
             responseDto = HubRouteIdResponseDto.from(hubRoute.getHubRouteId());
@@ -196,7 +204,12 @@ public class HubRouteService {
     }
 
     @Transactional
-    public BaseResponseDto<HubRouteInfoResponseDto> updateHubRouteById(UUID hubRouteId) {
+    public BaseResponseDto<HubRouteInfoResponseDto> updateHubRouteById(Long userId, String role, UUID hubRouteId) {
+        if (!checkForbidden(userId, role)) {
+            return BaseResponseDto
+                    .<HubRouteInfoResponseDto>from(HttpStatus.FORBIDDEN.value(), HttpStatus.FORBIDDEN, HubRouteMessage.HUB_ROUTE_UPDATED_FORBIDDEN.getMessage(), null);
+        }
+        String username = getUserNameByJwt(userId, role);
         try {
             HubRoute hubRoute = hubRouteRepository.findById(hubRouteId)
                     .orElseThrow(() ->
@@ -226,7 +239,7 @@ public class HubRouteService {
 
             // 허브 경로 정보 업데이트
             Duration timeTaken = stringToDuration(timeTakenAndDistDto.getTimeTaken());
-            hubRoute.update(timeTakenAndDistDto, timeTaken);
+            hubRoute.update(timeTakenAndDistDto, timeTaken, username);
 
             // 업데이트 저장
             hubRouteRepository.save(hubRoute);
@@ -243,8 +256,12 @@ public class HubRouteService {
     }
 
     @Transactional
-    public BaseResponseDto<HubRouteIdResponseDto> deleteHubRoute(UUID hubRouteId) {
-        // TODO: MASTER USER 확인 로직 추가
+    public BaseResponseDto<HubRouteIdResponseDto> deleteHubRoute(Long userId, String role, UUID hubRouteId) {
+        if (!checkForbidden(userId, role)) {
+            return BaseResponseDto
+                    .<HubRouteIdResponseDto>from(HttpStatus.FORBIDDEN.value(), HttpStatus.FORBIDDEN, HubRouteMessage.HUB_ROUTE_DELETED_FORBIDDEN.getMessage(), null);
+        }
+        String username = getUserNameByJwt(userId, role);
         try {
             // 허브 조회
             HubRoute hubRoute = hubRouteRepository.findById(hubRouteId)
@@ -259,7 +276,7 @@ public class HubRouteService {
             }
 
             // 허브 경로 삭제정보 업데이트
-            hubRoute.delete();
+            hubRoute.delete(username);
 
             return BaseResponseDto
                     .from(HttpStatus.OK.value(), HttpStatus.OK, HubRouteMessage.HUB_ROUTE_DELETED_SUCCESS.getMessage(), HubRouteIdResponseDto.from(hubRoute.getHubRouteId()));
@@ -416,9 +433,8 @@ public class HubRouteService {
     }
 
     @Transactional
-    public BaseResponseDto<HubRouteListResponseDto<HubRouteInfoResponseDto>> createHubRouteP2P(HubPointRequestDto requestDto) {
+    public BaseResponseDto<HubRouteListResponseDto<HubRouteInfoResponseDto>> createHubRouteP2P(Long userId, String role, HubPointRequestDto requestDto) {
         try {
-
             List<Hub> hubList = hubRepository.findAllAsListByIsDeleteFalse().orElseThrow(
                     () -> new NoSuchElementException(HubMessage.HUB_LIST_NOT_FOUND.getMessage())
             );
@@ -433,7 +449,7 @@ public class HubRouteService {
                     if(!connectedHubRoute.isPresent()){
                         // 아직 생성되지 않았다면 신규 경로 생성
                         HubPointRequestDto hubPointReq = new HubPointRequestDto(startHub.getHubId(), endHub.getHubId());
-                        createHubRoute(hubPointReq);
+                        createHubRoute(userId, role, hubPointReq);
                     } else {
                         if(connectedHubRoute.get().isDelete()){
                             // 생성했었지만 soft delete되어 있으면 다시 생성
@@ -473,12 +489,17 @@ public class HubRouteService {
     }
 
     @Transactional
-    public BaseResponseDto<HubRouteListResponseDto<HubRouteInfoResponseDto>> createHubToHubRelay(HubPointRequestDto requestDto) {
+    public BaseResponseDto<HubRouteListResponseDto<HubRouteInfoResponseDto>> createHubToHubRelay(Long userId, String role, HubPointRequestDto requestDto) {
+        if(!checkForbidden(userId, role)){
+            return BaseResponseDto
+                    .<HubRouteListResponseDto<HubRouteInfoResponseDto>>from(HttpStatus.FORBIDDEN.value(), HttpStatus.FORBIDDEN,
+                            HubRouteMessage.HUB_ROUTE_CREATE_FORBIDDEN.getMessage(), null);
+        }
+        String username = getUserNameByJwt(userId, role);
         try {
             List<Hub> hubList = hubRepository.findAllAsListByIsDeleteFalse().orElseThrow(
                     () -> new NoSuchElementException(HubMessage.HUB_LIST_NOT_FOUND.getMessage())
             );
-
             for(Hub startHub : hubList){
                 for(Hub endHub : hubList){
                     if(startHub.getHubId().equals(endHub.getHubId())){
@@ -491,7 +512,7 @@ public class HubRouteService {
                         if(!connectedHubRoute.isPresent()){
                             // 아직 생성되지 않았다면 신규 경로 생성
                             HubPointRequestDto hubPointReq = new HubPointRequestDto(startHub.getHubId(), endHub.getHubId());
-                            createHubRoute(hubPointReq);
+                            createHubRoute(userId, role, hubPointReq);
                         } else {
                             if(connectedHubRoute.get().isDelete()){
                                 // 생성했었지만 soft delete되어 있으면 다시 생성
@@ -505,7 +526,7 @@ public class HubRouteService {
                         // 연결되지 않은 허브경로인데 존재 한다면 softDelete처리. isDelete -> true
                         Optional<HubRoute> unconnectedHubRoute = hubRouteRepository.findByStartHubIdAndEndHubIdAndIsDeleteFalse(startHub.getHubId(), endHub.getHubId());
                         if(unconnectedHubRoute.isPresent()){
-                            unconnectedHubRoute.get().delete();
+                            unconnectedHubRoute.get().delete(username);
                             hubRouteRepository.save(unconnectedHubRoute.get());
                         }
                     }
@@ -812,5 +833,23 @@ public class HubRouteService {
         long minutes = totalMinutes % 60;
 
         return String.format("%dD %dH %dM", days, hours, minutes);
+    }
+
+    private boolean checkForbidden(Long userId, String role) {
+        BaseResponseDto<UserDto> userDto = userClient.getUserById(userId, role, userId);
+
+        if(userDto.getData().getRole().equals("MASTER")) {
+            return true;
+        }
+        if (userDto.getData().getRole().equals("HUB")) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private String getUserNameByJwt(Long userId, String role) {
+        BaseResponseDto<UserDto> userDto = userClient.getUserById(userId, role, userId);
+        return userDto.getData().getUsername();
     }
 }
