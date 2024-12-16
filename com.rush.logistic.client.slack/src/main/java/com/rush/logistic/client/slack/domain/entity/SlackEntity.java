@@ -25,10 +25,10 @@ public class SlackEntity extends BaseEntity {
     @Column(name = "message")
     private String message;
 
-    @Column(name = "send_User_Id")
+    @Column(name = "send_user_id")
     private String sendUserId;
 
-    @Column(name = "receive_User_Slack_Id")
+    @Column(name = "receive_user_slack_id")
     private String receiveUserSlackId;
 
     public void updateSlackEntity(SlackUpdateRequestDto requestDto){

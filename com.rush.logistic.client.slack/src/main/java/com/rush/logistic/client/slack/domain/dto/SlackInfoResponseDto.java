@@ -18,7 +18,7 @@ public class SlackInfoResponseDto {
     private UUID Id;
     private String message;
     private String sendUserId;
-    private String receiveUserId;
+    private String receiveUserSlackId;
     private LocalDateTime createdAt;
     private String createdBy;
     private LocalDateTime updatedAt;
@@ -29,7 +29,7 @@ public class SlackInfoResponseDto {
                 .Id(slack.getId())
                 .message(slack.getMessage())
                 .sendUserId(slack.getSendUserId())
-                .receiveUserId(slack.getReceiveUserSlackId())
+                .receiveUserSlackId(slack.getReceiveUserSlackId())
                 .createdAt(slack.getCreatedAt())
                 .createdBy(slack.getCreatedBy())
                 .updatedAt(slack.getUpdatedAt())

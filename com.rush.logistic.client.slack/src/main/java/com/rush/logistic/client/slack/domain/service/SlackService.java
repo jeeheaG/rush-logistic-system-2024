@@ -136,7 +136,7 @@ public class SlackService {
 
         ApiResponse<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
 
-        SlackEntity slackentity = slackRepository.findById(Long.valueOf(slackId)).orElseThrow(NotFoundSlackException::new);
+        SlackEntity slackentity = slackRepository.findById(UUID.fromString(slackId)).orElseThrow(NotFoundSlackException::new);
 
         slackentity.updateSlackEntity(slackUpdateRequestDto);
         slackRepository.save(slackentity);
@@ -149,7 +149,7 @@ public class SlackService {
 
         ApiResponse<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
 
-        SlackEntity slackentity = slackRepository.findById(Long.valueOf(slackId)).orElseThrow(NotFoundSlackException::new);
+        SlackEntity slackentity = slackRepository.findById(UUID.fromString(slackId)).orElseThrow(NotFoundSlackException::new);
 
         slackentity.setDelete(true);
         slackRepository.save(slackentity);
