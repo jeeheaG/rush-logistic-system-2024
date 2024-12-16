@@ -24,7 +24,6 @@ public class UserInfoResponseDto {
     private String email;
     private UUID hubId;
     private UUID companyId;
-    private UUID deliveryId;
     private LocalDateTime createAt;
     private String createdBy;
     private LocalDateTime updateAt;
@@ -39,7 +38,6 @@ public class UserInfoResponseDto {
                 .email(user.getEmail())
                 .hubId(user.getHubId())
                 .companyId(user.getCompanyId())
-                .deliveryId(user.getDeliveryId())
                 .createAt(LocalDateTime.now())
                 .createdBy(user.getCreatedBy())
                 .updateAt(LocalDateTime.now())

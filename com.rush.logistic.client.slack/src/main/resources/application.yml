@@ -4,7 +4,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/rush
     username: postgres
-    password: 1234
+    password: 1111
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -24,3 +24,11 @@ eureka:
 
 slack:
   token: ${SLACK_API_TOKEN}
+
+management:
+  zipkin:
+    tracing:
+      endpoint: "http://localhost:9411/api/v2/spans"
+  tracing:
+    sampling:
+      probability: 1.0

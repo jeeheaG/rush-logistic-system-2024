@@ -18,7 +18,7 @@ public enum DeliveryCode implements StatusCode {
     //4xx
     DELIVERY_NOT_EXIST(HttpStatus.NOT_FOUND, "존재하지 않는 배달"),
     DELIVERY_ALREADY_EXIST(HttpStatus.CONFLICT, "이미 존재하는 배달"),
-    ;
+    DELIVERY_HAS_NO_ROUTE(HttpStatus.CONFLICT, "배달 경록 존재하지 않는 배달");
 
     private final HttpStatus httpStatus;
     private final String message;

@@ -1,81 +1,45 @@
 package com.rush.logistic.client.order_delivery.global.auth.checker;
 
-import com.rush.logistic.client.order_delivery.domain.deliveryman.repository.DeliverymanRepository;
-import com.rush.logistic.client.order_delivery.domain.order.controller.client.CompanyClient;
-import com.rush.logistic.client.order_delivery.domain.order.controller.client.HubClient;
 import com.rush.logistic.client.order_delivery.domain.order.controller.client.UserClient;
 import com.rush.logistic.client.order_delivery.domain.order.controller.client.dto.response.GetUserInfoRes;
-import com.rush.logistic.client.order_delivery.domain.order.controller.client.dto.response.UserSlackResWrapper;
 import com.rush.logistic.client.order_delivery.global.auth.UserInfo;
 import com.rush.logistic.client.order_delivery.global.auth.UserRole;
 import com.rush.logistic.client.order_delivery.global.exception.BaseException;
 import com.rush.logistic.client.order_delivery.global.response.BasicCode;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
-@Component
 @RequiredArgsConstructor
-public class UserRoleChecker {
+public abstract class UserRoleChecker<T> {
     private final UserClient userClient;
-    private final DeliverymanRepository deliverymanRepository;
 
-    public void checkRole(List<RoleOption> options, UserInfo userInfo, UUID inChargeOf) {
+    public GetUserInfoRes getUserAndCheckAllRole(UserInfo userInfo) {
+        return this.getUserAndCheckRole(getAllRoles(), userInfo);
+    }
+
+    /**
+     * 권한의 현재 유효성 확인, 허용 권한에 포함되어 있는지 확인
+     * @param allowedRoles
+     * @param userInfo
+     * @return
+     */
+    public GetUserInfoRes getUserAndCheckRole(List<UserRole> allowedRoles, UserInfo userInfo) {
         Long userId = userInfo.getUserId();
         GetUserInfoRes userRes = userClient.getUserInfo(userId).data();
-
         UserRole role = userInfo.getRole();
 
         isRoleValid(userRes.role(), role);
 
-        boolean isAllowed = false;
-        for (RoleOption option : options) {
-            if (option.role() == role) {
-                if (!option.checkIsInCharge()) {
-                    isAllowed = true;
-                    break;
-                }
-
-                try {
-                    switch (option.role()) {
-                        case HUB -> {
-                            isAllowed = isHubInCharge(userRes, inChargeOf);
-                        }
-                        case COMPANY -> {
-                            isAllowed = isCompanyInCharge(userRes, inChargeOf);
-                        }
-                        case DELIVERY -> {
-                            isAllowed = isDeliveryInCharge(userRes, inChargeOf);
-                        }
-                    }
-                } catch (Exception e) {
-                    throw new BaseException(BasicCode.CANNOT_CHECK_USER_ROLE_IN_CHARGE);
-
-                }
-            }
+        if(allowedRoles.contains(role)) {
+            return userRes;
         }
-
-        if(!isAllowed) {
-            throw new BaseException(BasicCode.USER_NOT_ALLOWED);
-        }
+        throw new BaseException(BasicCode.USER_NOT_ALLOWED);
     }
 
-    private boolean isDeliveryInCharge(GetUserInfoRes userRes, UUID inChargeOf) {
-        // delivery 엔티티 조회해서 담당 배달인지 조회
-        return false;
-    }
+    public abstract void checkInCharge(T target, GetUserInfoRes getUserInfoRes);
 
-    private boolean isCompanyInCharge(GetUserInfoRes userRes, UUID inChargeOf) {
-        // 사용자 조회해서 담당 업체인지 조회
-        return false;
-    }
-
-    private boolean isHubInCharge(GetUserInfoRes userRes, UUID inChargeOf) {
-        // 사용자 조회해서 담당 허브인지 조회
-        return false;
-    }
 
     private void isRoleValid(UserRole newRole, UserRole checkRole) {
         if (!newRole.equals(checkRole)) {
@@ -83,4 +47,7 @@ public class UserRoleChecker {
         }
     }
 
+    private List<UserRole> getAllRoles() {
+        return Arrays.asList(UserRole.MASTER, UserRole.HUB, UserRole.COMPANY, UserRole.DELIVERY);
+    }
 }
