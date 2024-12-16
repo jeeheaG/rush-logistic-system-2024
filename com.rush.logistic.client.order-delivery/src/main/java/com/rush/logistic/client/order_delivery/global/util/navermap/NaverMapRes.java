@@ -15,10 +15,10 @@ public record NaverMapRes(
         String time
 
 ) {
-    public static NaverMapRes toDto() {
+    public static NaverMapRes toDto(String distance, String time) {
         return NaverMapRes.builder()
-                .distance(-1)
-                .time("dummyTime")
+                .distance(Integer.valueOf(distance))
+                .time(time)
                 .build();
     }
 
