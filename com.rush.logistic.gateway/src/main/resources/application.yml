@@ -24,7 +24,7 @@ spring:
         - id: company-product-service
           uri: lb://company-product-service
           predicates:
-            - Path=/api/products/**, /api/companies/**
+            - Path=/api/products/**, /api/companies/** ,/company-product-service/v3/api-docs
         - id: slack
           uri: lb://slack
           predicates:
