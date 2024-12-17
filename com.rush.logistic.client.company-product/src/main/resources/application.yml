@@ -2,9 +2,9 @@ spring:
   application:
     name: company-product-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/company
-    username: postgres
-    password: 1111
+    url: jdbc:postgresql://${COMPANY_DB_URL}
+    username: ${COMPANY_DB_USERNAME}
+    password: ${COMPANY_DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
