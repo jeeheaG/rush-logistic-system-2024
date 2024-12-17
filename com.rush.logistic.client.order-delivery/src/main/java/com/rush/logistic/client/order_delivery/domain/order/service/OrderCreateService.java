@@ -59,6 +59,11 @@ public class OrderCreateService {
         // 수령, 생산 업체가 소속된 허브ID 받아옴
         CompanyResWrapper<GetStartEndHubIdOfCompanyRes> getStartEndHubIdOfCompanyDto = companyClient.getStartEndHubIdOfCompany(GetStartEndHubIdOfCompanyReq.toDto(requestDto.produceCompanyId(), requestDto.receiveCompanyId()));
         log.info("createDeliveryAndOrder getStartEndHubIdOfCompanyDto : {}", getStartEndHubIdOfCompanyDto.result());
+
+        // 수령 업체 정보 받아옴 (업체 주소 필요)
+        CompanyResWrapper<GetCompanyByIdRes> getCompanyByIdResCompanyDto = companyClient.getCompanyById(requestDto.receiveCompanyId());
+        log.info("createDeliveryAndOrder getCompanyByIdResCompanyDto : {}", getCompanyByIdResCompanyDto.result());
+
         // TODO : -> 조회 실패할 경우 예외응답
 
 
@@ -80,7 +85,7 @@ public class OrderCreateService {
 
         // 마지막 허브-업체 간 경로 받아옴
         int hubRouteSize = hubRouteInfos.size();
-        NaverMapRes naverMapRes = naverMapUtil.getDistanceAndTimeByAddress(hubRouteInfoResWrap.data().hubRouteList().get(hubRouteSize-1).endHubAddress(), requestDto.deliveryInfo().address());
+        NaverMapRes naverMapRes = naverMapUtil.getDistanceAndTimeByAddress(hubRouteInfoResWrap.data().hubRouteList().get(hubRouteSize-1).endHubAddress(), getCompanyByIdResCompanyDto.result().address());
         log.info("createDeliveryAndOrder naverMapRes : {}", naverMapRes);
 
         // 경로별 담당자 배정, 배송 경로 생성
