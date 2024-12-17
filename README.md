@@ -22,11 +22,11 @@
 [📙 API 명세서](https://functional-iron-b15.notion.site/API-15e5724d1eee80d9a313ccb8c9f88bfe?pvs=4)
 
 ## ERD
-<img src = "https://github.com/user-attachments/assets/e5c1f783-08f5-4a98-84f2-2e1a900caa7d" width="700" height="500"/>
+![rush-logistic-system-2024](https://github.com/user-attachments/assets/37c36d73-cb23-49e8-bf84-ad1a3148ad96)
 <br>
 
 ## 인프라 아키텍처
-<img src = "https://github.com/user-attachments/assets/14329286-a6af-48b7-a984-5ea0da351363" width="700" height="500"/>
+![rush_(3)](https://github.com/user-attachments/assets/4b9d9c3b-efd8-4e0f-9bad-31f4b2313161)
 
 ### 📃 Order
 - 주문의 생성, 조회, 수정, 삭제 기능을 통해 주문 처리 및 물류 흐름 관리를 수행합니다.
