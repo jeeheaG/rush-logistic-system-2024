@@ -58,6 +58,7 @@ public class OrderCreateService {
     public OrderAllRes createDeliveryAndOrder(OrderAndDeliveryCreateReq requestDto, String userEmail) {
         // 수령, 생산 업체가 소속된 허브ID 받아옴
         CompanyResWrapper<GetStartEndHubIdOfCompanyRes> getStartEndHubIdOfCompanyDto = companyClient.getStartEndHubIdOfCompany(GetStartEndHubIdOfCompanyReq.toDto(requestDto.produceCompanyId(), requestDto.receiveCompanyId()));
+        log.info("createDeliveryAndOrder getStartEndHubIdOfCompanyDto : {}", getStartEndHubIdOfCompanyDto.result());
         // TODO : -> 조회 실패할 경우 예외응답
 
 
