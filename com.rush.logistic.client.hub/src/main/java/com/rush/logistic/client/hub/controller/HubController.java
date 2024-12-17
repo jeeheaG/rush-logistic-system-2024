@@ -9,8 +9,6 @@ import com.rush.logistic.client.hub.dto.HubListResponseDto;
 import com.rush.logistic.client.hub.model.Hub;
 import com.rush.logistic.client.hub.service.HubService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.util.List;
