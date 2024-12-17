@@ -46,8 +46,18 @@ management:
     sampling:
       probability: 1.0
 
+# swagger
+springdoc:
+  api-docs:
+    version: openapi_3_1
+    enabled: true
+    path: order-delivery-service/v3/api-docs
+  enable-spring-security: true
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
 
 gemini:
   api:
     url: ${ORDER_GEMINI_URL}
     key: ${ORDER_GEMINI_KEY}
+

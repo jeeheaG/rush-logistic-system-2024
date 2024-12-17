@@ -72,10 +72,6 @@ public class JwtAuthenticationFilter implements GlobalFilter {
 
         exchange = exchange.mutate().request(request).build();
 
-        // 일단 subject 의 userid 추출해서 새 헤더 추가
-//        String userId = getUserIdFromToken(token);
-//        exchange.getRequest().getHeaders().add(HEADER_USER_ID, userId);
-
         return chain.filter(exchange);
     }
 
@@ -86,8 +82,9 @@ public class JwtAuthenticationFilter implements GlobalFilter {
                 pathMatcher.match("/slacks/v3/**", path) ||
                 pathMatcher.match("/auth/v3/**", path) ||
                 pathMatcher.match("/users/v3/**", path) ||
-                pathMatcher.match("/hub-service/v3/**", path) ||
-                pathMatcher.match("/company-product-service/v3/**", path);
+                pathMatcher.match("/company-product-service/v3/**", path) ||
+                pathMatcher.match("/order-delivery-service/v3/**", path) ||
+                pathMatcher.match("/hub-service/v3/**", path);
     }
 
     /**

@@ -16,7 +16,7 @@ spring:
         - id: order-delivery-service
           uri: lb://order-delivery-service
           predicates:
-            - Path=/api/orders/**, /api/deliveries/**
+            - Path=/api/orders/**, /api/deliveries/**, /api/delivery-routes/**, /api/deliverymans/**, /order-delivery-service/v3/api-docs
         - id: hub-service
           uri: lb://hub-service
           predicates:
@@ -57,4 +57,6 @@ springdoc:
         url: /company-product-service/v3/api-docs
       - name: Slack Service
         url: /slacks/v3/api-docs
+      - name: Order Delivery Service
+        url: /order-delivery-service/v3/api-docs
     use-root-path: true
