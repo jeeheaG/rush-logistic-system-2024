@@ -30,12 +30,8 @@ public interface OrderRepository extends JpaRepository<Order, UUID>, OrderReposi
      */
     default PagedModel<OrderAllRes> findAllInPagedDto(Predicate predicate, Pageable pageRequest) {
         Page<Order> pageOrder = findAll(predicate, pageRequest); // DB 조회
-        log.info("findAllInPagedDto findAll pageOrder : {}", pageOrder.get().toList());
-        Page<OrderAllRes> pageDto = pageOrder.map(OrderAllRes::fromEntity);
-        log.info("findAllInPagedDto pageDto : {}", pageDto.get().toList());
-        PagedModel<OrderAllRes> model = new PagedModel<OrderAllRes>(pageDto);
-        log.info("findAllInPagedDto model : {}", model.getContent());
 
-        return model;
+        Page<OrderAllRes> pageDto = pageOrder.map(OrderAllRes::fromEntity);
+        return new PagedModel<OrderAllRes>(pageDto);
     }
 }
