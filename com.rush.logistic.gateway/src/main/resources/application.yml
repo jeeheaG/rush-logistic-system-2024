@@ -12,7 +12,7 @@ spring:
         - id: user-auth
           uri: lb://user-auth
           predicates:
-            - Path=/api/auth/**, /api/users/**
+            - Path=/api/auth/**, /api/users/**, /users/v3/api-docs
         - id: order-delivery-service
           uri: lb://order-delivery-service
           predicates:
@@ -28,7 +28,7 @@ spring:
         - id: slack
           uri: lb://slack
           predicates:
-            - Path=/api/slacks/**
+            - Path=/api/slacks/**, /slacks/v3/api-docs
       discovery:
         locator:
           enabled: true  # 서비스 디스커버리를 통해 동적으로 라우트를 생성하도록 설정
@@ -42,3 +42,19 @@ service:
   jwt:
     ## TODO : 실수로 커밋해버렸는데, 어차피 우리 키 새로 만들어야 해서 새 키로 바꾸고 환경변수 처리할 것!
     secret-key: "401b09eab3c013d4ca54922bb802bec8fd5318192b0a75f201d8b3727429080fb337591abd3e44453b954555b7a0812e1081c39b740293f765eae731f5a65ed1"
+
+
+springdoc:
+  swagger-ui:
+    urls:
+      - name: User Auth Service
+        url: /users/v3/api-docs
+      - name: Order Delivery Service
+        url: /order-delivery-service/v3/api-docs
+      - name: Hub Service
+        url: /hub-service/v3/api-docs
+      - name: Company Product Service
+        url: /company-product-service/v3/api-docs
+      - name: Slack Service
+        url: /slacks/v3/api-docs
+    use-root-path: true
