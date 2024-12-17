@@ -85,7 +85,8 @@ public class JwtAuthenticationFilter implements GlobalFilter {
                 pathMatcher.match("/v3/**", path) ||
                 pathMatcher.match("/slacks/v3/**", path) ||
                 pathMatcher.match("/auth/v3/**", path) ||
-                pathMatcher.match("/users/v3/**", path);
+                pathMatcher.match("/users/v3/**", path) ||
+                pathMatcher.match("/hub-service/v3/**", path);
     }
 
     /**
