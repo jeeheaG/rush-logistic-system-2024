@@ -18,8 +18,6 @@ import java.util.UUID;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, UUID>, OrderRepositoryCustom, QuerydslPredicateExecutor<Order> {
-    Logger log = LoggerFactory.getLogger(OrderRepository.class);
-
     Optional<Order> findByDelivery(Delivery delivery);
 
     /**

@@ -1,19 +1,30 @@
 package com.rush.logistic.client.order_delivery.domain.deliveryman.controller;
 
+import com.querydsl.core.types.Predicate;
 import com.rush.logistic.client.order_delivery.domain.deliveryman.controller.dto.request.DeliverymanCreateReq;
 import com.rush.logistic.client.order_delivery.domain.deliveryman.controller.dto.request.DeliverymanUpdateReq;
 import com.rush.logistic.client.order_delivery.domain.deliveryman.controller.dto.response.DeliverymanAllRes;
 import com.rush.logistic.client.order_delivery.domain.deliveryman.controller.dto.response.DeliverymanIdRes;
+import com.rush.logistic.client.order_delivery.domain.deliveryman.domain.Deliveryman;
 import com.rush.logistic.client.order_delivery.domain.deliveryman.exception.DeliverymanCode;
 import com.rush.logistic.client.order_delivery.domain.deliveryman.service.DeliverymanService;
 import com.rush.logistic.client.order_delivery.domain.order.controller.client.dto.response.GetUserInfoRes;
+import com.rush.logistic.client.order_delivery.domain.order.controller.dto.response.OrderAllRes;
+import com.rush.logistic.client.order_delivery.domain.order.domain.Order;
+import com.rush.logistic.client.order_delivery.domain.order.exception.OrderCode;
 import com.rush.logistic.client.order_delivery.global.auth.UserInfo;
 import com.rush.logistic.client.order_delivery.global.auth.UserInfoHeader;
 import com.rush.logistic.client.order_delivery.global.auth.UserRole;
 import com.rush.logistic.client.order_delivery.global.auth.checker.DeliverymanUserRoleChecker;
+import com.rush.logistic.client.order_delivery.global.common.SearchUtil;
 import com.rush.logistic.client.order_delivery.global.response.BaseResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.querydsl.binding.QuerydslPredicate;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,6 +57,18 @@ public class DeliverymanController {
 
         DeliverymanAllRes responseDto = deliverymanService.getDeliverymanDetail(userId, getUserInfoRes);
         return ResponseEntity.ok().body(BaseResponse.toResponse(DeliverymanCode.GET_DELIVERYMAN_OK, responseDto));
+    }
+
+    @GetMapping
+    public ResponseEntity<Object> searchDeliveryman(@UserInfoHeader UserInfo userInfo,
+                                              @QuerydslPredicate(root = Deliveryman.class) Predicate predicate,
+                                              @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        log.info("DeliverymanController searchDeliveryman");
+        GetUserInfoRes getUserInfoRes = deliverymanUserRoleChecker.getUserAndCheckAllRole(userInfo);
+        Pageable pageRequest = SearchUtil.checkAndGetPageRequest(pageable);
+
+        PagedModel<DeliverymanAllRes> responseDtos = deliverymanService.getDeliverymanSearch(getUserInfoRes, predicate, pageRequest);
+        return ResponseEntity.ok().body(BaseResponse.toResponse(DeliverymanCode.SEARCH_DELIVERYMAN_OK, responseDtos));
     }
 
     @PatchMapping("/{userId}")

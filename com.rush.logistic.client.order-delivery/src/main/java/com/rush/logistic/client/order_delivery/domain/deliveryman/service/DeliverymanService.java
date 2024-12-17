@@ -1,5 +1,6 @@
 package com.rush.logistic.client.order_delivery.domain.deliveryman.service;
 
+import com.querydsl.core.types.Predicate;
 import com.rush.logistic.client.order_delivery.domain.deliveryman.controller.dto.request.DeliverymanCreateReq;
 import com.rush.logistic.client.order_delivery.domain.deliveryman.controller.dto.request.DeliverymanUpdateReq;
 import com.rush.logistic.client.order_delivery.domain.deliveryman.controller.dto.response.DeliverymanAllRes;
@@ -10,6 +11,8 @@ import com.rush.logistic.client.order_delivery.domain.deliveryman.repository.Del
 import com.rush.logistic.client.order_delivery.domain.order.controller.client.dto.response.GetUserInfoRes;
 import com.rush.logistic.client.order_delivery.global.auth.checker.DeliverymanUserRoleChecker;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,4 +62,7 @@ public class DeliverymanService {
                 .orElseThrow(() -> new DeliverymanException(DeliverymanCode.DELIVERYMAN_NOT_EXIST));
     }
 
+    public PagedModel<DeliverymanAllRes> getDeliverymanSearch(GetUserInfoRes getUserInfoRes, Predicate predicate, Pageable pageRequest) {
+        return deliverymanRepository.findAllInPagedDto(predicate, pageRequest);
+    }
 }
