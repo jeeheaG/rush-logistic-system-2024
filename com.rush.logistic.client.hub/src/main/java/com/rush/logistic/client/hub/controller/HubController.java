@@ -8,6 +8,9 @@ import com.rush.logistic.client.hub.dto.HubInfoResponseDto;
 import com.rush.logistic.client.hub.dto.HubListResponseDto;
 import com.rush.logistic.client.hub.model.Hub;
 import com.rush.logistic.client.hub.service.HubService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +42,13 @@ public class HubController {
 
     private final HubService hubService;
 
+    @Operation(summary = "신규 HUB 생성", description = "신규 HUB를 생성합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공 or 이미 추가했던 HUB"),
+            @ApiResponse(responseCode = "201", description = "신규 HUB 생성 성공"),
+            @ApiResponse(responseCode = "403", description = "해당 권한으로는 HUB를 생성할 수 없습니다."),
+            @ApiResponse(responseCode = "500", description = "예외 발생-신규 HUB 생성 실패")
+    })
     @PostMapping
     public ResponseEntity<BaseResponseDto<HubIdResponseDto>> createHub(
             @RequestHeader(value = "USER_ID", required = true) Long userId,
@@ -49,6 +59,12 @@ public class HubController {
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
+    @Operation(summary = "특정 HUB 조회", description = "특정 HUB를 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "410", description = "이미 삭제한 HUB"),
+            @ApiResponse(responseCode = "404", description = "해당 HUB를 찾을 수 없습니다.")
+    })
     @GetMapping("/{hubId}")
     public ResponseEntity<BaseResponseDto<HubInfoResponseDto>> getHubDetails(@PathVariable("hubId") UUID hubId) {
         BaseResponseDto<HubInfoResponseDto> responseDto = hubService.getHubDetails(hubId);
@@ -56,6 +72,13 @@ public class HubController {
         return ResponseEntity.ok(responseDto);
     }
 
+    @Operation(summary = "특정 HUB 수정", description = "특정 HUB를 수정합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "410", description = "이미 삭제한 HUB"),
+            @ApiResponse(responseCode = "403", description = "해당 HUB를 수정할 권한이 없습니다."),
+            @ApiResponse(responseCode = "404", description = "해당 HUB를 찾을 수 없습니다.")
+    })
     @PutMapping("/{hubId}")
     public ResponseEntity<BaseResponseDto<HubInfoResponseDto>> updateHubDetails(
             @RequestHeader(value = "USER_ID", required = true) Long userId,
@@ -67,6 +90,13 @@ public class HubController {
         return ResponseEntity.ok(responseDto);
     }
 
+    @Operation(summary = "특정 HUB 삭제", description = "특정 HUB를 soft delete합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "410", description = "이미 삭제한 HUB"),
+            @ApiResponse(responseCode = "403", description = "해당 HUB를 삭제할 권한이 없습니다."),
+            @ApiResponse(responseCode = "404", description = "해당 HUB를 찾을 수 없습니다.")
+    })
     @DeleteMapping("/{hubId}")
     public ResponseEntity<BaseResponseDto<HubIdResponseDto>> deleteHub(
             @RequestHeader(value = "USER_ID", required = true) Long userId,
@@ -76,7 +106,12 @@ public class HubController {
 
         return ResponseEntity.ok(responseDto);
     }
-  
+
+    @Operation(summary = "전체 HUB 목록 조회", description = "전체 HUB 목록 조회(페이징) 및 검색(QueryDSL)합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "404", description = "해당 HUB를 찾을 수 없습니다.")
+    })
     @GetMapping
     public ResponseEntity<BaseResponseDto<HubListResponseDto<HubInfoResponseDto>>> getHubInfoList(
             @RequestParam(required = false) List<UUID> idList,
