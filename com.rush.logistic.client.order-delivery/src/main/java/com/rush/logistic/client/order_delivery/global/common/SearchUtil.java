@@ -17,8 +17,8 @@ public class SearchUtil {
 
         int size = pageable.getPageSize();
         List<Integer> sizeAvailable = Arrays.asList(10, 30, 50);
-        if (!sizeAvailable.contains(page)) {
-            page = 10;
+        if (!sizeAvailable.contains(size)) {
+            size = 10;
         }
 
         Sort sort = pageable.getSort();
