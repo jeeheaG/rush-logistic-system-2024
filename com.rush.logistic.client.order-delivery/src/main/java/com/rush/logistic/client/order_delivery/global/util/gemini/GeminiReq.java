@@ -26,7 +26,7 @@ public record GeminiReq(
 
     public String toStringMessage() {
         StringBuilder sb = new StringBuilder();
-        sb.append("다음 배송 정보를 바탕으로 해당 상품의 배송 출발 기한 날짜와 시각을 정해줘. 답변 형식은 아래 정보들을 깔끔하게 항목으로 정리한 다음, '배송 출발 기한 날짜는 ~입니다.' 이런 거 한두문장만 넣어줘");
+        sb.append("다음 배송 정보를 바탕으로 해당 상품의 배송 출발 기한 날짜와 시각을 정해줘. 답변 형식은 아래 정보들을 깔끔하게 항목으로 정리한 다음, '배송 출발 기한 날짜는 ~입니다.' 이런 거 한문장만 넣어줘. 같은 정보를 반복해서 언급하지 말고, 전체 길이는 200자이내로 해줘");
         sb.append(toStringInfo());
        return sb.toString();
     }
