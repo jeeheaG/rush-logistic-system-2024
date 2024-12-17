@@ -66,7 +66,7 @@
     - TO-BE : gateway 에서 토큰 복호화 일괄 처리, 커스텀 어노테이션과 Util 클래스 사용하여 로직 단일화
 - 문제 정의 : 검색 구현
     - AS-IS : 복잡한 검색 조건 및 불필요하게 많은 페이징 정보
-    - TO-BE : QueryDsl 의 인터체이스 상속으로 Predicate 기반 검색 구현, PagedModel 사용으로 불필요한 데이터 전파 방지
+    - TO-BE : QueryDsl 인터페이스 상속으로 Predicate 기반 검색 구현, PagedModel 사용으로 불필요한 데이터 전파 방지
 - 문제 정의 : DB와 Response 반환값 불일치
     - AS-IS : Updated_at 등 현재 데이터 값이 아닌 1차 캐싱 데이터 반환
     - TO-BE : EntityManager flush, clear를 통한 캐싱 데이터 삭제 후 ReLoad를 통한 실시간 값 반영
