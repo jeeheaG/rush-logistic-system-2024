@@ -9,6 +9,9 @@ import com.rush.logistic.client.hub.dto.HubRouteInfoResponseDto;
 import com.rush.logistic.client.hub.dto.HubRouteListResponseDto;
 import com.rush.logistic.client.hub.model.HubRoute;
 import com.rush.logistic.client.hub.service.HubRouteService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +39,13 @@ public class HubRouteController {
 
     private final HubRouteService hubRouteService;
 
+    @Operation(summary = "HUB 간 경로 생성", description = "신규 HUB route를 생성합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공 or 이미 연결된 HUB route"),
+            @ApiResponse(responseCode = "201", description = "신규 HUB route 생성 성공"),
+            @ApiResponse(responseCode = "403", description = "해당 권한으로는 HUB route를 생성할 수 없습니다."),
+            @ApiResponse(responseCode = "400", description = "예외 발생-신규 HUB route 생성 실패")
+    })
     @PostMapping
     public ResponseEntity<BaseResponseDto<HubRouteIdResponseDto>> createHubRoute(
             @RequestHeader(value = "USER_ID", required = true) Long userId,
@@ -46,6 +56,11 @@ public class HubRouteController {
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
+    @Operation(summary = "HUB간 경로 조회", description = "두 HUB간 HUB route 연결정보를 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "404", description = "해당 HUB route를 찾을 수 없습니다.")
+    })
     @GetMapping
     public ResponseEntity<BaseResponseDto<HubRouteListResponseDto<HubRouteInfoResponseDto>>> getHubRouteInfo(@RequestParam("startHubId") UUID startHubId,
                                                                                     @RequestParam("endHubId") UUID endHubId) {
@@ -54,6 +69,12 @@ public class HubRouteController {
         return ResponseEntity.ok(responseDto);
     }
 
+    @Operation(summary = "특정 HUB 경로 조회", description = "특정 HUB route를 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "410", description = "이미 삭제한 HUB route"),
+            @ApiResponse(responseCode = "404", description = "해당 HUB route를 찾을 수 없습니다.")
+    })
     @GetMapping("/{hubRouteId}")
     public ResponseEntity<BaseResponseDto<HubRouteInfoResponseDto>> getHubRouteInfoById(@PathVariable("hubRouteId") UUID hubRouteId) {
         BaseResponseDto<HubRouteInfoResponseDto> responseDto = hubRouteService.getHubRouteInfoById(hubRouteId);
@@ -61,6 +82,13 @@ public class HubRouteController {
         return ResponseEntity.ok(responseDto);
     }
 
+    @Operation(summary = "HUB 간 경로 정보 업데이트", description = "특정 HUB route의 경로정보를 최신화합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "410", description = "이미 삭제한 HUB route"),
+            @ApiResponse(responseCode = "403", description = "해당 HUB route를 수정할 권한이 없습니다."),
+            @ApiResponse(responseCode = "404", description = "해당 HUB route를 찾을 수 없습니다.")
+    })
     @PutMapping("/{hubRouteId}")
     public ResponseEntity<BaseResponseDto<HubRouteInfoResponseDto>> updateHubRouteById(
             @RequestHeader(value = "USER_ID", required = true) Long userId,
@@ -71,6 +99,13 @@ public class HubRouteController {
         return ResponseEntity.ok(responseDto);
     }
 
+    @Operation(summary = "HUB간 경로 삭제", description = "특정 HUB route를 soft delete합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "410", description = "이미 삭제한 HUB"),
+            @ApiResponse(responseCode = "403", description = "해당 HUB route를 삭제할 권한이 없습니다."),
+            @ApiResponse(responseCode = "404", description = "해당 HUB route를 찾을 수 없습니다.")
+    })
     @DeleteMapping("/{hubRouteId}")
     public ResponseEntity<BaseResponseDto<HubRouteIdResponseDto>> deleteHubRoute(
             @RequestHeader(value = "USER_ID", required = true) Long userId,
@@ -81,6 +116,11 @@ public class HubRouteController {
         return ResponseEntity.ok(responseDto);
     }
 
+    @Operation(summary = "전체 HUB간 경로 목록 조회", description = "전체 HUB route 목록 조회(페이징) 및 검색(QueryDSL)합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "404", description = "해당 HUB route를 찾을 수 없습니다.")
+    })
     @GetMapping("/list")
     public ResponseEntity<BaseResponseDto<HubListResponseDto<HubRouteInfoResponseDto>>> getHubRouteInfoList(
             @RequestParam(required = false) List<UUID> idList,
@@ -94,6 +134,11 @@ public class HubRouteController {
         return ResponseEntity.ok(responseDto);
     }
 
+    @Operation(summary = "HUB간 P2P 경로 조회", description = "전체 HUB의 P2P연결에 대한 경로(테스트용으로 경로도 자동 생성)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "404", description = "해당 HUB route를 찾을 수 없습니다.")
+    })
     @PostMapping("/createP2P")
     public ResponseEntity<BaseResponseDto<HubRouteListResponseDto<HubRouteInfoResponseDto>>> createHubRouteP2P(
             @RequestHeader(value = "USER_ID", required = true) Long userId,
@@ -104,6 +149,11 @@ public class HubRouteController {
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
+    @Operation(summary = "HUB간 HUB to HUB relay 경로 조회", description = "전체 HUB의 HUB to HUB relay연결에 대한 경로(테스트용으로 경로도 자동 생성)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "404", description = "해당 HUB route를 찾을 수 없습니다.")
+    })
     @PostMapping("/createHubToHubRelay")
     public ResponseEntity<BaseResponseDto<HubRouteListResponseDto<HubRouteInfoResponseDto>>> createHubToHubRelay(
             @RequestHeader(value = "USER_ID", required = true) Long userId,
