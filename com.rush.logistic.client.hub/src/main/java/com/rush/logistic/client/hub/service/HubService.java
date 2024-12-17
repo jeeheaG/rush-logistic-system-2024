@@ -159,7 +159,6 @@ public class HubService {
                 HubItem existHubItem = hubItemRepository.findById(String.valueOf(hubId)).get();
                 responseDto = HubInfoResponseDto.fromRedis(existHubItem);
 
-                // 중복된 허브명
                 return BaseResponseDto
                         .<HubInfoResponseDto>from(HttpStatus.OK.value(), HttpStatus.OK, HubMessage.HUB_FOUND_SUCCESS.getMessage(), responseDto);
             }
