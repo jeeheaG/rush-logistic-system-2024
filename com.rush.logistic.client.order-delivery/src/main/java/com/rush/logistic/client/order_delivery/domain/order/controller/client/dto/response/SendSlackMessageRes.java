@@ -2,14 +2,19 @@ package com.rush.logistic.client.order_delivery.domain.order.controller.client.d
 
 import lombok.Builder;
 
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
+import java.util.UUID;
 
 @Builder
 public record SendSlackMessageRes(
-        String slackId,
+        String id,
         String message,
-        ZonedDateTime createdAt,
         String sendUserId,
-        String receiveUserId
+        String receiveUserSlackId,
+        String createdAt,
+        String createdBy,
+        String updatedAt,
+        String updatedBy
 ) {
 }

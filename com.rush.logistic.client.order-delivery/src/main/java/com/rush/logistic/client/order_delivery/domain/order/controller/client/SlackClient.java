@@ -8,7 +8,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(value = "slack-service", configuration = FeignConfig.class)
+@FeignClient(value = "slack", configuration = FeignConfig.class)
 public interface SlackClient {
     @PostMapping("/api/slacks")
     UserSlackResWrapper<SendSlackMessageRes> sendSlackMessage(@RequestBody SendSlackMessageReq requestDto);
