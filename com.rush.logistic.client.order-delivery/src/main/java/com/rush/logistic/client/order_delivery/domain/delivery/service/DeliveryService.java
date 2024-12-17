@@ -1,5 +1,6 @@
 package com.rush.logistic.client.order_delivery.domain.delivery.service;
 
+import com.querydsl.core.types.Predicate;
 import com.rush.logistic.client.order_delivery.domain.delivery.controller.dto.request.DeliveryAllReq;
 import com.rush.logistic.client.order_delivery.domain.delivery.controller.dto.response.DeliveryAllRes;
 import com.rush.logistic.client.order_delivery.domain.delivery.domain.Delivery;
@@ -9,6 +10,8 @@ import com.rush.logistic.client.order_delivery.domain.delivery.repository.Delive
 import com.rush.logistic.client.order_delivery.domain.order.controller.client.dto.response.GetUserInfoRes;
 import com.rush.logistic.client.order_delivery.global.auth.checker.DeliveryUserRoleChecker;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,5 +67,10 @@ public class DeliveryService {
     private Delivery getDeliveryEntityById(UUID deliveryId) {
         return deliveryRepository.findById(deliveryId)
                 .orElseThrow(() -> new DeliveryException(DeliveryCode.DELIVERY_NOT_EXIST));
+    }
+
+    public PagedModel<DeliveryAllRes> getDeliverySearch(GetUserInfoRes getUserInfoRes, Predicate predicate, Pageable pageRequest) {
+        return deliveryRepository.findAllInPagedDto(predicate, pageRequest);
+
     }
 }

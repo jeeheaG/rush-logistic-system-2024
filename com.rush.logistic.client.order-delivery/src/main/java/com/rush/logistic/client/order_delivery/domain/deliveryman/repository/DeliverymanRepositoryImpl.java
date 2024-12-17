@@ -4,7 +4,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class DeliverymanRepositoryCustomImpl implements DeliverymanRepositoryCustom {
+public class DeliverymanRepositoryImpl implements DeliverymanRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
 

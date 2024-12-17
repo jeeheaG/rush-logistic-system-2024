@@ -1,14 +1,18 @@
 package com.rush.logistic.client.order_delivery.domain.delivery_route.service;
 
+import com.querydsl.core.types.Predicate;
 import com.rush.logistic.client.order_delivery.domain.delivery_route.controller.dto.request.DeliveryRouteUpdateReq;
 import com.rush.logistic.client.order_delivery.domain.delivery_route.controller.dto.response.DeliveryRouteAllRes;
 import com.rush.logistic.client.order_delivery.domain.delivery_route.domain.DeliveryRoute;
 import com.rush.logistic.client.order_delivery.domain.delivery_route.exception.DeliveryRouteCode;
 import com.rush.logistic.client.order_delivery.domain.delivery_route.exception.DeliveryRouteException;
 import com.rush.logistic.client.order_delivery.domain.delivery_route.repository.DeliveryRouteRepository;
+import com.rush.logistic.client.order_delivery.domain.deliveryman.controller.dto.response.DeliverymanAllRes;
 import com.rush.logistic.client.order_delivery.domain.order.controller.client.dto.response.GetUserInfoRes;
 import com.rush.logistic.client.order_delivery.global.auth.checker.DeliveryRouteUserRoleChecker;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,5 +66,9 @@ public class DeliveryRouteService {
     private DeliveryRoute getDeliveryRouteEntityById(UUID deliveryRouteId) {
         return deliveryRouteRepository.findById(deliveryRouteId)
                 .orElseThrow(() -> new DeliveryRouteException(DeliveryRouteCode.DELIVERY_ROUTE_NOT_EXIST));
+    }
+
+    public PagedModel<DeliveryRouteAllRes> getDeliveryRouteSearch(GetUserInfoRes getUserInfoRes, Predicate predicate, Pageable pageRequest) {
+        return deliveryRouteRepository.findAllInPagedDto(predicate, pageRequest);
     }
 }
