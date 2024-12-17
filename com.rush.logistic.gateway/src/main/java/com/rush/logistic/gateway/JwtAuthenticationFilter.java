@@ -12,6 +12,7 @@ import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
@@ -27,11 +28,22 @@ public class JwtAuthenticationFilter implements GlobalFilter {
     private static final String AUTH_ENDPOINT_PREFIX = "/api/auth";
     private static final String HEADER_USER_ID = "USER_ID";
 
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
+
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         log.info("JwtAuthenticationFilter start");
-        // 회원가입, 로그인일 경우 토큰 확인 안함
+
         String path = exchange.getRequest().getURI().getPath();
+
+        // Swagger 및 인증 예외 경로 확인
+        if (isExemptedPath(path)) {
+            log.info("Request is exempted from JWT validation: {}", path);
+            return chain.filter(exchange);
+        }
+
+        // 회원가입, 로그인일 경우 토큰 확인 안함
+
         if (path.startsWith(AUTH_ENDPOINT_PREFIX)) {
             return chain.filter(exchange);
         }
@@ -65,6 +77,15 @@ public class JwtAuthenticationFilter implements GlobalFilter {
 //        exchange.getRequest().getHeaders().add(HEADER_USER_ID, userId);
 
         return chain.filter(exchange);
+    }
+
+    private boolean isExemptedPath(String path) {
+        return path.startsWith(AUTH_ENDPOINT_PREFIX) ||
+                pathMatcher.match("/swagger-ui/index.html", path) ||
+                pathMatcher.match("/v3/**", path) ||
+                pathMatcher.match("/slacks/v3/**", path) ||
+                pathMatcher.match("/auth/v3/**", path) ||
+                pathMatcher.match("/users/v3/**", path);
     }
 
     /**

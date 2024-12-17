@@ -22,6 +22,7 @@ public class AuthConfig {
                         .requestMatchers("/api/auth/signIn").permitAll()
                         .requestMatchers("/api/auth/signUp").permitAll()
                         .requestMatchers("/api/users/**").permitAll()
+                        .requestMatchers("/users/v3/api-docs").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
