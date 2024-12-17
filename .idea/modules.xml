@@ -2,27 +2,14 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.rush.logistic.client.company-product.iml" filepath="$PROJECT_DIR$/.idea/modules/com.rush.logistic.client.company-product.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.rush.logistic.client.company-product.main.iml" filepath="$PROJECT_DIR$/.idea/modules/com.rush.logistic.client.company-product.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.rush.logistic.client.company-product.test.iml" filepath="$PROJECT_DIR$/.idea/modules/com.rush.logistic.client.company-product.test.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.rush.logistic.client.hub.iml" filepath="$PROJECT_DIR$/.idea/modules/com.rush.logistic.client.hub.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.rush.logistic.client.hub.main.iml" filepath="$PROJECT_DIR$/.idea/modules/com.rush.logistic.client.hub.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.rush.logistic.client.hub.test.iml" filepath="$PROJECT_DIR$/.idea/modules/com.rush.logistic.client.hub.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.rush.logistic.client.order-delivery.iml" filepath="$PROJECT_DIR$/.idea/modules/com.rush.logistic.client.order-delivery.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.rush.logistic.client.order-delivery.main.iml" filepath="$PROJECT_DIR$/.idea/modules/com.rush.logistic.client.order-delivery.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.rush.logistic.client.order-delivery.test.iml" filepath="$PROJECT_DIR$/.idea/modules/com.rush.logistic.client.order-delivery.test.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.rush.logistic.client.slack.iml" filepath="$PROJECT_DIR$/.idea/modules/com.rush.logistic.client.slack.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.rush.logistic.client.slack.main.iml" filepath="$PROJECT_DIR$/.idea/modules/com.rush.logistic.client.slack.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.rush.logistic.client.slack.test.iml" filepath="$PROJECT_DIR$/.idea/modules/com.rush.logistic.client.slack.test.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.rush.logistic.client.user-auth.iml" filepath="$PROJECT_DIR$/.idea/modules/com.rush.logistic.client.user-auth.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.rush.logistic.client.user-auth.main.iml" filepath="$PROJECT_DIR$/.idea/modules/com.rush.logistic.client.user-auth.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.rush.logistic.client.user-auth.test.iml" filepath="$PROJECT_DIR$/.idea/modules/com.rush.logistic.client.user-auth.test.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.rush.logistic.gateway.iml" filepath="$PROJECT_DIR$/.idea/modules/com.rush.logistic.gateway.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.rush.logistic.gateway.main.iml" filepath="$PROJECT_DIR$/.idea/modules/com.rush.logistic.gateway.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.rush.logistic.gateway.test.iml" filepath="$PROJECT_DIR$/.idea/modules/com.rush.logistic.gateway.test.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.rush.logistic.server.iml" filepath="$PROJECT_DIR$/.idea/modules/com.rush.logistic.server.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.rush.logistic.server.main.iml" filepath="$PROJECT_DIR$/.idea/modules/com.rush.logistic.server.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.rush.logistic.server.test.iml" filepath="$PROJECT_DIR$/.idea/modules/com.rush.logistic.server.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.rush.logistic.gateway.main~1.iml" filepath="$PROJECT_DIR$/.idea/modules/com.rush.logistic.gateway.main~1.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/hub_main.iml" filepath="$PROJECT_DIR$/.idea/modules/hub_main.iml" group="hub" />
     </modules>
   </component>
