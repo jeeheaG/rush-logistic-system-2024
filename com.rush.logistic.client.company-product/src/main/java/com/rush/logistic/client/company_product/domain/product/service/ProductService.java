@@ -1,6 +1,5 @@
 package com.rush.logistic.client.company_product.domain.product.service;
 
-import com.rush.logistic.client.company_product.domain.company.dto.CompanyDto;
 import com.rush.logistic.client.company_product.domain.company.entity.Company;
 import com.rush.logistic.client.company_product.domain.company.repository.CompanyRepository;
 import com.rush.logistic.client.company_product.domain.product.dto.ProductDto;
@@ -15,9 +14,7 @@ import com.rush.logistic.client.company_product.global.client.UserResponseDto;
 import com.rush.logistic.client.company_product.global.client.UserRoleEnum;
 import com.rush.logistic.client.company_product.global.exception.ApplicationException;
 import com.rush.logistic.client.company_product.global.exception.ErrorCode;
-import com.rush.logistic.client.company_product.global.exception.Response;
 import jakarta.persistence.EntityManager;
-import jakarta.ws.rs.ForbiddenException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -56,12 +53,12 @@ public class ProductService {
         ApiResponse<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
         UserResponseDto userData = response.getData();
 
-        if (UserRoleEnum.MASTER.getRole().equals(role)) {
+        if (UserRoleEnum.MASTER.name().equals(role)) {
             // 마스터 관리자: 모든 상품을 추가할 수 있음
             return;
         }
 
-        if (UserRoleEnum.HUB.getRole().equals(role)) {
+        if (UserRoleEnum.HUB.name().equals(role)) {
             // 허브 관리자: 담당 허브에 대한 리소스만 생성 가능
             UUID hubId = UUID.fromString(userData.getHubId());
             if (!hubId.equals(request.hubId())) {
@@ -103,12 +100,8 @@ public class ProductService {
             UUID companyId,
             UUID hubId,
             Pageable pageable,
-            String sortType,
-            String role,
-            String authenticatedUserId
+            String sortType
     ) {
-        ApiResponse<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
-
         // 페이지 사이즈 제한
         int[] allowedPageSizes = {10, 30, 50};
         int pageSize = pageable.getPageSize();
@@ -154,8 +147,7 @@ public class ProductService {
     }
 
     //상품 단건 조회
-    public ProductSearchResponse getProduct(UUID id, String role, String authenticatedUserId) {
-        ApiResponse<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
+    public ProductSearchResponse getProduct(UUID id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ApplicationException(ErrorCode.PRODUCT_NOT_FOUND));
 
@@ -181,12 +173,12 @@ public class ProductService {
         ApiResponse<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
         UserResponseDto userData = response.getData();
 
-        if (UserRoleEnum.MASTER.getRole().equals(role)) {
+        if (UserRoleEnum.MASTER.name().equals(role)) {
             // 관리자는 모든 업체 수정 가능
             return;
         }
 
-        if (UserRoleEnum.HUB.getRole().equals(role)) {
+        if (UserRoleEnum.HUB.name().equals(role)) {
             // 허브 매니저 권한 체크
             UUID hubId = UUID.fromString(userData.getHubId());
             if (!hubId.equals(request.hubId())) {
@@ -245,11 +237,11 @@ public class ProductService {
         ApiResponse<UserResponseDto> response = userClient.getUserById(authenticatedUserId, role, authenticatedUserId);
         UserResponseDto userData = response.getData();
 
-        if (UserRoleEnum.MASTER.getRole().equals(role)) {
+        if (UserRoleEnum.MASTER.name().equals(role)) {
             // 관리자는 모든 업체 삭제 가능
             return;
         }
-        if (UserRoleEnum.HUB.getRole().equals(role)) {
+        if (UserRoleEnum.HUB.name().equals(role)) {
             // 허브 매니저 권한 체크
             Company company = companyRepository.findById(id)
                     .orElseThrow(() -> new ApplicationException(ErrorCode.INVALID_REQUEST));

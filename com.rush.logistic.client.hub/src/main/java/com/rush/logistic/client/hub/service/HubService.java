@@ -2,6 +2,8 @@ package com.rush.logistic.client.hub.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Predicate;
 import com.rush.logistic.client.hub.dto.BaseResponseDto;
 import com.rush.logistic.client.hub.dto.HubIdResponseDto;
 import com.rush.logistic.client.hub.dto.HubInfoRequestDto;
@@ -12,6 +14,7 @@ import com.rush.logistic.client.hub.dto.UserDto;
 import com.rush.logistic.client.hub.message.HubMessage;
 import com.rush.logistic.client.hub.model.Hub;
 import com.rush.logistic.client.hub.model.HubItem;
+import com.rush.logistic.client.hub.model.QHub;
 import com.rush.logistic.client.hub.repository.HubItemRepository;
 import com.rush.logistic.client.hub.repository.HubRepository;
 import com.rush.logistic.client.hub.repository.UserClient;
@@ -23,10 +26,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -301,17 +301,17 @@ public class HubService {
     }
 
     public BaseResponseDto<HubListResponseDto<HubInfoResponseDto>> getHubInfoList(
-            int page, int size, String sortBy, boolean isAsc
+            List<UUID> idList, Predicate predicate, Pageable pageable
     ) {
         try {
-            Direction direction = isAsc ? Direction.ASC : Direction.DESC;
-            Sort sort = Sort.by(direction, sortBy);
-            Pageable pageable = PageRequest.of(page, size, sort);
-
             // 허브 리스트 조회
-            Page<Hub> hubList = hubRepository.findPagedByIsDeleteFalse(pageable).orElseThrow(() ->
-                    new NoSuchElementException(HubMessage.HUB_INFO_LIST_NOT_FOUND.getMessage())
-            );
+            BooleanBuilder booleanBuilder = new BooleanBuilder(predicate);
+            if(idList != null && !idList.isEmpty()) {
+                booleanBuilder.and(QHub.hub.hubId.in(idList));
+            }
+            booleanBuilder.and(QHub.hub.isDelete.eq(false));
+            booleanBuilder.and(QHub.hub.createdAt.gt(QHub.hub.createdAt.min()));
+            Page<Hub> hubList = hubRepository.findAll(predicate, pageable);
 
             List<HubInfoResponseDto> hubInfoList = hubList.stream()
                     .map(HubInfoResponseDto::from)

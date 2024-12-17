@@ -49,21 +49,16 @@ public class CompanyController {
                                                       UUID hubId,
                                                       CompanyType companyType,
                                                       Pageable pageable,
-                                                      String sortType,
-                                                      @RequestHeader(value = "role", required = true) String role,
-                                                      @RequestHeader(value = "USER_ID", required = true) String authenticatedUserId
+                                                      String sortType
     ) {
-        Page<CompanyDto> companies = companyService.getAllCompany(name, hubId, companyType, pageable, sortType, role, authenticatedUserId);
-        System.out.println(role);
+        Page<CompanyDto> companies = companyService.getAllCompany(name, hubId, companyType, pageable, sortType);
+
         return Response.success(companies, "업체 조회에 성공하였습니다.");
     }
 
     @GetMapping("/{id}")
-    public Response<CompanySearchResponse> getCompany(@PathVariable UUID id,
-                                                      @RequestHeader(value = "role", required = true) String role,
-                                                      @RequestHeader(value = "USER_ID", required = true) String authenticatedUserId
-    ) {
-        return Response.success(companyService.getCompany(id,role,authenticatedUserId), "업체 단건 조회에 성공하였습니다.");
+    public Response<CompanySearchResponse> getCompany(@PathVariable UUID id) {
+        return Response.success(companyService.getCompany(id), "업체 단건 조회에 성공하였습니다.");
     }
 
     @PutMapping("/{id}")

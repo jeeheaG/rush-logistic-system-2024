@@ -2,9 +2,10 @@ package com.rush.logistic.client.hub.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Predicate;
 import com.rush.logistic.client.hub.dto.BaseResponseDto;
 import com.rush.logistic.client.hub.dto.EdgeDto;
-import com.rush.logistic.client.hub.dto.HubIdResponseDto;
 import com.rush.logistic.client.hub.dto.HubListResponseDto;
 import com.rush.logistic.client.hub.dto.HubPointRequestDto;
 import com.rush.logistic.client.hub.dto.HubRouteIdResponseDto;
@@ -19,6 +20,7 @@ import com.rush.logistic.client.hub.message.HubRouteMessage;
 import com.rush.logistic.client.hub.model.Hub;
 import com.rush.logistic.client.hub.model.HubItem;
 import com.rush.logistic.client.hub.model.HubRoute;
+import com.rush.logistic.client.hub.model.QHubRoute;
 import com.rush.logistic.client.hub.repository.HubItemRepository;
 import com.rush.logistic.client.hub.repository.HubRepository;
 import com.rush.logistic.client.hub.repository.HubRouteRepository;
@@ -34,14 +36,10 @@ import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import javax.swing.text.html.Option;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -398,17 +396,20 @@ public class HubRouteService {
     }
 
     public BaseResponseDto<HubListResponseDto<HubRouteInfoResponseDto>> getHubRouteInfoList(
-            int page, int size, String sortBy, boolean isAsc
+            List<UUID> idList, Predicate predicate, Pageable pageable
     ) {
         try {
-            Direction direction = isAsc ? Direction.ASC : Direction.DESC;
-            Sort sort = Sort.by(direction, sortBy);
-            Pageable pageable = PageRequest.of(page, size, sort);
-
             // 허브 경로 리스트 조회
-            Page<HubRoute> hubRouteList = hubRouteRepository.findAllByIsDeleteFalse(pageable).orElseThrow(() ->
-                    new NoSuchElementException(HubRouteMessage.HUB_ROUTE_LIST_NOT_FOUND.getMessage())
-            );
+//            Page<HubRoute> hubRouteList = hubRouteRepository.findAllByIsDeleteFalse(pageable).orElseThrow(() ->
+//                    new NoSuchElementException(HubRouteMessage.HUB_ROUTE_LIST_NOT_FOUND.getMessage())
+//            );
+            BooleanBuilder booleanBuilder = new BooleanBuilder(predicate);
+            if(idList != null && !idList.isEmpty()) {
+                booleanBuilder.and(QHubRoute.hubRoute.hubRouteId.in(idList));
+            }
+            booleanBuilder.and(QHubRoute.hubRoute.isDelete.eq(false));
+            booleanBuilder.and(QHubRoute.hubRoute.createdAt.gt(QHubRoute.hubRoute.createdAt.min()));
+            Page<HubRoute> hubRouteList = hubRouteRepository.findAll(predicate, pageable);
 
             List<HubRouteInfoResponseDto> hubRouteInfoList = new ArrayList<>();
             for(HubRoute hubRoute : hubRouteList){
