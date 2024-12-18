@@ -92,7 +92,7 @@
   - AS-IS : Naver Map API로 응답을 받았으나 body에 정상적으로 담기지 않음
     - 터미널에 출력된 문자열을 확인해보니 특정 공백이 'NBSP'로 이루어진 것을 확인, [\\\s\\\u00A0]+ 을 통해 공백과 NBSP로 이루어진 문자를 모두 %20으로 변환 → 변환은 성공했으나 여전히 body에 담기지 않음
       <br>
-      <img width="709" alt="image" src="https://github.com/user-attachments/assets/96130add-cf10-4c04-b758-d26e51307b38"/>
+      <img width="709" alt="image" src="https://github.com/user-attachments/assets/a703a2f6-d9a3-4f3c-b250-c22c05fc8b08"/>
   - TO-BE : URI인코딩 과정에서 잘못된 인코딩이 있었음,명시적으로 encode 타입 지정
     <img width="709" alt="image" src="https://github.com/user-attachments/assets/9d860b4e-6bc0-421b-b197-0e659f545c8a" />
     
