@@ -21,7 +21,7 @@
 <img src="https://img.shields.io/badge/MSA -535D6C?style=flat&logo=awesomewm&logoColor=white"/><img src="https://img.shields.io/badge/swagger -85EA2D?style=flat&logo=swagger&logoColor=white"/><img src="https://img.shields.io/badge/Zipkin -FE5F50?style=flat&logo=Zipkin&logoColor=white"/><img src="https://img.shields.io/badge/Docker -2496ED?style=flat&logo=docker&logoColor=white"/><br>
 <img src="https://img.shields.io/badge/Java 17 -C70D2C?style=flat&logo=java&logoColor=white"/><img src="https://img.shields.io/badge/springboot 3.4-6DB33F?style=flat&logo=springboot&logoColor=white"/><img src="https://img.shields.io/badge/springsecurity (Auth,JWT)-6DB33F?style=flat&logo=springsecurity&logoColor=white"/><img src="https://img.shields.io/badge/QueryDSL-5395FD?style=flat&logo=QueryDSL&logoColor=white"/><br>
 <img src="https://img.shields.io/badge/postgresql -4169E1?style=flat&logo=postgresql&logoColor=white"/><img src="https://img.shields.io/badge/redis -FF4438?style=flat&logo=redis&logoColor=white"/><img src="https://img.shields.io/badge/GoogleGemini -8E75B2?style=flat&logo=googlegemini&logoColor=white"/><img src="https://img.shields.io/badge/Naver Direction5 -03C75A?style=flat&logo=naver&logoColor=white"/>
-<img src="https://img.shields.io/badge/GoogleGeocode -4285F4?style=flat&logo=googlemaps&logoColor=white"/>
+<img src="https://img.shields.io/badge/Naver Geocoding -03C75A?style=flat&logo=naver&logoColor=white"/>
 
 ## 문서 자료
 [📘 테이블 명세서](https://docs.google.com/spreadsheets/d/1xiXvHmo2wijXeWZmYdi3OQq0XHNwmVog8oWbCUE3zuE/edit?gid=2112576932#gid=2112576932)<br>
