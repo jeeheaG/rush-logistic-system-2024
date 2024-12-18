@@ -78,13 +78,21 @@
   - AS-IS : Updated_at 등 현재 데이터 값이 아닌 1차 캐싱 데이터 반환
   - TO-BE : EntityManager flush, clear를 통한 캐싱 데이터 삭제 후 ReLoad를 통한 실시간 값 반영
     
-- 문제 정의 : Hub 간 경로 비효율
-  - AS-IS : 기존 P2P 방식으로 허브 간 경로를 설정했을 때에 너무 비효율적인 배송 경로를 사용하게 됨
+- 문제 정의 : HUB 간 경로 비효율
+  - AS-IS : 기존 P2P 방식으로 HUB 간 경로를 설정했을 때에 경유지 없이 직접 연결되어 경로는 효율적이나 HUB와 HUB 사이를 이동하는 화물 차량이 불필요하게 많아질 수 있어 너무 비효율적인 배송 경로를 사용하게 됨
+  <br>
+    <img width="354" alt="image" src="https://github.com/user-attachments/assets/3a215b91-ff92-436f-bba2-f11200796027"/>
+  <br>
   - TO-BE : 허브 간 경로 탐색에 dijkstra 알고리즘을 적용, 출발, 도착 허브 간 최적 경로 사용, 배송 소요시간과 거리 최적화로 효율적인 배송 시스템 구축
+  <br>
+    <img width="354" alt="image" src="https://github.com/user-attachments/assets/9aed8b46-1b4e-478b-8448-45a5a63ff381"/>
     <img width="1167" alt="image" src="https://github.com/user-attachments/assets/ada8e7e0-aa39-4285-afbb-f9b481f2208f" />
 
 - 문제 정의 : Naver Map API Response Body 파싱 문제
-  - AS-IS : Naver Map API로 응답을 받았으나 body에 정상적으로 담기지 않음, 출력된 문자열을 그대로 URL에 담기 위해 복사/붙여넣기 해보니 일붜 공백은 NBSP로 이루어진 것을 확인, [\\\s\\\u00A0]+ 을 통해 공백과 NBSP로 이루어진 문자를 모두 %20으로 변환 → 실패
+  - AS-IS : Naver Map API로 응답을 받았으나 body에 정상적으로 담기지 않음
+    - 터미널에 출력된 문자열을 확인해보니 특정 공백이 'NBSP'로 이루어진 것을 확인, [\\\s\\\u00A0]+ 을 통해 공백과 NBSP로 이루어진 문자를 모두 %20으로 변환 → 변환은 성공했으나 여전히 body에 담기지 않음
+      <br>
+      <img width="709" alt="image" src="https://github.com/user-attachments/assets/96130add-cf10-4c04-b758-d26e51307b38"/>
   - TO-BE : URI인코딩 과정에서 잘못된 인코딩이 있었음,명시적으로 encode 타입 지정
     <img width="709" alt="image" src="https://github.com/user-attachments/assets/9d860b4e-6bc0-421b-b197-0e659f545c8a" />
     
