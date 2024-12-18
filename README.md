@@ -10,9 +10,9 @@
 
 ## 👨‍👩‍👧‍👦 Our Team
 
-|        박지혜        |        강희승         |   김주한   |      김한준      |
-|:-----------------:|:------------------:|:-------:|:-------------:|
-| Order<br>Delivery | Company<br>Product | Hub<br> | User<br>Slack |
+| 박지혜        <br>[@jeeheaG](https://github.com/jeeheaG) | 강희승<br>[@Hxxseung](https://github.com/Hxxseung) | 김주한<br>[@Hany-Kim](https://github.com/Hany-Kim) | 김한준<br>[@hanjoon](https://github.com/wkdehf217) |
+|:-----------------------------------------------------:|:-----------------------------------------------:|:-----------------------------------------------:|:-----------------------------------------------:|
+|                   Order<br>Delivery                   |               Company<br>Product                |                     Hub<br>                     |                  User<br>Slack                  |
 
 <br>
 
@@ -64,9 +64,19 @@
 - 문제 정의 : 사용자 인가 관리
     - AS-IS : 메인 비즈니스 로직과 섞여 퍼져있는 검증 로직
     - TO-BE : gateway 에서 토큰 복호화 일괄 처리, 커스텀 어노테이션과 Util 클래스 사용하여 로직 단일화
+      <img width="1167" alt="image" src="https://github.com/user-attachments/assets/63315793-784f-42c3-986e-c94f7ed8df61" />
 - 문제 정의 : 검색 구현
     - AS-IS : 복잡한 검색 조건 및 불필요하게 많은 페이징 정보
     - TO-BE : QueryDsl 인터페이스 상속으로 Predicate 기반 검색 구현, PagedModel 사용으로 불필요한 데이터 전파 방지
 - 문제 정의 : DB와 Response 반환값 불일치
     - AS-IS : Updated_at 등 현재 데이터 값이 아닌 1차 캐싱 데이터 반환
     - TO-BE : EntityManager flush, clear를 통한 캐싱 데이터 삭제 후 ReLoad를 통한 실시간 값 반영
+- 문제 정의 : Hub 간 경로 비효율
+    - AS-IS : 기존 P2P 방식으로 허브 간 경로를 설정했을 때에 너무 비효율적인 배송 경로를 사용하게 됨
+    - TO-BE : 허브 간 경로 탐색에 dijkstra 알고리즘을 적용, 출발, 도착 허브 간 최적 경로 사용, 배송 소요시간과 거리 최적화로 효율적인 배송 시스템 구축
+    <img width="1167" alt="image" src="https://github.com/user-attachments/assets/ada8e7e0-aa39-4285-afbb-f9b481f2208f" />
+
+- 문제 정의 : Naver Map API Response Body 파싱 문제
+    - AS-IS : Naver Map API로 응답을 받았으나 body에 정상적으로 담기지 않음, 출력된 문자열을 그대로 URL에 담기 위해 복사/붙여넣기 해보니 일붜 공백은 NBSP로 이루어진 것을 확인, [\\\s\\\u00A0]+ 을 통해 공백과 NBSP로 이루어진 문자를 모두 %20으로 변환 → 실패 
+    - TO-BE : URI인코딩 과정에서 잘못된 인코딩이 있었음,명시적으로 encode 타입 지정
+      <img width="709" alt="image" src="https://github.com/user-attachments/assets/9d860b4e-6bc0-421b-b197-0e659f545c8a" />
