@@ -70,3 +70,41 @@
 - 문제 정의 : DB와 Response 반환값 불일치
     - AS-IS : Updated_at 등 현재 데이터 값이 아닌 1차 캐싱 데이터 반환
     - TO-BE : EntityManager flush, clear를 통한 캐싱 데이터 삭제 후 ReLoad를 통한 실시간 값 반영
+      
+
+
+
+![슬라이드1](https://github.com/user-attachments/assets/4339f2a1-da7a-4eee-82ad-f45268846ceb)
+
+![슬라이드2](https://github.com/user-attachments/assets/78990dc8-2b89-425b-abb0-09f63b22767a)
+
+![슬라이드3](https://github.com/user-attachments/assets/8c702b17-b410-4d2d-aaf7-92cdf1687448)
+
+![슬라이드4](https://github.com/user-attachments/assets/1ce12049-aa27-4352-88d6-0a602c2fcb3c)
+
+![슬라이드5](https://github.com/user-attachments/assets/13fd0816-34b6-466c-b1dd-6a1b445a78f0)
+
+![슬라이드6](https://github.com/user-attachments/assets/e2bb2664-bb97-4f03-8e1a-5cfa33a83724)
+
+![슬라이드7](https://github.com/user-attachments/assets/083ce072-1871-4079-b7e6-4c3b5e0f55b0)
+
+![슬라이드8](https://github.com/user-attachments/assets/8e0361fb-c714-4297-8844-273614fbe6fc)
+
+![슬라이드9](https://github.com/user-attachments/assets/af6a7e0c-0a21-4368-a5c1-24d8b311aa94)
+
+![슬라이드10](https://github.com/user-attachments/assets/f744d14f-b097-4b00-9c2a-e43600cb00b2)
+
+![슬라이드11](https://github.com/user-attachments/assets/34c58c22-e269-4c1f-8f40-329eb370bb8c)
+
+![슬라이드12](https://github.com/user-attachments/assets/4527183a-73fc-4502-9198-2f17e11077d8)
+
+![슬라이드13](https://github.com/user-attachments/assets/f43e249b-b385-4201-81f1-eb2cf5b184a3)
+
+![슬라이드14](https://github.com/user-attachments/assets/1ecccf3f-e64d-436e-ac31-802902194dbe)
+
+![슬라이드15](https://github.com/user-attachments/assets/ff2b2917-78ea-4b4e-b3df-788fae491297)
+
+![슬라이드17](https://github.com/user-attachments/assets/c35ec3b4-2063-45ec-8947-64741f1c9af0)
+
+
+
