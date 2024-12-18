@@ -70,3 +70,6 @@
 - 문제 정의 : DB와 Response 반환값 불일치
     - AS-IS : Updated_at 등 현재 데이터 값이 아닌 1차 캐싱 데이터 반환
     - TO-BE : EntityManager flush, clear를 통한 캐싱 데이터 삭제 후 ReLoad를 통한 실시간 값 반영
+- 문제 정의 : Gateway 에서의 인증 처리
+    - AS-IS : 각 서비스에서 SecurityContextHolder를 사용
+    - TO-BE : 게이트웨이의 역할을 인증까지로 제한, 권한 검증(인가)는 User 서비스에서만 처리
