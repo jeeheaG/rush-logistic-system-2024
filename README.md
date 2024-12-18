@@ -28,6 +28,9 @@
 
 [📙 API 명세서](https://functional-iron-b15.notion.site/API-15e5724d1eee80d9a313ccb8c9f88bfe?pvs=4)
 
+[📺 시연 영상 (Youtube)](https://youtu.be/VwLhALtTsYA?si=80umj_Rzz0c6PpgL)
+
+
 ## ERD
 ![rush-logistic-system-2024](https://github.com/user-attachments/assets/37c36d73-cb23-49e8-bf84-ad1a3148ad96)
 <br>
