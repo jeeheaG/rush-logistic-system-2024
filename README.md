@@ -10,7 +10,7 @@
 
 ## 👨‍👩‍👧‍👦 Our Team
 
-| 박지혜<br>[@jeeheaG](https://github.com/jeeheaG) | 강희승<br>[@Hxxseung](https://github.com/Hxxseung) | 김주한<br>[@Hany-Kim](https://github.com/Hany-Kim) | 김한준<br>[@hanhoon](https://github.com/wkdehf217) |
+| 박지혜<br>[@jeeheaG](https://github.com/jeeheaG) | 강희승<br>[@Hxxseung](https://github.com/Hxxseung) | 김주한<br>[@Hany-Kim](https://github.com/Hany-Kim) | 김한준<br>[@wkdehf217](https://github.com/wkdehf217) |
 |:---------------------------------------------:|:-----------------------------------------------:|:-----------------------------------------------:|:-----------------------------------------------:|
 |               Order<br>Delivery               |               Company<br>Product                |                     Hub<br>                     |                  User<br>Slack                  |
 
