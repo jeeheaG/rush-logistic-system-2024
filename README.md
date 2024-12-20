@@ -94,11 +94,6 @@
       <img width="709" alt="image" src="https://github.com/user-attachments/assets/a703a2f6-d9a3-4f3c-b250-c22c05fc8b08"/>
   - TO-BE : URI인코딩 과정에서 잘못된 인코딩이 있었음,명시적으로 encode 타입 지정
     <img width="709" alt="image" src="https://github.com/user-attachments/assets/9d860b4e-6bc0-421b-b197-0e659f545c8a" />
-    
-- 문제 정의 : Gateway 에서의 인증 처리
-  - AS-IS : 각 서비스에서 SecurityContextHolder를 사용
-  - TO-BE : 게이트웨이의 역할을 인증까지로 제한, 권한 검증(인가)는 User 서비스에서만 처리
-  
   
   
 ---
