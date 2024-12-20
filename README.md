@@ -1,4 +1,4 @@
-## 대규모 AI 시스템 설계 프로젝트
+## 대규모 물류 AI 시스템 설계 프로젝트
 ![image](https://github.com/user-attachments/assets/fdfe1353-be66-4fd1-9d18-1cf4296fbfd7)
 
 ### 1. 목표
